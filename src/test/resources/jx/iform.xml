@@ -1,0 +1,7 @@
+<iform>
+  <field name="CompanyName">
+  	<label>Company Name</label>
+    <input type="text"/>
+  </field>
+  <field name="PlanName" />
+</iform>

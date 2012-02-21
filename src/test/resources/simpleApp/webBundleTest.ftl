@@ -1,0 +1,1 @@
+[@webBundle path="/js/" type="js" /]

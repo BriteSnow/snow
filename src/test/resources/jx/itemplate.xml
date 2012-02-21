@@ -1,0 +1,5 @@
+<itemplate>
+  <field name="CompanyName" show="true" other='true'>
+  	<defaultValue>BitsAndBuzz</defaultValue>
+  </field>
+</itemplate>
