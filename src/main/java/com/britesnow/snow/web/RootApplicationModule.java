@@ -1,7 +1,7 @@
 package com.britesnow.snow.web;
 
 import java.io.File;
-import java.util.Properties;
+import java.util.Map;
 
 
 import com.britesnow.snow.web.binding.ApplicationFolder;
@@ -25,9 +25,9 @@ public class RootApplicationModule  extends AbstractModule {
 
     private File webAppFolder;
     private File appFolder;
-    private Properties properties;
+    private Map properties;
     
-    public RootApplicationModule(Properties properties,File webAppFolder, File appFolder){
+    public RootApplicationModule(Map properties,File webAppFolder, File appFolder){
         this.webAppFolder = webAppFolder;
         this.appFolder = appFolder;   
         this.properties = properties;
@@ -37,7 +37,7 @@ public class RootApplicationModule  extends AbstractModule {
     protected void configure() {
         Names.bindProperties(binder(), properties);
         
-        bind(Properties.class).annotatedWith(ApplicationProperties.class).toInstance(properties);
+        bind(Map.class).annotatedWith(ApplicationProperties.class).toInstance(properties);
         bind(File.class).annotatedWith(WebAppFolder.class).toInstance(this.webAppFolder);
         bind(File.class).annotatedWith(ApplicationFolder.class).toInstance(this.appFolder);
     }

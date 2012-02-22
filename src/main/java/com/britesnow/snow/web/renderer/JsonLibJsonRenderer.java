@@ -7,7 +7,7 @@ import net.sf.json.JSONSerializer;
 import net.sf.json.JsonConfig;
 import net.sf.json.util.CycleDetectionStrategy;
 
-public class DefaultJsonRenderer{
+public class JsonLibJsonRenderer implements JsonRenderer{
     static private final String[] excludes = {"stackTrace"};
 
     public void render(Object data, Writer out) {

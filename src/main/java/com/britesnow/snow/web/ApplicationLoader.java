@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.servlet.ServletContext;
@@ -16,20 +17,22 @@ import org.slf4j.LoggerFactory;
 
 import com.britesnow.snow.util.MapUtil;
 import com.britesnow.snow.web.db.hibernate.DefaultHibernateModule;
+import com.google.common.base.Splitter;
+import com.google.common.base.Throwables;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
 public class ApplicationLoader {
-    static private Logger logger = LoggerFactory.getLogger(ApplicationLoader.class);
+    static private Logger  logger = LoggerFactory.getLogger(ApplicationLoader.class);
 
-    protected Injector              appInjector;
-    //File                  sfkFolder;
-    private ServletContext        servletContext;
-    private File                  webAppFolder; 
+    protected Injector     appInjector;
+    // File sfkFolder;
+    private ServletContext servletContext;
+    private File           webAppFolder;
 
-    PropertyPostProcessor propertyPostProcessor;
+    PropertyPostProcessor  propertyPostProcessor;
 
     public ApplicationLoader(File webAppFolder, ServletContext servletContext) {
         this.webAppFolder = fixWebAppFolder(webAppFolder);
@@ -37,20 +40,113 @@ public class ApplicationLoader {
 
     }
 
-    public File getWebAppFolder(){
+    public File getWebAppFolder() {
         return webAppFolder;
     }
     
+    protected File getAppFolder(){
+        File appFolder = null;
+        if (servletContext != null) {
+            String appDirPath = servletContext.getInitParameter("appDir");
+            if (appDirPath != null) {
+                appFolder = new File(appDirPath);
+            } 
+            
+        }
+        if (appFolder == null){
+            appFolder = getWebAppFolder();
+        }
+        
+        return appFolder;
+    }
+
     @SuppressWarnings("unchecked")
     public ApplicationLoader load() throws Exception {
 
-        /*--------- Load the Properties ---------*/
+        Map<String,String> appProperties = loadAppProperties();
+        
+        /*--------- Load WebApplication ---------*/
+        // Building the root modules
+        // rootModules cannot be overrided
+        String applicationConfigClassStr = appProperties.get("snow.applicationModuleClasses");
+        Iterable<String> applicationClassNames = Splitter.on(",").split(applicationConfigClassStr);
+        List<Module> applicationModules = buildApplicationModules(applicationClassNames);
+        
+        return load(applicationModules,appProperties);
+        /*--------- /Load WebApplication ---------*/
+
+    }
+    
+    protected ApplicationLoader load(List<Module> applicationModules, Map<String,String> appProperties){
+
+        // build the rootModules
+        List<Module> rootModules = new ArrayList<Module>();
+        rootModules.add(new RootWebModule(servletContext));
+        rootModules.add(new RootApplicationModule(appProperties, getWebAppFolder(), getAppFolder()));
+
+        // get the applicationPackageBase
+        String applicationPackageBase = null;
+        if (applicationModules != null && applicationModules.size() > 0) {
+            applicationPackageBase = applicationModules.get(0).getClass().getPackage().getName();
+        }
+        
+        // build the defaultModules
+        List<Module> defaultModules = new ArrayList<Module>();
+        defaultModules.add(new DefaultApplicationModule(applicationPackageBase));
+        
+        boolean hasHibernate = (appProperties != null && MapUtil.hasKeyStartsWith(appProperties, "hibernate."));
+        if (hasHibernate) {
+            defaultModules.add(new DefaultHibernateModule());
+        }
+        
+
+        Module combineAppModule;
+        if (applicationModules != null) {
+            combineAppModule = Modules.override(defaultModules).with(applicationModules);
+        } else {
+            combineAppModule = Modules.combine(defaultModules);
+        }
+
+        rootModules.add(combineAppModule);
+
+        appInjector = Guice.createInjector(rootModules);        
+        
+        
+        return this;
+    }
+
+    public WebController getWebController() {
+        return appInjector.getInstance(WebController.class);
+    }
+
+    
+    protected List<Module> buildApplicationModules(Iterable<String> applicationModuleClassNames){
+        List<Module> modules = new ArrayList<Module>();
+        
+        for (String className : applicationModuleClassNames){
+            try {
+                Class applicationModuleClass = Class.forName(className);
+                Module applicationModule = (Module) applicationModuleClass.newInstance();
+                modules.add(applicationModule);
+            } catch (Exception e) {
+                Throwables.propagate(e);
+            }
+        }
+        
+        return modules;
+    }
+    
+    protected Map loadAppProperties() {
         // First load the application.properties
-        Properties appProperties = new Properties();
+        Map appProperties = new Properties();
         File propertiesFile = getWebInfPropertiesFile();
 
         if (propertiesFile.exists()) {
-            appProperties.load(new FileReader(propertiesFile));
+            try {
+                ((Properties)appProperties).load(new FileReader(propertiesFile));
+            } catch (Exception e) {
+                Throwables.propagate(e);
+            }
         } else {
             logger.info("No application.properties found at " + propertiesFile.getAbsolutePath()
                                     + " - Starting blank application.");
@@ -58,29 +154,24 @@ public class ApplicationLoader {
 
         // if a ServletContext, then look if there is a WebApp instance in the appDir parent folder
         // with the name [appDir].application.properties
-        // The appDir is either the webApp root or the appDir that has been set in the servletContext initParameter
-        // (usually by snowServlet)
-        File appDir = null;
+        File appFolder = getAppFolder();
         if (servletContext != null) {
-            String appDirPath = servletContext.getInitParameter("appDir");
-            if (appDirPath != null) {
-                appDir = new File(appDirPath);
-            } else {
-                appDir = getWebAppFolder();
-            }
+            String appFolderName = appFolder.getName();
 
-            String appDirFolderName = appDir.getName();
-
-            File appDirPropertiesFile = new File(appDir.getParentFile(), appDirFolderName + ".application.properties");
+            File appDirPropertiesFile = new File(appFolder.getParentFile(), appFolderName + ".application.properties");
             if (appDirPropertiesFile.exists()) {
                 Properties appDirProperties = new Properties();
-                appDirProperties.load(new FileReader(appDirPropertiesFile));
+                try {
+                    appDirProperties.load(new FileReader(appDirPropertiesFile));
+                } catch (Exception e) {
+                    Throwables.propagate(e);
+                }
                 // override the appProperties with the WebAppRoperties
                 appProperties.putAll(appDirProperties);
             }
 
-        }else{
-            appDir = getWebAppFolder();
+        } else {
+            appFolder = getWebAppFolder();
         }
 
         PropertyPostProcessor propertyPostProcessor = getPropertyPostProcessor();
@@ -88,7 +179,7 @@ public class ApplicationLoader {
         // if we do not have it programmatically, then, look in the
         // snow.snow.propertyPostProcessorClass properties
         if (propertyPostProcessor == null) {
-            String propertyPostProcessorClassName = appProperties.getProperty("snow.propertyPostProcessorClass");
+            String propertyPostProcessorClassName = (String) appProperties.get("snow.propertyPostProcessorClass");
             if (propertyPostProcessorClassName != null) {
                 try {
                     Class<PropertyPostProcessor> propertyPostProcessorClass = (Class<PropertyPostProcessor>) Class.forName(propertyPostProcessorClassName);
@@ -113,55 +204,9 @@ public class ApplicationLoader {
                                     + e.getMessage());
         }
 
-        /*--------- /Load the Properties ---------*/
-
-        /*--------- Load WebApplication ---------*/
-        // Building the root modules
-        // rootModules cannot be overrided
-        List<Module> rootModules = new ArrayList<Module>();
-        rootModules.add(new RootWebModule(servletContext));
-        rootModules.add(new RootApplicationModule(appProperties, getWebAppFolder(), appDir));
-
-        
-        String applicationConfigClassStr = appProperties.getProperty("snow.applicationWebModuleConfigClass");
-        Class applicationModuleClass = null;
-        String applicationPackageBase = null;
-        if (applicationConfigClassStr != null){
-            applicationModuleClass = Class.forName(applicationConfigClassStr);
-            applicationPackageBase = applicationModuleClass.getPackage().getName();
-        }
-        // build the default modules
-        // default modules can be overrided
-        List<Module> defaultModules = new ArrayList<Module>();
-        defaultModules.add(new DefaultApplicationModule(applicationPackageBase));
-
-        boolean hasHibernate = (appProperties != null && MapUtil.hasKeyStartsWith(appProperties, "hibernate."));
-        if (hasHibernate) {
-            defaultModules.add(new DefaultHibernateModule());
-        }
-
-        
-        Module combineAppModule;
-        if (applicationModuleClass != null) {
-            Module applicationModule = (Module) applicationModuleClass.newInstance();
-            combineAppModule = Modules.override(defaultModules).with(applicationModule);
-        } else {
-            combineAppModule = Modules.combine(defaultModules);
-        }
-
-        rootModules.add(combineAppModule);
-
-        appInjector = Guice.createInjector(rootModules);
-        /*--------- /Load WebApplication ---------*/
-
-        return this;
+        return appProperties;
     }
 
-    
-    public WebController getWebController(){
-        return appInjector.getInstance(WebController.class);
-    }
-    
     // --------- PropertyPostProcessor Methods --------- //
 
     public PropertyPostProcessor getPropertyPostProcessor() {
@@ -178,12 +223,12 @@ public class ApplicationLoader {
     }
 
     // --------- /PropertyPostProcessor Methods --------- //
-    
-    private File getWebInfPropertiesFile(){
+
+    private File getWebInfPropertiesFile() {
         File webAppFolder = getWebAppFolder();
-        return new File(webAppFolder,"WEB-INF/snow/application.properties");
+        return new File(webAppFolder, "WEB-INF/snow/application.properties");
     }
-    
+
     private File fixWebAppFolder(File webAppFolder) {
         String webAppFolderName = webAppFolder.getName();
         // Linux hack (somehow on Linux when contextPath empty, the
@@ -195,5 +240,5 @@ public class ApplicationLoader {
         }
 
         return webAppFolder;
-    }    
+    }
 }

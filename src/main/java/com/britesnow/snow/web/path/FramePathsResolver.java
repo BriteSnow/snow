@@ -3,7 +3,7 @@ package com.britesnow.snow.web.path;
 import com.britesnow.snow.web.RequestContext;
 
 
-public interface FramePathResolver{
+public interface FramePathsResolver{
     
-    public String resolve(RequestContext rc);
+    public String[] resolve(RequestContext rc);
 }

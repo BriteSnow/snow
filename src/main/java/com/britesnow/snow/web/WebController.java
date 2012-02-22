@@ -23,7 +23,7 @@ import com.britesnow.snow.util.MapUtil;
 import com.britesnow.snow.web.auth.Auth;
 import com.britesnow.snow.web.auth.AuthService;
 import com.britesnow.snow.web.db.hibernate.HibernateSessionInViewHandler;
-import com.britesnow.snow.web.path.FramePathResolver;
+import com.britesnow.snow.web.path.FramePathsResolver;
 import com.britesnow.snow.web.path.PathFileResolver;
 import com.britesnow.snow.web.path.ResourcePathResolver;
 import com.britesnow.snow.web.renderer.WebBundleManager;
@@ -65,7 +65,7 @@ public class WebController {
     private RequestLifeCycle              requestLifeCycle              = null;
 
     @Inject
-    private FramePathResolver             framePathResolver;
+    private FramePathsResolver             framePathResolver;
 
     @Inject
     private ResourcePathResolver          resourcePathResolver;
@@ -138,9 +138,9 @@ public class WebController {
         String resourcePath = resourcePathResolver.resolve(rc);
 
         if (isTemplatePath(resourcePath)) {
-            String framePath = framePathResolver.resolve(rc);
-            rc.setFramePath(framePath);
             rc.setResourcePath(fixTemplateAndJsonResourcePath(resourcePath));
+            String[] framePaths = framePathResolver.resolve(rc);
+            rc.setFramePaths(framePaths);
             responseType = ResponseType.template;
         } else if (isJsonPath(resourcePath)) {
             rc.setResourcePath(fixTemplateAndJsonResourcePath(resourcePath));

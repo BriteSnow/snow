@@ -35,8 +35,11 @@ public class IncludeFrameContentTemplateDirective extends IncludeTemplateBase im
 
         RequestContext rc = getDataModel("r.rc", RequestContext.class);
         
-        String resourcePath = rc.getResourcePath();
-        String templateName = templateNameResolver.resolve(resourcePath);
+        String path = rc.popFramePath();
+        if (path == null){
+            path = rc.getResourcePath();
+        }
+        String templateName = templateNameResolver.resolve(path);
         
         includeTemplate(rc,templateName,env);
     }

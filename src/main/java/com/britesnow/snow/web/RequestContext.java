@@ -8,7 +8,10 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.lang.reflect.Array;
 import java.net.URLDecoder;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,46 +33,45 @@ import com.britesnow.snow.util.ObjectUtil;
 import com.britesnow.snow.web.auth.Auth;
 
 public class RequestContext {
-    static private Logger logger = LoggerFactory.getLogger(RequestContext.class);
-    
+    static private Logger       logger             = LoggerFactory.getLogger(RequestContext.class);
+
     HttpServletRequest          req;
     HttpServletResponse         res;
     ServletContext              servletContext;
 
     private ServletFileUpload   fileUploader;
-    private boolean             isParamInitialized    = false;
-    private boolean             isMultipart           = false;
+    private boolean             isParamInitialized = false;
+    private boolean             isMultipart        = false;
     private List<?>             fileItems;
 
-    //built on demand
-    private Map<String, Object> paramMap              = null;
+    // built on demand
+    private Map<String, Object> paramMap           = null;
 
     // built on demand
     private Map<String, String> cookieMap;
 
     private String              resourcePath;
-    private String              framePath;
+    private Deque<String>       framePathsStack;
 
-    //this is the roo model for the container the "r" map (for the request) and "m" for the model (i.e. WebMap)
-    private Map                 rootModel             = new HashMap();
-    //this is the HashMap for the "m" model map
-    private Map                 webMap                = new HashMap();
+    // this is the roo model for the container the "r" map (for the request) and "m" for the model (i.e. WebMap)
+    private Map                 rootModel          = new HashMap();
+    // this is the HashMap for the "m" model map
+    private Map                 webMap             = new HashMap();
 
-    private Map<Class, Object>  beanMap               = new HashMap<Class, Object>();
+    private Map<Class, Object>  beanMap            = new HashMap<Class, Object>();
 
-    //usually set by the WebController.service
+    // usually set by the WebController.service
     private WebActionResponse   webActionResponse;
 
-    //optional
+    // optional
     private Writer              writer;
     private String              pathInfo;
 
-    //set by AuthService.authRequest
+    // set by AuthService.authRequest
     private Auth<?>             auth;
 
-
     public RequestContext(HttpServletRequest req, HttpServletResponse res, ServletContext servletContext,
-                          ServletFileUpload fileUploader) {
+                            ServletFileUpload fileUploader) {
         this.req = req;
         this.res = res;
         this.servletContext = servletContext;
@@ -128,17 +130,16 @@ public class RequestContext {
         return (T) beanMap.get(beanClass);
     }
 
-    // --------- /Bean Methods --------- //    
+    // --------- /Bean Methods --------- //
 
-    
     /*--------- Param Methods ---------*/
-    
+
     // mostly for Mock objects
-    protected void setParamMap(Map<String,Object> paramMap){
+    protected void setParamMap(Map<String, Object> paramMap) {
         this.paramMap = paramMap;
         isParamInitialized = true;
     }
-    
+
     public Map<String, Object> getParamMap() {
         initParamsIfNeeded();
         return paramMap;
@@ -148,8 +149,8 @@ public class RequestContext {
      * A map of all the param starting with the prefix.
      * 
      * @param prefix
-     * @return The key is the string after the prefix, and the value, is the
-     *         value itself. Return null if no param started with the prefix.
+     * @return The key is the string after the prefix, and the value, is the value itself. Return null if no param
+     *         started with the prefix.
      */
     public Map<String, Object> getParamMap(String prefix) {
         Map<String, Object> allParamMap = getParamMap();
@@ -194,8 +195,7 @@ public class RequestContext {
     }
 
     /**
-     * Simple method to get the Request value for a given parameter name. Return
-     * null if the value is null or empty.
+     * Simple method to get the Request value for a given parameter name. Return null if the value is null or empty.
      * 
      * @param name
      *            parameter value
@@ -206,8 +206,7 @@ public class RequestContext {
     }
 
     /**
-     * Return the param value as "cls" class object. If the value is null (or
-     * empty string) return null.
+     * Return the param value as "cls" class object. If the value is null (or empty string) return null.
      * 
      * @param <T>
      * @param name
@@ -219,11 +218,9 @@ public class RequestContext {
     }
 
     /**
-     * Return the param value as "cls" class object. If the value is null (or
-     * empty string) return the defaultValue.<br>
+     * Return the param value as "cls" class object. If the value is null (or empty string) return the defaultValue.<br>
      * 
-     * Note: For the first call, this method will parse the request (in case of
-     * a multipart).<br />
+     * Note: For the first call, this method will parse the request (in case of a multipart).<br />
      * 
      * <div class="issues"> <strong>Issues</strong>
      * <ul>
@@ -247,7 +244,7 @@ public class RequestContext {
         if (paramMap == null) {
             return defaultValue;
         }
-        //if we have a primitive type or array, then, just get the single value and convert it to the appropriate type
+        // if we have a primitive type or array, then, just get the single value and convert it to the appropriate type
         if (ObjectUtil.isPrimitive(cls) || cls.isArray() || cls == FileItem.class || cls.isEnum()) {
             // first, try to get it from the paramMap
             Object valueObject = paramMap.get(name);
@@ -269,11 +266,12 @@ public class RequestContext {
             } else if (valueObject instanceof String[]) {
                 return (T) ObjectUtil.getValue((String[]) valueObject, cls, defaultValue);
             } else {
-                //hope for the best (should be a fileItem)
+                // hope for the best (should be a fileItem)
                 return (T) valueObject;
             }
         }
-        //otherwise, if it is not a primitive type, attempt to create the targeted object with the corresponding paramMap
+        // otherwise, if it is not a primitive type, attempt to create the targeted object with the corresponding
+        // paramMap
         else {
             Map subParamMap = getParamMap(name + "."); // i.e., "product."
             if (subParamMap != null) {
@@ -293,8 +291,7 @@ public class RequestContext {
     }
 
     /**
-     * Get the param from the request, and if not found, from the cookie. TODO:
-     * need to support the # params as well.
+     * Get the param from the request, and if not found, from the cookie. TODO: need to support the # params as well.
      * 
      * @param <T>
      * @param name
@@ -319,26 +316,25 @@ public class RequestContext {
                     fileItems = fileUploader.parseRequest(getReq());
                     paramMap = new HashMap<String, Object>();
 
-                    Map<String,Class> paramBaseClasses = new HashMap<String,Class>();
+                    Map<String, Class> paramBaseClasses = new HashMap<String, Class>();
                     boolean hasMultivalues = false;
 
                     for (Object item : fileItems) {
                         FileItem fileItem = (FileItem) item;
                         String paramName = fileItem.getFieldName();
 
-                        // in case of normal fields, take the string value.  otherwise
+                        // in case of normal fields, take the string value. otherwise
                         // put the whole file item into the map.
                         Object value;
                         Class paramBaseClass;
-                        if(fileItem.isFormField()) {
+                        if (fileItem.isFormField()) {
                             try {
                                 value = fileItem.getString("UTF-8");
                             } catch (UnsupportedEncodingException e) {
                                 value = fileItem.getString();
                             }
                             paramBaseClass = String.class;
-                        }
-                        else {
+                        } else {
                             value = fileItem;
                             paramBaseClass = FileItem.class;
                         }
@@ -347,8 +343,9 @@ public class RequestContext {
                         // matching parameter types...
                         // todo - could support this as Object arrays or arrays of most specific shared super class.
                         Class prevBaseClass = paramBaseClasses.put(paramName, paramBaseClass);
-                        if(prevBaseClass != null && !prevBaseClass.equals(paramBaseClass)) {
-                            throw new IllegalArgumentException("parameter " + paramName + " has mixed parameter types (expected all file or all string)");
+                        if (prevBaseClass != null && !prevBaseClass.equals(paramBaseClass)) {
+                            throw new IllegalArgumentException("parameter " + paramName
+                                                    + " has mixed parameter types (expected all file or all string)");
                         }
 
                         // if there is already a value, then, create a list
@@ -418,7 +415,7 @@ public class RequestContext {
                     try {
                         value = URLDecoder.decode(value, "UTF-8");
                     } catch (Exception e) {
-                        //YES, ignore for now. If failed, the raw value will be in the cookie. 
+                        // YES, ignore for now. If failed, the raw value will be in the cookie.
                     }
                     cookieMap.put(c.getName(), value);
                 }
@@ -449,7 +446,7 @@ public class RequestContext {
     public void removeCookie(String name) {
         // update the response
         HttpRequestUtil.removeCookie(getReq(), getRes(), name);
-        //update the cookieMap
+        // update the cookieMap
         getCookieMap().remove(name);
     }
 
@@ -460,39 +457,33 @@ public class RequestContext {
      * @param stateContext
      * @return return a WebState for a given uiContext. Never return null.
      */
-    /* TODO: needs to implement WebStateHandler
-    public WebStateHandle getWebState(String stateContext){
-        if (webStateMap == null){
-            webStateMap = new HashMap<String, WebStateHandle>();
-        }
-        WebStateHandle webState = webStateMap.get(stateContext);
-        if (webState == null){
-            webState = getWebStateHandleFactory().constructWebStateHandle(stateContext, this);
-            webStateMap.put(stateContext, webState);
-        }
-        return webState;
-    }
-    */
-    // --------- /WebState Methods --------- //    
-    
+    /*
+     * TODO: needs to implement WebStateHandler public WebStateHandle getWebState(String stateContext){ if (webStateMap
+     * == null){ webStateMap = new HashMap<String, WebStateHandle>(); } WebStateHandle webState =
+     * webStateMap.get(stateContext); if (webState == null){ webState =
+     * getWebStateHandleFactory().constructWebStateHandle(stateContext, this); webStateMap.put(stateContext, webState);
+     * } return webState; }
+     */
+    // --------- /WebState Methods --------- //
+
     // --------- Paths --------- //
-    
-    public String[] getResourcePaths(){
+
+    public String[] getResourcePaths() {
         return splitPath(getResourcePath());
     }
-    
+
     public String getResourcePathAt(int i) {
-        return pathAt(getResourcePaths(),i);
+        return pathAt(getResourcePaths(), i);
     }
 
     public <T> T getResourcePathAt(int i, Class<T> cls) {
-        return pathAt(getResourcePaths(),i, cls, null);
+        return pathAt(getResourcePaths(), i, cls, null);
     }
 
     public <T> T getResourcePathAt(int i, Class<T> cls, T defaultValue) {
-        return pathAt(getResourcePaths(),i, cls, defaultValue);
+        return pathAt(getResourcePaths(), i, cls, defaultValue);
     }
-    
+
     public String getResourcePath() {
         return resourcePath;
     }
@@ -501,17 +492,26 @@ public class RequestContext {
         this.resourcePath = resourcePath;
     }
 
-    public String getFramePath() {
-        return framePath;
+    public void setFramePaths(String[] framePaths) {
+        if (framePaths != null) {
+            ArrayDeque<String> stack = new ArrayDeque<String>();
+            stack.addAll(Arrays.asList(framePaths));
+            framePathsStack = stack;
+        }
     }
 
-    public void setFramePath(String framePath) {
-        this.framePath = framePath;
+    public String popFramePath() {
+        if (framePathsStack != null && !framePathsStack.isEmpty()) {
+            return framePathsStack.pop();
+        } else {
+            return null;
+        }
     }
+
     // --------- /Paths --------- //
-    
-    // TODO: probably does not need to be that complicated. Might want to use Guava here. 
-    static private String[] splitPath(String path){
+
+    // TODO: probably does not need to be that complicated. Might want to use Guava here.
+    static private String[] splitPath(String path) {
         String[] paths = null;
         String[] tmpPaths = path.split("/");
         // remove the first element (always empty since the currentPri
@@ -524,23 +524,22 @@ public class RequestContext {
         } else {
             paths = new String[0];
         }
-        return paths;         
+        return paths;
     }
-    
-    static private String pathAt(String[] paths,int i){
+
+    static private String pathAt(String[] paths, int i) {
         if (paths.length > i) {
             return paths[i];
         } else {
             return null;
         }
     }
-    
-    public <T> T pathAt(String[] paths,int i, Class<T> cls, T defaultValue) {
-        String valueStr = pathAt(paths,i);
+
+    public <T> T pathAt(String[] paths, int i, Class<T> cls, T defaultValue) {
+        String valueStr = pathAt(paths, i);
         return ObjectUtil.getValue(valueStr, cls, defaultValue);
     }
-    
-    
+
     /*--------- Writer ---------*/
     public void setWriter(Writer writer) {
         this.writer = writer;
@@ -560,12 +559,12 @@ public class RequestContext {
             return null;
         }
     }
+
     /*--------- /Writer ---------*/
 
     /*--------- RootModel ---------*/
     /**
-     * Return the value in the model map (the m.**) with the appropriate type or
-     * null if not found.
+     * Return the value in the model map (the m.**) with the appropriate type or null if not found.
      * 
      * @see #getModelValue(String, Class, Object)
      */
@@ -574,13 +573,11 @@ public class RequestContext {
     }
 
     /**
-     * Return the value in the model map (the m.**) with the appropriate type
-     * and fall back value.
+     * Return the value in the model map (the m.**) with the appropriate type and fall back value.
      * 
      * @param <T>
      * @param namePath
-     *            path deliminated with the ".". Note that the "m." should not
-     *            be in this namePath.
+     *            path deliminated with the ".". Note that the "m." should not be in this namePath.
      * @param cls
      *            The type of the value to be casted to
      * @param defaultValue
@@ -625,13 +622,14 @@ public class RequestContext {
         return servletContext;
     }
 
-    public String getContextPath(){
-    	HttpServletRequest request = getReq();
-		if (request != null) {
-			return request.getContextPath();
-		}
-		return null;
+    public String getContextPath() {
+        HttpServletRequest request = getReq();
+        if (request != null) {
+            return request.getContextPath();
+        }
+        return null;
     }
+
     public String getPathInfo() {
         if (pathInfo == null) {
             if (req != null) {

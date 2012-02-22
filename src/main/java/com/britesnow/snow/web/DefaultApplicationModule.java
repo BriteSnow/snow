@@ -15,10 +15,12 @@ import com.britesnow.snow.web.handler.annotation.WebExceptionHandler;
 import com.britesnow.snow.web.handler.annotation.WebModelHandler;
 import com.britesnow.snow.web.handler.annotation.WebResourceHandler;
 import com.britesnow.snow.web.handler.annotation.WebTemplateDirectiveHandler;
-import com.britesnow.snow.web.path.DefaultFramePathResolver;
+import com.britesnow.snow.web.path.DefaultFramePathsResolver;
 import com.britesnow.snow.web.path.DefaultResourcePathResolver;
-import com.britesnow.snow.web.path.FramePathResolver;
+import com.britesnow.snow.web.path.FramePathsResolver;
 import com.britesnow.snow.web.path.ResourcePathResolver;
+import com.britesnow.snow.web.renderer.JsonLibJsonRenderer;
+import com.britesnow.snow.web.renderer.JsonRenderer;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -37,9 +39,10 @@ public class DefaultApplicationModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(FramePathResolver.class).to(DefaultFramePathResolver.class);
+        bind(FramePathsResolver.class).to(DefaultFramePathsResolver.class);
         bind(ResourcePathResolver.class).to(DefaultResourcePathResolver.class);
         bind(ActionNameResolver.class).to(DefaultActionNameResolver.class);
+        bind(JsonRenderer.class).to(JsonLibJsonRenderer.class);
 
         if (applicationPackageBase != null) {
             bind(String.class).annotatedWith(ApplicationPackageBase.class).toInstance(applicationPackageBase);
@@ -48,7 +51,7 @@ public class DefaultApplicationModule extends AbstractModule {
 
     @Provides
     @WebHandlers
-    @Inject(optional = true)
+    @Inject
     @Nullable
     public Object[] providesWebHandlers(Injector injector, @WebHandlerClasses Class[] webHandlerClasses) {
 

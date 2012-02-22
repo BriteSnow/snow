@@ -11,6 +11,7 @@ import net.sf.json.JSONSerializer;
 import net.sf.json.JsonConfig;
 import net.sf.json.util.CycleDetectionStrategy;
 
+// TODO: needs to make it an interface and Guice managed (i.e. JsonProcessor)
 public class JsonUtil {
 
     public static String toJson(Object obj) {

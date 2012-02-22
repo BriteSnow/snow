@@ -29,7 +29,7 @@ import com.britesnow.snow.web.handler.annotation.WebModelHandler;
 import com.britesnow.snow.web.handler.annotation.WebResourceHandler;
 import com.britesnow.snow.web.handler.annotation.WebTemplateDirectiveHandler;
 import com.britesnow.snow.web.param.WebParameterParser;
-import com.britesnow.snow.web.renderer.DefaultJsonRenderer;
+import com.britesnow.snow.web.renderer.JsonRenderer;
 import com.britesnow.snow.web.renderer.freemarker.FreemarkerTemplateRenderer;
 import com.britesnow.snow.web.renderer.freemarker.TemplateDirectiveProxy;
 import com.google.inject.Inject;
@@ -66,7 +66,7 @@ public class Application {
 
     // TODO: need to use just the JsonRenderer when it will be an interface.
     @Inject
-    private DefaultJsonRenderer                                     jsonRenderer;
+    private JsonRenderer                                     jsonRenderer;
 
     @Inject(optional = true)
     @Nullable
@@ -143,7 +143,7 @@ public class Application {
         
         processWebModels(m,rc);
         
-        String path = rc.getFramePath();
+        String path = rc.popFramePath();
         if (path == null){
             path = rc.getResourcePath();
             path = getTemplatePath(path);
