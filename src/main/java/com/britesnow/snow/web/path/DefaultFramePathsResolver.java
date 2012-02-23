@@ -26,7 +26,7 @@ public class DefaultFramePathsResolver implements FramePathsResolver {
         
         List<String> pathArray = new ArrayList<String>();
         Iterables.addAll(pathArray, Splitter.on("/").split(path));
-        for (int i = pathArray.size() -1; i > -1; i--){
+        for (int i = pathArray.size() -1; i > 0; i--){
             framePath = Joiner.on("/").join(pathArray.subList(0, i));
             framePath += "/" + FRAME_NAME;
             if (!framePath.startsWith("/")){

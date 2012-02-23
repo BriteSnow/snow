@@ -21,7 +21,7 @@ public class SimpleAppTest extends SnowWebApplicationTestSupport {
         SnowWebApplicationTestSupport.initWebApplication("src/test/resources/simpleApp");
     }
 
-    //@Test
+    @Test
     public void testHelloPage() throws Exception {
 
             RequestContextMock rc = requestContextFactory.createRequestContext(RequestMethod.GET, "/helloPage");
@@ -35,7 +35,7 @@ public class SimpleAppTest extends SnowWebApplicationTestSupport {
             assertEquals("---Hello John---", result);
     }
 
-    //@Test
+    @Test
     public void testContactJson() throws Exception {
             Map result;
             RequestContextMock rc;
@@ -57,7 +57,7 @@ public class SimpleAppTest extends SnowWebApplicationTestSupport {
  
     }
 
-    //@Test
+    @Test
     public void testContactPage() {
         try {
             String result;
@@ -90,14 +90,14 @@ public class SimpleAppTest extends SnowWebApplicationTestSupport {
             RequestContextMock rc;
             
             // test with the /contact path
-            rc = requestContextFactory.createRequestContext(RequestMethod.GET, "notes/");
+            rc = requestContextFactory.createRequestContext(RequestMethod.GET, "/notes/");
             webController.service(rc);
             result = rc.getResponseAsString();
             
             assertEquals("---!!!notes/_frame!!!This is the notes/index.ftl page!!!/notes/_frame!!!---",result);
     }   
     
-    //@Test
+    @Test
     public void testAddContactAction() throws Exception {
             Map result;
             RequestContextMock rc;
@@ -120,7 +120,7 @@ public class SimpleAppTest extends SnowWebApplicationTestSupport {
 
     }    
     
-    //@Test
+    @Test
     public void testWebBundle() throws Exception{
         String result;
         RequestContextMock rc;
