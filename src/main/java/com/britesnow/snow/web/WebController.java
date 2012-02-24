@@ -362,7 +362,7 @@ public class WebController {
         return path;
     }
 
-    static Set cachableExtension = MapUtil.setIt(".css", ".js", ".png", ".gif", ".jpeg");
+    static Set cachableExtension = MapUtil.setIt(".css",".less", ".js", ".png", ".gif", ".jpeg");
 
     /**
      * Return true if the content pointed by the pathInfo is static.<br>

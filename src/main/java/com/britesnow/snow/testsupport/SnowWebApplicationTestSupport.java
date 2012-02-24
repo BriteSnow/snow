@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.AfterClass;
+import org.junit.Assert;
 
 import com.britesnow.snow.testsupport.mock.ApplicationLoaderMock;
 import com.britesnow.snow.testsupport.mock.RequestContextMockFactory;
@@ -70,6 +71,16 @@ public class SnowWebApplicationTestSupport {
         appLoader = null;
     }
 
+    
+    // --------- Assert --------- //
+    public void assertContains(String[] contains,String result){
+        for (String contain : contains){
+            if (result.indexOf(contain) < 0){
+                Assert.fail("Result did not contain [" + contain + "] but was:\n" + result);
+            }
+        }
+    }
+    // --------- /Assert --------- //
 
 
 }

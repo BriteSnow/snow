@@ -6,57 +6,58 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-
 import com.britesnow.snow.util.FileUtil;
 import com.britesnow.snow.web.binding.WebAppFolder;
 import com.google.inject.Singleton;
 
 @Singleton
 public class WebBundleManager {
-    
-    public static final String  WEB_BUNDLE_ALL_PREFIX         = "_web_bundle_all";
-    
+
+    public static final String WEB_BUNDLE_ALL_PREFIX = "_web_bundle_all";
+    public static final String DEBUG_LINK_STRING     = "_debug_links";
+
     @Inject
-    private @WebAppFolder File webAppFolder;
-    
-    
-    public boolean isWebBundle(String resourcePath){
+    private @WebAppFolder
+    File                       webAppFolder;
+
+    public boolean isWebBundle(String resourcePath) {
         boolean r = false;
 
-        String[] priPathAndExt = FileUtil.getFileNameAndExtension(resourcePath);
+        String fileName = FileUtil.getFilePathAndName(resourcePath)[1];
+        String[] priPathAndExt = FileUtil.getFileNameAndExtension(fileName);
 
-        if (priPathAndExt[0].endsWith(WEB_BUNDLE_ALL_PREFIX) && (priPathAndExt[1].equalsIgnoreCase(".js") || priPathAndExt[1].equalsIgnoreCase(".css"))) {
+        // TODO: probably need to change the extension test with regex
+        if (priPathAndExt[0].startsWith(WEB_BUNDLE_ALL_PREFIX) && (priPathAndExt[1].equalsIgnoreCase(".js") || priPathAndExt[1].equalsIgnoreCase(".css") || priPathAndExt[1].equalsIgnoreCase(".less"))) {
             r = true;
         }
-        return r;        
+        return r;
     }
-    
-    public String getContent(String resourcePath){
-        
+
+    public String getContent(String resourcePath) {
+
         String ext = FileUtil.getFileNameAndExtension(resourcePath)[1];
-        File resourceFolder = new File(webAppFolder,resourcePath).getParentFile();
-        
-        List<File> files = getWebBundleFiles(resourceFolder,ext);
-        
+        File resourceFolder = new File(webAppFolder, resourcePath).getParentFile();
+
+        List<File> files = getWebBundleFiles(resourceFolder, ext);
+
         StringBuilder contentSB = new StringBuilder();
         for (File file : files) {
             contentSB.append(FileUtil.getFileContentAsString(file));
             contentSB.append("\n");
         }
-        
+
         String content = contentSB.toString();
-        return content;        
-        
+        return content;
+
     }
-    
-    
-    public List<File> getWebBundleFiles(File folder, String fileExt){
+
+    public List<File> getWebBundleFiles(File folder, String fileExt) {
         List<File> files = null;
         File[] allFiles = FileUtil.getFiles(folder, fileExt);
 
-        //TODO: look at the "all.bundle" file for custom inclusion/ordering
+        // TODO: look at the "all.bundle" file for custom inclusion/ordering
         files = Arrays.asList(allFiles);
 
-        return files;        
-    }    
+        return files;
+    }
 }
