@@ -1,0 +1,1 @@
+[@webBundle path="/css/" type="less" /]

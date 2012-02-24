@@ -4,7 +4,7 @@
   <groupId>com.britesnow</groupId>
   <artifactId>snow</artifactId>
   <packaging>jar</packaging>
-  <version>1.9.2</version>
+  <version>1.9.4-SNAPSHOT</version>
   <name>snow</name>
   <url>http://britesnow.com/snow</url>
   
@@ -121,6 +121,12 @@
       <artifactId>commons-beanutils</artifactId>
       <version>1.8.0</version>
     </dependency>
+    
+	<dependency>
+		<groupId>org.mozilla</groupId>
+		<artifactId>rhino</artifactId>
+		<version>1.7R3</version>
+	</dependency>    
 	
     <dependency>
       <groupId>net.sf.json-lib</groupId>

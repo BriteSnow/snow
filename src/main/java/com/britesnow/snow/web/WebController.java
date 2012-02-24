@@ -3,11 +3,13 @@ package com.britesnow.snow.web;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -20,9 +22,12 @@ import org.slf4j.LoggerFactory;
 
 import com.britesnow.snow.util.FileUtil;
 import com.britesnow.snow.util.MapUtil;
+import com.britesnow.snow.util.Pair;
+import com.britesnow.snow.web.AbortWithHttpStatusException.HttpStatus;
 import com.britesnow.snow.web.auth.Auth;
 import com.britesnow.snow.web.auth.AuthService;
 import com.britesnow.snow.web.db.hibernate.HibernateSessionInViewHandler;
+import com.britesnow.snow.web.less.LessProcessor;
 import com.britesnow.snow.web.path.FramePathsResolver;
 import com.britesnow.snow.web.path.PathFileResolver;
 import com.britesnow.snow.web.path.ResourcePathResolver;
@@ -39,52 +44,55 @@ public class WebController {
         template, json, other;
     }
 
-    private static final String           CHAR_ENCODING                 = "UTF-8";
-    private static final String           MODEL_KEY_REQUEST             = "r";
-    public static int                     BUFFER_SIZE                   = 2048 * 2;
+    private static final String             CHAR_ENCODING                 = "UTF-8";
+    private static final String             MODEL_KEY_REQUEST             = "r";
+    public static int                       BUFFER_SIZE                   = 2048 * 2;
 
-    private ServletFileUpload             fileUploader;
+    private ServletFileUpload               fileUploader;
+
+    // For now, a very simple cache for the .less.css result
+    private Map<String, Pair<Long, String>> lessCache                     = new ConcurrentHashMap<String, Pair<Long, String>>();
 
     @Inject
-    private HttpWriter                    httpWriter;
+    private HttpWriter                      httpWriter;
 
     @Inject(optional = true)
-    private ServletContext                servletContext;
+    private ServletContext                  servletContext;
     @Inject
-    private Application                   application;
+    private Application                     application;
     @Inject
-    private WebBundleManager              webBundleManager;
+    private WebBundleManager                webBundleManager;
 
     @Inject(optional = true)
-    private AuthService                   authService;
+    private AuthService                     authService;
 
     @Inject(optional = true)
-    private HibernateSessionInViewHandler hibernateSessionInViewHandler = null;
+    private HibernateSessionInViewHandler   hibernateSessionInViewHandler = null;
 
     @Inject(optional = true)
-    private RequestLifeCycle              requestLifeCycle              = null;
+    private RequestLifeCycle                requestLifeCycle              = null;
 
     @Inject
-    private FramePathsResolver             framePathResolver;
+    private FramePathsResolver              framePathResolver;
 
     @Inject
-    private ResourcePathResolver          resourcePathResolver;
+    private ResourcePathResolver            resourcePathResolver;
 
     @Inject
-    private PathFileResolver              pathFileResolver;
+    private PathFileResolver                pathFileResolver;
 
     @Inject
-    private ActionNameResolver            actionNameResolver;
+    private ActionNameResolver              actionNameResolver;
 
-    private ThreadLocal<RequestContext>   requestContextTl              = new ThreadLocal<RequestContext>();
+    private ThreadLocal<RequestContext>     requestContextTl              = new ThreadLocal<RequestContext>();
 
-    private CurrentRequestContextHolder   currentRequestContextHolder   = new CurrentRequestContextHolder() {
-                                                                            @Override
-                                                                            public RequestContext getCurrentRequestContext() {
+    private CurrentRequestContextHolder     currentRequestContextHolder   = new CurrentRequestContextHolder() {
+                                                                              @Override
+                                                                              public RequestContext getCurrentRequestContext() {
 
-                                                                                return requestContextTl.get();
-                                                                            }
-                                                                        };
+                                                                                  return requestContextTl.get();
+                                                                              }
+                                                                          };
 
     // will be injected from .properties file
     // FIXME: need to implement this.
@@ -98,7 +106,7 @@ public class WebController {
     @Inject(optional = true)
     public void injectIgnoreTemplateNotFound(@Named("snow.ignoreTemplateNotFound") String ignore) {
         if ("true".equalsIgnoreCase(ignore)) {
-            //ignoreTemplateNotFound = true;
+            // ignoreTemplateNotFound = true;
         }
     }
 
@@ -317,12 +325,22 @@ public class WebController {
 
             // if not processed, then, default processing
             if (!webFileProcessed) {
-                File resourceFile = pathFileResolver.resolve(resourcePath);
-                if (resourceFile.exists()) {
-                    boolean isCachable = isCachable(resourcePath);
-                    httpWriter.writeFile(rc, resourceFile, isCachable, null);
+
+                // if it is a ".less.css" we need to process the .less file
+                if (resourcePath.endsWith(".less.css")) {
+                    String lessFilePath = resourcePath.substring(0, resourcePath.length() - 4);
+                    Reader contentReader = new StringReader(processLessFile(lessFilePath));
+
+                    String fileName = FileUtil.getFilePathAndName(resourcePath)[1];
+                    httpWriter.writeStringContent(rc, fileName, contentReader, true, null);
                 } else {
-                    sendHttpError(rc, HttpServletResponse.SC_NOT_FOUND, null);
+                    File resourceFile = pathFileResolver.resolve(resourcePath);
+                    if (resourceFile.exists()) {
+                        boolean isCachable = isCachable(resourcePath);
+                        httpWriter.writeFile(rc, resourceFile, isCachable, null);
+                    } else {
+                        sendHttpError(rc, HttpServletResponse.SC_NOT_FOUND, null);
+                    }
                 }
             }
 
@@ -330,6 +348,37 @@ public class WebController {
     }
 
     // --------- /Service Request --------- //
+
+    private String processLessFile(String lessFilePath){
+        File lessFile = pathFileResolver.resolve(lessFilePath);
+        if (!lessFile.exists()){
+            throw new AbortWithHttpStatusException(HttpStatus.NOT_FOUND,"File " + lessFilePath + " not found");
+        }
+        
+        // Now, determine the youngest .less file
+        long maxTime = 0;
+        File lessFolder = lessFile.getParentFile();
+        for (File file : lessFolder.listFiles()){
+            String name = file.getName().toLowerCase();
+            if (name.endsWith(".less")){
+                long time = file.lastModified();
+                if (time > maxTime){
+                    maxTime = time;
+                }
+            }
+        }
+        
+        String lessResult = null;
+        Pair<Long,String> timeAndContent = lessCache.get(lessFilePath);
+        if (timeAndContent != null && maxTime <= timeAndContent.getFirst()){
+            // if we have a match, and none of the maxTime of all the .less file still smaller or equal than the cache item, then, still valid
+            lessResult = timeAndContent.getSecond();
+        }else{
+            lessResult = new LessProcessor().compile(lessFile);
+            lessCache.put(lessFilePath,new Pair<Long,String>(maxTime,lessResult));
+        }
+        return lessResult;
+    }
 
     private void sendHttpError(RequestContext rc, int errorCode, String message) throws IOException {
 
@@ -362,7 +411,7 @@ public class WebController {
         return path;
     }
 
-    static Set cachableExtension = MapUtil.setIt(".css", ".js", ".png", ".gif", ".jpeg");
+    static Set cachableExtension = MapUtil.setIt(".css", ".less", ".js", ".png", ".gif", ".jpeg");
 
     /**
      * Return true if the content pointed by the pathInfo is static.<br>

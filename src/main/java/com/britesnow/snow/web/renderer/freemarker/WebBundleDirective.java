@@ -36,9 +36,11 @@ public class WebBundleDirective implements TemplateDirectiveModel {
     public enum Alert{
         NOT_VALID_WEBBUNDLE_PATH, NOT_VALID_WEBBUNDLE_TYPE;
     }
-    static final private String DEBUG_LINK_STRING = "_debug_links";
-    private enum LinkItemType {
-        css, js
+    
+    
+    
+    private enum LinkType {
+        css, js, less
     };
 
     @Inject
@@ -53,14 +55,14 @@ public class WebBundleDirective implements TemplateDirectiveModel {
 
         RequestContext rc = getDataModel("r.rc", RequestContext.class);
         
-        Boolean debug_links = rc.getParam(DEBUG_LINK_STRING, Boolean.class, null);
+        Boolean debug_links = rc.getParam(WebBundleManager.DEBUG_LINK_STRING, Boolean.class, null);
         //if not null, make sure we set the cookie with the value
         if (debug_links != null){
-            rc.setCookie(DEBUG_LINK_STRING, debug_links);
+            rc.setCookie(WebBundleManager.DEBUG_LINK_STRING, debug_links);
         }
         //if there is not debug_link param in the URL, check the cookie (set false if not found)
         else{
-            debug_links = rc.getCookie(DEBUG_LINK_STRING, Boolean.class, false);
+            debug_links = rc.getCookie(WebBundleManager.DEBUG_LINK_STRING, Boolean.class, false);
         }
         
         String contextPath = rc.getContextPath();
@@ -76,11 +78,13 @@ public class WebBundleDirective implements TemplateDirectiveModel {
         String typeStr = getParam(args,"type",String.class);
         String key = getParam(args,"key",String.class);
         
-        LinkItemType type = ObjectUtil.getValue(typeStr, LinkItemType.class, null);
-        if (type == null){
+        LinkType linkType = ObjectUtil.getValue(typeStr, LinkType.class, null);
+        
+        if (linkType == null){
             throw new SnowRuntimeException(Alert.NOT_VALID_WEBBUNDLE_TYPE,"type",typeStr);
         }
-        String fileExt = "." + type.name();
+        
+        String fileExt = "." + linkType.name();
 
         BufferedWriter bw = new BufferedWriter(env.getOut());
         
@@ -96,10 +100,10 @@ public class WebBundleDirective implements TemplateDirectiveModel {
         
         //if debug mode, include all the files
         
-        if (debug_links){
+        if (debug_links && linkType != LinkType.less){
             List<File> files = webBundleManager.getWebBundleFiles(folder, fileExt);
             for (File file : files){
-                sb.append(buildHtmlTag(webPath + file.getName(), type));
+                sb.append(buildHtmlTag(webPath + file.getName(), linkType));
             }
         }
         //if not debug mode, then, include the "_web_bundle_all..."
@@ -124,7 +128,7 @@ public class WebBundleDirective implements TemplateDirectiveModel {
             }
             sbHref.append(fileExt);
             
-            sb.append(buildHtmlTag(sbHref.toString(),type));
+            sb.append(buildHtmlTag(sbHref.toString(),linkType));
             
             
         }
@@ -136,9 +140,14 @@ public class WebBundleDirective implements TemplateDirectiveModel {
         bw.flush();
     }
 
-    private String buildHtmlTag(String href,LinkItemType type){
+    private String buildHtmlTag(String href,LinkType type){
         StringBuilder sb = new StringBuilder();
         switch (type) {
+            case less:
+                sb.append("<link type='text/css' href='");
+                sb.append(href);
+                sb.append("'  rel='stylesheet/less'  />\n");
+                break;
             case css:
                 sb.append("<link type='text/css' href='");
                 sb.append(href);
