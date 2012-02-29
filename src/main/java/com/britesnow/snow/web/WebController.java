@@ -318,7 +318,7 @@ public class WebController {
         if (webBundleManager.isWebBundle(resourcePath)) {
             String content = webBundleManager.getContent(resourcePath);
             StringReader reader = new StringReader(content);
-            httpWriter.writeStringContent(rc, href, reader, false, null);
+            httpWriter.writeStringContent(rc, href, reader, true, null);
         } else {
             // First, see and process the eventual WebFileHandler
             boolean webFileProcessed = application.processWebFile(rc);
