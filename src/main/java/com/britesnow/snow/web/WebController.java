@@ -413,6 +413,7 @@ public class WebController {
 
     static Set cachableExtension = MapUtil.setIt(".css", ".less", ".js", ".png", ".gif", ".jpeg");
 
+
     /**
      * Return true if the content pointed by the pathInfo is static.<br>
      * Right now, just return true if there is no extension
