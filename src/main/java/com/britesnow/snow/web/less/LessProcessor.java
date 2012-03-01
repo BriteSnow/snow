@@ -31,6 +31,7 @@ public class LessProcessor {
     
     private Scriptable scope;
     private ClassLoader classLoader;
+    @SuppressWarnings("unused")
     private Function compileString;
     private Function compileFile;
 
