@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import com.britesnow.snow.util.FileUtil;
 import com.britesnow.snow.util.MapUtil;
+import com.google.common.base.Throwables;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -28,13 +29,12 @@ public class HttpWriter {
 
     public static int      BUFFER_SIZE = 2048 * 2;
 
-    @Inject(optional=true)
+    @Inject(optional = true)
     private ServletContext servletContext;
-
 
     public String getContentType(String resourcePath) {
         String contentType = null;
-        if (servletContext != null){
+        if (servletContext != null) {
             servletContext.getMimeType(resourcePath);
         }
         // if the servletContext (server) could not fine the mimeType, then, give a little help
@@ -44,19 +44,18 @@ public class HttpWriter {
         return contentType;
     }
 
-    public void writeFile(RequestContext rc,File file, boolean cache, Map options) throws Throwable{
+    public void writeFile(RequestContext rc, File file, boolean cache, Map options) throws Throwable {
         String contentType = FileUtil.getExtraMimeType(file.getAbsolutePath());
-        
+
         if (contentType != null && (contentType.startsWith("text") || contentType.indexOf("javascript") != -1)) {
-           FileReader reader = new FileReader(file);
-           writeStringContent(rc, file.getName(), reader, cache, options);
-        }else{
+            FileReader reader = new FileReader(file);
+            writeStringContent(rc, file.getName(), reader, cache, options);
+        } else {
             InputStream fileIs = new FileInputStream(file);
-            writeBinaryContent(rc,file.getName(),fileIs,cache,options);
+            writeBinaryContent(rc, file.getName(), fileIs, cache, options);
         }
     }
-    
-    
+
     /**
      * Still experimental
      * 
@@ -68,19 +67,17 @@ public class HttpWriter {
      * @param options
      * @throws Exception
      */
-    public void writeStringContent(RequestContext rc, String fileName, Reader contentReader, boolean cache, Map options)
-                            throws Exception {
-        
-        HttpServletRequest req = rc.getReq();
-        String characterEncoding = MapUtil.getNestedValue(options, "characterEncoding");
-        characterEncoding = (characterEncoding != null) ? characterEncoding : "UTF-8";
-        req.setCharacterEncoding(characterEncoding);
-
-        setHeaders(rc, fileName, cache, options);
-
-        // --------- Stream File --------- //
+    public void writeStringContent(RequestContext rc, String fileName, Reader contentReader, boolean cache, Map options) {
         Writer ow = null;
         try {
+            HttpServletRequest req = rc.getReq();
+            String characterEncoding = MapUtil.getDeepValue(options, "characterEncoding");
+            characterEncoding = (characterEncoding != null) ? characterEncoding : "UTF-8";
+            req.setCharacterEncoding(characterEncoding);
+
+            setHeaders(rc, fileName, cache, options);
+
+            // --------- Stream File --------- //
 
             // create the reader/writer
             ow = rc.getRes().getWriter();
@@ -93,11 +90,16 @@ public class HttpWriter {
                 readLength = contentReader.read(buffer);
             }
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error("Error in HTTP Writer because: " + e.getMessage());
+            throw Throwables.propagate(e);
         } finally {
-            contentReader.close();
-            if (ow != null) {
-                ow.close();
+            try {
+                contentReader.close();
+                if (ow != null) {
+                    ow.close();
+                }
+            } catch (Exception e) {
+                throw Throwables.propagate(e);
             }
         }
     }
@@ -133,7 +135,7 @@ public class HttpWriter {
     private void setHeaders(RequestContext rc, String fileName, Boolean cache, Map options) throws Exception {
         HttpServletResponse res = rc.getRes();
 
-        String contentType = MapUtil.getNestedValue(options, "contentType");
+        String contentType = MapUtil.getDeepValue(options, "contentType");
         contentType = (contentType != null) ? contentType : getContentType(fileName);
         res.setContentType(contentType);
 

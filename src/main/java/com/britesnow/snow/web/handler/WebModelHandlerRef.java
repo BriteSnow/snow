@@ -3,30 +3,23 @@
  */
 package com.britesnow.snow.web.handler;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.britesnow.snow.web.RequestContext;
 import com.britesnow.snow.web.handler.annotation.WebModelHandler;
-import com.britesnow.snow.web.param.WebParamRef;
-import com.britesnow.snow.web.param.WebParameterParser;
+import com.britesnow.snow.web.param.resolver.WebParamResolverRef;
 
 
-public class WebModelHandlerRef extends BaseWebHandlerRef implements PathMatcher {
+public class WebModelHandlerRef extends WebHandlerRef implements PathMatcher {
 
     WebModelHandler webModel;
 
-    public WebModelHandlerRef(Object object, Method method, Map<Class<? extends Annotation>,WebParameterParser> webParameterParserMap,
+    public WebModelHandlerRef(Object object, Method method,WebParamResolverRef[] webParamResolverRefs,
                               WebModelHandler webModel) {
-        super(object, method, webParameterParserMap);
+        super(object, method,webParamResolverRefs);
         this.webModel = webModel;
-        
-        initWebParamRefs();
     }
-
     
     /* (non-Javadoc)
      * @see org.snowfk.web.method.PathMatcher#matchesPath(java.lang.String)
@@ -50,21 +43,6 @@ public class WebModelHandlerRef extends BaseWebHandlerRef implements PathMatcher
         }
     }
     
-    public void invokeWebModel(Map m,RequestContext rc) throws Exception{
-        Object[] paramValues = new Object[webArgRefs.size()];
-        
-        //the first param of a WebModel MUST be the Model Map
-        paramValues[0] = m;
-        
-        if (webArgRefs.size() > 1){
-            for (int i = 1; i < paramValues.length;i++){
-                WebParamRef webParamRef = webArgRefs.get(i);
-                paramValues[i] = webParamRef.getValue(method, rc);
-            }
-        }
-        
-        method.invoke(webHandler,paramValues);
-    }
     
     public String toString(){
         return "WebModelRef: " + method.getName();

@@ -43,14 +43,14 @@ public class SimpleAppTest extends SnowWebApplicationTestSupport {
         rc.setParamMap(MapUtil.mapIt("id", "1"));
         webController.service(rc);
         result = rc.getResponseAsJson();
-        assertEquals("Mike", MapUtil.getNestedValue(result, "contact.name"));
+        assertEquals("Mike", MapUtil.getDeepValue(result, "contact.name"));
 
         // test getting contact id = 2 (Dylan)
         rc = requestContextFactory.createRequestContext(RequestMethod.GET, "/contact.json");
         rc.setParamMap(MapUtil.mapIt("id", "2"));
         webController.service(rc);
         result = rc.getResponseAsJson();
-        assertEquals("Dylan", MapUtil.getNestedValue(result, "contact.name"));
+        assertEquals("Dylan", MapUtil.getDeepValue(result, "contact.name"));
 
     }
 
@@ -97,15 +97,14 @@ public class SimpleAppTest extends SnowWebApplicationTestSupport {
         rc.setParamMap(MapUtil.mapIt("action", "addContact", "name", "Jennifer"));
         webController.service(rc);
         result = rc.getResponseAsJson();
-        assertEquals(MapUtil.getNestedValue(result, "result.name"), "Jennifer");
+        assertEquals("Jennifer",result.get("name"));
 
-        String newContactId = MapUtil.getNestedValue(result, "result.id");
+        String newContactId = MapUtil.getDeepValue(result, "id");
         rc = requestContextFactory.createRequestContext(RequestMethod.GET, "/contact.json");
         rc.setParamMap(MapUtil.mapIt("id", newContactId));
         webController.service(rc);
         result = rc.getResponseAsJson();
-        assertEquals("Jennifer", MapUtil.getNestedValue(result, "contact.name"));
-
+        assertEquals("Jennifer", MapUtil.getDeepValue(result, "contact.name"));
     }
 
 }

@@ -321,7 +321,7 @@ public class WebController {
             httpWriter.writeStringContent(rc, href, reader, true, null);
         } else {
             // First, see and process the eventual WebFileHandler
-            boolean webFileProcessed = application.processWebFile(rc);
+            boolean webFileProcessed = application.processWebResourceHandler(rc);
 
             // if not processed, then, default processing
             if (!webFileProcessed) {

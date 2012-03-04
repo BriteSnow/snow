@@ -11,11 +11,10 @@ import java.lang.annotation.Target;
 /**
  * 
  * Add this annotation to a @WebAction or @WebModel method inject. <br />
- * Note that this notation is optional in @WebModel, since the first argument must be a Map.
  * Usage: 
  * <pre>
  * \@WebAction
- * public void addUser(@WebMap Map m){...}
+ * public void addUser(@WebMode; Map m){...}
  * </pre>
  * 
  * @author Jeremy Chone
@@ -23,6 +22,6 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME) 
 @Target(ElementType.PARAMETER)
-public @interface WebMap {
+public @interface WebModel {
 
 }

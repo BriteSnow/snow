@@ -3,7 +3,6 @@
  */
 package com.britesnow.snow.web.param;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Map;
 
@@ -12,51 +11,43 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.britesnow.snow.web.RequestContext;
-import com.britesnow.snow.web.param.annotation.WebMap;
+import com.britesnow.snow.web.param.annotation.WebModel;
 import com.britesnow.snow.web.param.annotation.WebParam;
 import com.britesnow.snow.web.param.annotation.WebPath;
 import com.britesnow.snow.web.param.annotation.WebUser;
 
-public class WebParamRef {
+public class OldWebParamRef {
 
     private WebParam  webParam  = null;
     private WebUser   webUser   = null;
     private WebPath   webPath   = null;
-    private WebMap    webMap    = null;
+    private WebModel    webMap    = null;
 
-    private WebParameterParser webParameterParser;
-    private Annotation webParameterAnnotation;
 
     private Class     paramClass;
 
-    public WebParamRef(Class paramClass) {
+    public OldWebParamRef(Class paramClass) {
         this.paramClass = paramClass;
     }
 
-    public WebParamRef(WebParam webParam, Class paramClass) {
+    public OldWebParamRef(WebParam webParam, Class paramClass) {
         this(paramClass);
         this.webParam = webParam;
     }
 
-    public WebParamRef(WebUser webUser, Class paramClass) {
+    public OldWebParamRef(WebUser webUser, Class paramClass) {
         this(paramClass);
         this.webUser = webUser;
     }
 
-    public WebParamRef(WebPath webPath, Class paramClass) {
+    public OldWebParamRef(WebPath webPath, Class paramClass) {
         this(paramClass);
         this.webPath = webPath;
     }
 
-    public WebParamRef(WebMap webMap, Class paramClass) {
+    public OldWebParamRef(WebModel webMap, Class paramClass) {
         this(paramClass);
         this.webMap = webMap;
-    }
-
-    public WebParamRef(WebParameterParser webParameterParser, Annotation webParameterAnnotation, Class paramClass) {
-        this.webParameterParser = webParameterParser;
-        this.webParameterAnnotation = webParameterAnnotation;
-        this.paramClass = paramClass;
     }
 
     public Class getArgClass(){
@@ -76,7 +67,7 @@ public class WebParamRef {
         } else if (webParam != null && paramClass == Map.class) {
             value = rc.getParamMap(webParam.value());
         } else if (webMap != null) {
-            value = rc.getWebMap();
+            value = rc.getWebModel();
         } else if (webUser != null) {
             if (rc.getAuth() != null) {
                 value = rc.getAuth().getUser();
@@ -90,8 +81,6 @@ public class WebParamRef {
             else {
                 value = rc.getResourcePath();
             }
-        } else if (webParameterParser != null) {
-            value = webParameterParser.getParameterValue(m, webParameterAnnotation, paramClass, rc);
         } else {
             String paramName;
             if (webParam != null) {

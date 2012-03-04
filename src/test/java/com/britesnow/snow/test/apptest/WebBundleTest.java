@@ -41,7 +41,7 @@ public class WebBundleTest extends SnowWebApplicationTestSupport {
         RequestContextMock rc;        
         
         // test the get on a _web_bundle_all__.... request.
-        rc = requestContextFactory.createRequestContext(RequestMethod.GET, "/js/_web_bundle_all__anykey.js");
+        rc = requestContextFactory.createRequestContext(RequestMethod.GET, "/js/_web_bundle_all__anykey__.js");
         webController.service(rc);
         result = rc.getResponseAsString();
         assertContains(new String[]{"var js1","var js2"},result);

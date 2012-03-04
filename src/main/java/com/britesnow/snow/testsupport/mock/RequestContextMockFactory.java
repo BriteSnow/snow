@@ -11,9 +11,14 @@ public class RequestContextMockFactory {
     }
     private Injector injector;
     
-    public RequestContextMockFactory init(){
+    
+    public RequestContextMockFactory(){
         injector = Guice.createInjector(new MockFactoryModule());
-        return this;
+    }
+    
+    
+    public RequestContextMock createRequestContext(){
+        return createRequestContext(RequestMethod.GET,"/");
     }
     
     public RequestContextMock createRequestContext(RequestMethod method,String pathInfo){

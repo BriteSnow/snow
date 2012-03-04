@@ -1,66 +1,61 @@
 package com.britesnow.snow.web.handler;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.britesnow.snow.util.FileUtil;
-import com.britesnow.snow.web.RequestContext;
 import com.britesnow.snow.web.handler.annotation.WebResourceHandler;
-import com.britesnow.snow.web.param.WebParamRef;
-import com.britesnow.snow.web.param.WebParameterParser;
+import com.britesnow.snow.web.param.resolver.WebParamResolverRef;
 
-public class WebResourceHandlerRef extends BaseWebHandlerRef implements PathMatcher {
+public class WebResourceHandlerRef extends WebHandlerRef implements PathMatcher {
 
     private WebResourceHandler webResourceHandler;
 
-    public WebResourceHandlerRef(Object object, Method method, Map<Class<? extends Annotation>,WebParameterParser> webParameterParserMap,
-                             WebResourceHandler webFile) {
-        super(object, method, webParameterParserMap);
-        this.webResourceHandler = webFile;
-        initWebParamRefs();
+    public WebResourceHandlerRef(Object object, Method method, WebParamResolverRef[] webParamResolverRefs,
+                            WebResourceHandler webResourceHandler) {
+        super(object, method, webParamResolverRefs);
+        this.webResourceHandler = webResourceHandler;
     }
 
     @Override
     public boolean matchesPath(String path) {
         String[] fileNameAndExt = FileUtil.getFileNameAndExtension(path);
-        boolean match = false;
-        //first match the ext.
-        for (String ext : webResourceHandler.ext()) {
-            
-            if (ext.equalsIgnoreCase(fileNameAndExt[1])) {
-                match = true;
-                break;
+        boolean extFilterOk = false;
+        // first match the ext.
+        // if we have a "ext" filter, then we pre-filter the path
+        String[] exts = webResourceHandler.ext();
+        if (exts.length > 0) {
+            for (String ext : exts) {
+                ext = ext.toLowerCase();
+                String pathExt = fileNameAndExt[1].toLowerCase();
+                if (ext.equalsIgnoreCase(pathExt)) {
+                    extFilterOk = true;
+                    break;
+                }
             }
+        } else {
+            extFilterOk = true;
         }
 
-        //if the match match, then, match the matches
-        if (match) {
+        boolean match = false;
+        // if the match match, then, match the matches
+        if (extFilterOk) {
             for (String regex : webResourceHandler.matches()) {
+                
                 Pattern pat = Pattern.compile(regex);
                 Matcher mat = pat.matcher(path);
                 Boolean matches = mat.matches();
                 if (matches) {
                     match = true;
                     break;
-                }else{
+                } else {
                     match = false;
                 }
             }
         }
 
         return match;
-    }
-
-    public Object invokeWebFile(RequestContext rc) throws Exception {
-        Object[] paramValues = new Object[webArgRefs.size()];
-        int i = 0;
-        for (WebParamRef webParamRef : webArgRefs) {
-            paramValues[i++] = webParamRef.getValue(method, rc);
-        }
-        return method.invoke(webHandler, paramValues);
     }
 
 }

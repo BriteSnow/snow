@@ -21,12 +21,11 @@ public class MapUtil {
 	
 	
 	/**
-	 * Convenient method for the getNestedValue(Map m, String namePath, Class<T> cls, T defaultValue) with cls String.class and defaultValue = null
 	 * @param m the nested map
 	 * @param namePath the namePath (i.e. "product.name")
 	 */
-	public static String  getNestedValue(Map m, String namePath) {
-		return getNestedValue(m,namePath,String.class);
+	public static String  getDeepValue(Map m, String namePath) {
+		return getDeepValue(m,namePath,String.class);
 	}
 	
 	/**
@@ -37,8 +36,8 @@ public class MapUtil {
 	 * @param cls
 	 * @return
 	 */
-	public static <T> T getNestedValue(Map m, String namePath, Class<T> cls) {
-		return getNestedValue(m,namePath,cls,null);
+	public static <T> T getDeepValue(Map m, String namePath, Class<T> cls) {
+		return getDeepValue(m,namePath,cls,null);
 	}
 	
 	/**
@@ -51,7 +50,7 @@ public class MapUtil {
 	 * @param defaultValue the default value in case the map, namePath, or value do not exist
 	 * @return
 	 */
-	public static <T> T getNestedValue(Map m, String namePath, Class<T> cls, T defaultValue) {
+	public static <T> T getDeepValue(Map m, String namePath, Class<T> cls, T defaultValue) {
         if (m != null && namePath != null) {
             String[] names = namePath.split("\\.");
             Map tmpMap = m;
@@ -80,16 +79,6 @@ public class MapUtil {
 
         return defaultValue;		
 	}
-	
-	@Deprecated
-    public static <T> T getTreeMapValue(Map m, String namePath, Class<T> cls, T defaultValue) {
-    	return getNestedValue(m,namePath,cls,defaultValue);
-    }
-	
-	@Deprecated
-	 public static Map<String, Object> treeMapIt(Object... objs) {
-		return nestMapIt(objs);
-	}
 	// --------- /Nested Map --------- //
 
     /**
@@ -102,7 +91,7 @@ public class MapUtil {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static Map<String, Object> nestMapIt(Object... objs) {
+    public static Map<String, Object> deepMapIt(Object... objs) {
         HashMap<String, Object> m = new HashMap<String, Object>();
 
         for (int i = 0; i < objs.length; i += 2) {

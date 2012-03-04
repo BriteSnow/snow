@@ -7,11 +7,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import com.britesnow.snow.web.param.WebParamRef;
-import com.britesnow.snow.web.param.WebParameterParser;
-import com.britesnow.snow.web.param.annotation.WebMap;
+import com.britesnow.snow.web.param.OldWebParamRef;
+import com.britesnow.snow.web.param.annotation.WebModel;
 import com.britesnow.snow.web.param.annotation.WebParam;
 import com.britesnow.snow.web.param.annotation.WebPath;
 import com.britesnow.snow.web.param.annotation.WebUser;
@@ -20,13 +18,11 @@ import com.britesnow.snow.web.param.annotation.WebUser;
 public class BaseWebHandlerRef {
     protected Object       webHandler;
     protected Method       method;
-    protected List<WebParamRef> webArgRefs = new ArrayList<WebParamRef>();
-    protected Map<Class<? extends Annotation>,WebParameterParser> webParameterParserMap;
+    protected List<OldWebParamRef> webArgRefs = new ArrayList<OldWebParamRef>();
     
-    public BaseWebHandlerRef(Object webHandler, Method method, Map<Class<? extends Annotation>,WebParameterParser> webParameterParserMap) {
+    public BaseWebHandlerRef(Object webHandler, Method method) {
         this.webHandler = webHandler;
         this.method = method;
-        this.webParameterParserMap = webParameterParserMap;
     }
     
     protected void initWebParamRefs(){
@@ -38,20 +34,18 @@ public class BaseWebHandlerRef {
 
             for (Class paramClass : paramClasses){
                 Annotation webArgumentAnnotation = getWebArgumentAnnotationFromAnnotationArray(paramAnnotationsArray[i]);
-                WebParamRef webParamRef;
+                OldWebParamRef webParamRef;
                 if (webArgumentAnnotation instanceof WebParam){
-                    webParamRef = new WebParamRef((WebParam)webArgumentAnnotation,paramClass);
+                    webParamRef = new OldWebParamRef((WebParam)webArgumentAnnotation,paramClass);
                 }else if (webArgumentAnnotation instanceof WebUser){
-                    webParamRef = new WebParamRef((WebUser)webArgumentAnnotation,paramClass);
+                    webParamRef = new OldWebParamRef((WebUser)webArgumentAnnotation,paramClass);
                 }else if (webArgumentAnnotation instanceof WebPath){
-                    webParamRef = new WebParamRef((WebPath)webArgumentAnnotation,paramClass);
-                }else if (webArgumentAnnotation instanceof WebMap){
-                    webParamRef = new WebParamRef((WebMap)webArgumentAnnotation,paramClass);
-                }else if (webArgumentAnnotation != null && webParameterParserMap.containsKey(webArgumentAnnotation.annotationType())) {
-                    webParamRef = new WebParamRef(webParameterParserMap.get(webArgumentAnnotation.annotationType()), (Annotation) webArgumentAnnotation, paramClass);
+                    webParamRef = new OldWebParamRef((WebPath)webArgumentAnnotation,paramClass);
+                }else if (webArgumentAnnotation instanceof WebModel){
+                    webParamRef = new OldWebParamRef((WebModel)webArgumentAnnotation,paramClass);
                 }
                 else{
-                    webParamRef = new WebParamRef(paramClass);
+                    webParamRef = new OldWebParamRef(paramClass);
                 }
                 webArgRefs.add(webParamRef);
                 
@@ -73,10 +67,7 @@ public class BaseWebHandlerRef {
                 if (annotation instanceof WebPath){
                     return annotation;
                 }
-                if (annotation instanceof WebMap){
-                    return annotation;
-                }
-                if (webParameterParserMap.containsKey(annotation.annotationType())) {
+                if (annotation instanceof WebModel){
                     return annotation;
                 }
             }

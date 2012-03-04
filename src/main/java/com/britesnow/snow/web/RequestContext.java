@@ -559,7 +559,7 @@ public class RequestContext {
      * @return
      */
     public <T> T getModelValue(String namePath, Class<T> cls, T defaultValue) {
-        return MapUtil.getNestedValue(webMap, namePath, cls, defaultValue);
+        return MapUtil.getDeepValue(webMap, namePath, cls, defaultValue);
     }
 
     public Map getRootModel() {
@@ -569,7 +569,7 @@ public class RequestContext {
     /**
      * @return the Model M (use for the page model "m")
      */
-    public Map getWebMap() {
+    public Map getWebModel() {
         return webMap;
     }
 

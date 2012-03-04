@@ -32,7 +32,7 @@ public class WebActionException extends RuntimeException {
 
     public Map<String, Object> getData() {
         if (data == null && treeMapArgs != null) {
-            data = MapUtil.nestMapIt(treeMapArgs);
+            data = MapUtil.deepMapIt(treeMapArgs);
         }
         return data;
     }

@@ -6,6 +6,7 @@ import java.util.Map;
 import com.britesnow.snow.util.MapUtil;
 import com.britesnow.snow.web.handler.annotation.WebActionHandler;
 import com.britesnow.snow.web.handler.annotation.WebModelHandler;
+import com.britesnow.snow.web.param.annotation.WebModel;
 import com.britesnow.snow.web.param.annotation.WebParam;
 
 public class SimpleWebHandlers {
@@ -21,7 +22,7 @@ public class SimpleWebHandlers {
     }
     
     @WebModelHandler(startsWith="/contact")
-    public void contactPage(Map m, @WebParam("id")Long contactId){
+    public void contactPage(@WebModel Map m, @WebParam("id")Long contactId){
         Map contact = contactStore.get(contactId);
         m.put("contact",contact);
     }

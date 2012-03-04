@@ -1,4 +1,4 @@
-package com.britesnow.snow.web.handler.annotation;
+package com.britesnow.snow.web.param.resolver.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,5 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME) 
 @Target(ElementType.METHOD)
-public @interface WebExceptionHandler {
+public @interface WebParamResolver {
+
+    Class[] annotatedWith() default {};
 }

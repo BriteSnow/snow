@@ -12,7 +12,14 @@ public class RequestContextMock extends RequestContext {
 
     HttpServletRequestMock req;
     HttpServletResponseMock res; 
-                            
+                 
+    
+    /**
+     * This should be call via the MockFactory 
+     * @param req
+     * @param res
+     * @param servletContext
+     */
     @Inject
     public RequestContextMock(HttpServletRequestMock req,HttpServletResponseMock res, ServletContext servletContext){
         super(req,res,servletContext,null);

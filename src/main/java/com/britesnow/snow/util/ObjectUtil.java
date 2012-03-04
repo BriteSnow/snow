@@ -3,144 +3,81 @@
  */
 package com.britesnow.snow.util;
 
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.ConvertUtilsBean;
-import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.beanutils.PropertyUtilsBean;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("unchecked")
 public class ObjectUtil {
-    static private Logger logger = LoggerFactory.getLogger(ObjectUtil.class);
-    
-    static NumberFormat numberFormat = NumberFormat.getInstance(Locale.US); 
-    
+    static NumberFormat        numberFormat         = NumberFormat.getInstance(Locale.US);
+
     public static final String DEFAULT_DATE_PATTERN = "yyyy-MM-dd";
-    
-    //NOTE: the beanUtil use the ObjectUtil.getValue to convert
-    static BeanUtilsBean beanUtilsBean = new BeanUtilsBean(new ConvertUtilsBean() {
 
-                                           @SuppressWarnings("unchecked")
-                                           @Override
-                                           public Object convert(String value, Class clazz) {
+    // NOTE: the beanUtil use the ObjectUtil.getValue to convert
+    static BeanUtilsBean       beanUtilsBean        = new BeanUtilsBean(new ConvertUtilsBean() {
 
-                                               if (clazz.isEnum()) {
-                                                   if (value != null && value.length() > 0){
-                                                       return Enum.valueOf(clazz, value);
-                                                   }else{
-                                                       return null;
-                                                   }
-                                                   
-                                               } else {
-                                                   return getValue(value, clazz,null);
-                                               }
+                                                        @SuppressWarnings("unchecked")
+                                                        @Override
+                                                        public Object convert(String value, Class clazz) {
 
-                                           }
+                                                            if (clazz.isEnum()) {
+                                                                if (value != null && value.length() > 0) {
+                                                                    return Enum.valueOf(clazz, value);
+                                                                } else {
+                                                                    return null;
+                                                                }
 
-                                       }, new PropertyUtilsBean() {
+                                                            } else {
+                                                                return getValue(value, clazz, null);
+                                                            }
 
-                                           @Override
-                                           public Object getProperty(Object bean, String name) throws IllegalAccessException,
-                                                                   InvocationTargetException, NoSuchMethodException {
+                                                        }
 
-                                               Object property = super.getProperty(bean, name);
+                                                    }, new PropertyUtilsBean() {
 
-                                               //if null, then, try the best to create the target class
-                                               if (property == null) {
-                                                   Class propClass = getPropertyType(bean, name);
-                                                   //if it is 
-                                                   if (propClass != null && !propClass.isInterface()) {
-                                                       try {
-                                                           property = propClass.newInstance();
-                                                           setProperty(bean, name, property);
-                                                       } catch (InstantiationException e) {
-                                                           throw new InvocationTargetException(e, "Cannot instantiate class "
-                                                                                   + propClass + " for property " + name);
-                                                       }
-                                                   }
-                                               }
-                                               return property;
+                                                        @Override
+                                                        public Object getProperty(Object bean, String name)
+                                                                                throws IllegalAccessException,
+                                                                                InvocationTargetException,
+                                                                                NoSuchMethodException {
 
-                                           }
+                                                            Object property = super.getProperty(bean, name);
 
-                                       });
+                                                            // if null, then, try the best to create the target class
+                                                            if (property == null) {
+                                                                Class propClass = getPropertyType(bean, name);
+                                                                // if it is
+                                                                if (propClass != null && !propClass.isInterface()) {
+                                                                    try {
+                                                                        property = propClass.newInstance();
+                                                                        setProperty(bean, name, property);
+                                                                    } catch (InstantiationException e) {
+                                                                        throw new InvocationTargetException(e, "Cannot instantiate class " + propClass
+                                                                                                + " for property "
+                                                                                                + name);
+                                                                    }
+                                                                }
+                                                            }
+                                                            return property;
 
-    @Deprecated
-    public static void copyNotNull(Object src, Object dest) {
-        try {
+                                                        }
 
-            PropertyDescriptor[] pds = PropertyUtils.getPropertyDescriptors(src);
-            for (PropertyDescriptor pd : pds) {
-                String name = pd.getName();
-                if (pd.getWriteMethod() != null) {
-                    Object value = PropertyUtils.getProperty(src, name);
-                    if (value != null) {
-                        PropertyUtils.setProperty(dest, name, value);
-                    }
-                }
-            }
+                                                    });
 
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            throw (new RuntimeException(e));
-        }
-    }
+
 
     /**
-     * Copy all the properties are that not null, or not empty (for List and
-     * array objects) to the dest object.
-     * 
-     * @param src
-     * @param dest
-     */
-    @Deprecated
-    public static void copyNotNullNotEmpty(Object src, Object dest) {
-        try {
-
-            PropertyDescriptor[] pds = PropertyUtils.getPropertyDescriptors(src);
-            for (PropertyDescriptor pd : pds) {
-                String name = pd.getName();
-
-                if (pd.getWriteMethod() != null) {
-                    Object value = PropertyUtils.getProperty(src, name);
-                    boolean copy = true;
-
-                    if (value == null) {
-                        copy = false;
-                    } else if (value instanceof List && ((List) value).size() < 1) {
-                        copy = false;
-                    } else if (value.getClass().isArray() && ((Object[]) value).length < 1) {
-                        copy = false;
-                    }
-
-                    if (copy) {
-                        PropertyUtils.setProperty(dest, name, value);
-                    }
-                }
-            }
-            // BeanUtils.copyProperties(dest, src);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            throw (new RuntimeException(e));
-        }
-    }
-
-    /**
-     * Safe equal methods for two object. If both are null, return true,
-     * otherwise, if only one is null, return false, otherwise, if they match
-     * return true if not false.
+     * Safe equal methods for two object. If both are null, return true, otherwise, if only one is null, return false,
+     * otherwise, if they match return true if not false.
      * 
      * @param obj1
      * @param obj2
@@ -150,7 +87,7 @@ public class ObjectUtil {
         if (obj1 == null && obj2 == null) {
             return true;
         }
-        //if we are hear, one of the obj must be not null, so, if one null, return false
+        // if we are hear, one of the obj must be not null, so, if one null, return false
         if (obj1 == null || obj2 == null) {
             return false;
         }
@@ -172,8 +109,7 @@ public class ObjectUtil {
     /**
      * <div class="notes"> <strong>Notes:</strong>
      * <ul>
-     * <li>So far does not safeguard any type conversion (will throw an runtime
-     * exception if parsing fail)</li>
+     * <li>So far does not safeguard any type conversion (will throw an runtime exception if parsing fail)</li>
      * </ul>
      * </div>
      * 
@@ -235,7 +171,7 @@ public class ObjectUtil {
                         } catch (IllegalArgumentException e) {
                             return defaultValue;
                         }
-                    }else if(cls==Date.class){
+                    } else if (cls == Date.class) {
                         SimpleDateFormat sdf = new SimpleDateFormat(DEFAULT_DATE_PATTERN);
                         return (T) new java.util.Date(sdf.parse(valueStr).getTime());
                     }
@@ -249,8 +185,7 @@ public class ObjectUtil {
         return defaultValue;
     }
 
-    private static Set<Class> primitiveClasses = MapUtil.setIt(String.class, Integer.class, Long.class, Float.class,
-                                                                       Boolean.class);
+    private static Set<Class> primitiveClasses = MapUtil.setIt(String.class, Integer.class, Long.class, Float.class, Boolean.class);
 
     public static final boolean isPrimitive(Class cls) {
         return primitiveClasses.contains(cls);

@@ -47,7 +47,7 @@ public class SnowWebApplicationTestSupport {
         appInjector = appLoader.getApplicationInjector();
         
         // for convenience create a RequestContextMockFactory
-        requestContextFactory = new RequestContextMockFactory().init();
+        requestContextFactory = new RequestContextMockFactory();
     }
     
     /**
