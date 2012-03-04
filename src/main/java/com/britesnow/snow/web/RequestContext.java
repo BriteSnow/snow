@@ -31,6 +31,7 @@ import com.britesnow.snow.util.HttpRequestUtil;
 import com.britesnow.snow.util.MapUtil;
 import com.britesnow.snow.util.ObjectUtil;
 import com.britesnow.snow.web.auth.Auth;
+import com.google.common.base.Throwables;
 
 public class RequestContext {
     static private Logger       logger             = LoggerFactory.getLogger(RequestContext.class);
@@ -64,7 +65,6 @@ public class RequestContext {
     private WebActionResponse   webActionResponse;
 
     // optional
-    private Writer              writer;
     private String              pathInfo;
 
     // set by AuthService.authRequest
@@ -290,24 +290,6 @@ public class RequestContext {
         }
     }
 
-    /**
-     * Get the param from the request, and if not found, from the cookie. TODO: need to support the # params as well.
-     * 
-     * @param <T>
-     * @param name
-     * @param cls
-     * @param defaultValue
-     * @return
-     */
-    public <T> T getOmniParam(String name, Class<T> cls, T defaultValue) {
-        T value = getParam(name, cls, null);
-        if (value == null) {
-            value = getCookie(name, cls, defaultValue);
-        }
-        return value;
-    }
-
-    @SuppressWarnings("unchecked")
     private void initParamsIfNeeded() {
         if (!isParamInitialized) {
             isMultipart = ServletFileUpload.isMultipartContent(getReq());
@@ -510,6 +492,7 @@ public class RequestContext {
 
     // --------- /Paths --------- //
 
+    // --------- Utilities for Paths --------- //
     // TODO: probably does not need to be that complicated. Might want to use Guava here.
     static private String[] splitPath(String path) {
         String[] paths = null;
@@ -539,24 +522,15 @@ public class RequestContext {
         String valueStr = pathAt(paths, i);
         return ObjectUtil.getValue(valueStr, cls, defaultValue);
     }
-
+    // --------- /Utilities for Paths --------- //
+    
+    
     /*--------- Writer ---------*/
-    public void setWriter(Writer writer) {
-        this.writer = writer;
-    }
-
     public Writer getWriter() {
-        if (writer != null) {
-            return writer;
-        } else if (res != null) {
-            try {
-                return res.getWriter();
-            } catch (IOException e) {
-                logger.error(e.getMessage());
-                throw new RuntimeException(e);
-            }
-        } else {
-            return null;
+        try {
+            return res.getWriter();
+        } catch (IOException e) {
+            throw Throwables.propagate(e);
         }
     }
 

@@ -68,23 +68,16 @@ public class LessProcessor {
     }
     
     public String compile(File input) {
-        String result = null;
         try {
+            String result = null;
             long time = System.currentTimeMillis();
             logger.debug("Compiling File: " + "file:" + input.getAbsolutePath());
             result = call(compileFile, new Object[] {"file:" + input.getAbsolutePath(), classLoader});
             logger.debug("The compilation of '" + input + "' took " + (System.currentTimeMillis () - time) + " ms.");
-            
+            return result;
         } catch (Exception e) {
-            try {
-                parseLessException(e);
-            }catch(Exception e2){
-                Throwables.propagate(e2);
-            }
-            
+            throw Throwables.propagate(parseLessException(e));
         }
-        
-        return result;
     }    
     
     private synchronized String call(Function fn, Object[] args) {
@@ -92,7 +85,7 @@ public class LessProcessor {
     }
     
     
-    private void parseLessException(Exception root) throws LessException {
+    private LessException parseLessException(Exception root){
         logger.debug("Parsing LESS Exception", root);
         if (root instanceof JavaScriptException) {
             Scriptable value = (Scriptable) ((JavaScriptException) root).getValue();
@@ -135,9 +128,9 @@ public class LessProcessor {
                         }
                     }
                 }
-                throw new LessException(message, errorType, filename, line, column, extractList);
+                return new LessException(message, errorType, filename, line, column, extractList);
             }
         }
-        throw new LessException(root);
+        return new LessException(root);
     }    
 }

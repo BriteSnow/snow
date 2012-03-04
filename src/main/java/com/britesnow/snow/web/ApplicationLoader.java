@@ -129,7 +129,7 @@ public class ApplicationLoader {
                 Module applicationModule = (Module) applicationModuleClass.newInstance();
                 modules.add(applicationModule);
             } catch (Exception e) {
-                Throwables.propagate(e);
+                throw Throwables.propagate(e);
             }
         }
         
@@ -145,7 +145,7 @@ public class ApplicationLoader {
             try {
                 ((Properties)appProperties).load(new FileReader(propertiesFile));
             } catch (Exception e) {
-                Throwables.propagate(e);
+                throw Throwables.propagate(e);
             }
         } else {
             logger.info("No application.properties found at " + propertiesFile.getAbsolutePath()
