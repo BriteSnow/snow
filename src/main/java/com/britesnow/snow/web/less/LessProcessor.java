@@ -81,7 +81,10 @@ public class LessProcessor {
     }    
     
     private synchronized String call(Function fn, Object[] args) {
-        return (String) Context.call(null, fn, scope, scope, args);
+        Context.enter();
+        String result = (String) Context.call(null, fn, scope, scope, args);
+        Context.exit();
+        return result;
     }
     
     

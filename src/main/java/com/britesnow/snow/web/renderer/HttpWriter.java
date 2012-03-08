@@ -1,4 +1,4 @@
-package com.britesnow.snow.web;
+package com.britesnow.snow.web.renderer;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -18,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.britesnow.snow.util.FileUtil;
-import com.britesnow.snow.util.MapUtil;
+import com.britesnow.snow.web.RequestContext;
 import com.google.common.base.Throwables;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -28,6 +27,8 @@ public class HttpWriter {
     static private Logger  logger      = LoggerFactory.getLogger(HttpWriter.class);
 
     public static int      BUFFER_SIZE = 2048 * 2;
+    
+    private final HttpWriterOptions defaultOptions = new HttpWriterOptions();
 
     @Inject(optional = true)
     private ServletContext servletContext;
@@ -44,7 +45,8 @@ public class HttpWriter {
         return contentType;
     }
 
-    public void writeFile(RequestContext rc, File file, boolean cache, Map options) {
+    public void writeFile(RequestContext rc, File file, boolean cache, HttpWriterOptions options) {
+        options = (options != null)?options:defaultOptions;
         String contentType = FileUtil.getExtraMimeType(file.getAbsolutePath());
         try{
         if (contentType != null && (contentType.startsWith("text") || contentType.indexOf("javascript") != -1)) {
@@ -70,11 +72,13 @@ public class HttpWriter {
      * @param options
      * @throws Exception
      */
-    public void writeStringContent(RequestContext rc, String fileName, Reader contentReader, boolean cache, Map options) {
+    public void writeStringContent(RequestContext rc, String fileName, Reader contentReader, boolean cache, HttpWriterOptions options) {
+        options = (options != null)?options:defaultOptions;
         Writer ow = null;
+        
         try {
             HttpServletRequest req = rc.getReq();
-            String characterEncoding = MapUtil.getDeepValue(options, "characterEncoding");
+            String characterEncoding = options.getCharacterEncoding();
             characterEncoding = (characterEncoding != null) ? characterEncoding : "UTF-8";
             req.setCharacterEncoding(characterEncoding);
 
@@ -107,9 +111,9 @@ public class HttpWriter {
         }
     }
 
-    public void writeBinaryContent(RequestContext rc, String fileName, InputStream contentIS, boolean cache, Map options)
+    public void writeBinaryContent(RequestContext rc, String fileName, InputStream contentIS, boolean cache, HttpWriterOptions options)
                             throws Exception {
-
+        options = (options != null)?options:defaultOptions;
         setHeaders(rc, fileName, cache, options);
 
         OutputStream os = rc.getRes().getOutputStream();
@@ -135,10 +139,12 @@ public class HttpWriter {
         }
     }
 
-    private void setHeaders(RequestContext rc, String fileName, Boolean cache, Map options) throws Exception {
+    private void setHeaders(RequestContext rc, String fileName, Boolean cache, HttpWriterOptions options) throws Exception {
+        options = (options != null)?options:defaultOptions;
+        
         HttpServletResponse res = rc.getRes();
 
-        String contentType = MapUtil.getDeepValue(options, "contentType");
+        String contentType = options.getContentType();
         contentType = (contentType != null) ? contentType : getContentType(fileName);
         res.setContentType(contentType);
 

@@ -20,31 +20,45 @@ public class HttpServletRequestMock implements HttpServletRequest {
 
     private String method;
     private String pathInfo;
-    private String contextPath = "";
-    private Map    headers = new HashMap();
+    private String contextPath  = "";
+    private Map    headers      = new HashMap();
     private Map    parameterMap = new HashMap();
-    
+    private Map    attributeMap = new HashMap();
+
     // --------- Additional Mock Methods --------- //
-    public void setMethod(String method){
+    public void setMethod(String method) {
         this.method = method;
     }
-    
-    public void setPathInfo(String pathInfo){
+
+    public void setPathInfo(String pathInfo) {
         this.pathInfo = pathInfo;
     }
+
     // --------- /Additional Mock Methods --------- //
-    
+
+    // --------- Attribute Overrides --------- //
     @Override
     public Object getAttribute(String arg0) {
-        // TODO Auto-generated method stub
-        return null;
+        return attributeMap.get(arg0);
+    }
+
+    @Override
+    public void removeAttribute(String arg0) {
+        attributeMap.remove(arg0);
+
+    }
+
+    @Override
+    public void setAttribute(String arg0, Object arg1) {
+        attributeMap.put(arg0, arg1);
     }
 
     @Override
     public Enumeration getAttributeNames() {
-        // TODO Auto-generated method stub
+        // NOT SUPPORTED IN MOCK
         return null;
     }
+    // --------- /Attribute Overrides --------- //
 
     @Override
     public String getCharacterEncoding() {
@@ -187,18 +201,6 @@ public class HttpServletRequestMock implements HttpServletRequest {
     public boolean isSecure() {
         // TODO Auto-generated method stub
         return false;
-    }
-
-    @Override
-    public void removeAttribute(String arg0) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void setAttribute(String arg0, Object arg1) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override

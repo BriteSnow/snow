@@ -3,19 +3,19 @@ package com.britesnow.snow.web;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nullable;
 import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.britesnow.snow.SnowRuntimeException;
-import com.britesnow.snow.web.binding.WebHandlers;
 import com.britesnow.snow.web.db.hibernate.HibernateSessionFactoryBuilder;
+import com.britesnow.snow.web.exception.WebExceptionCatcherRef;
+import com.britesnow.snow.web.exception.WebExceptionContext;
 import com.britesnow.snow.web.handler.WebActionHandlerRef;
 import com.britesnow.snow.web.handler.WebHandlerInterceptor;
 import com.britesnow.snow.web.handler.WebHandlerContext;
-import com.britesnow.snow.web.handler.WebHandlerRegistry;
+import com.britesnow.snow.web.handler.WebObjectRegistry;
 import com.britesnow.snow.web.handler.WebHandlerType;
 import com.britesnow.snow.web.handler.WebResourceHandlerRef;
 import com.britesnow.snow.web.handler.WebModelHandlerRef;
@@ -52,13 +52,10 @@ public class Application {
     @Inject
     private JsonRenderer                   jsonRenderer;
 
-    @Inject(optional = true)
-    @Nullable
-    @WebHandlers
-    private Object[]                       webHandlers;
+
 
     @Inject
-    private WebHandlerRegistry             webHandlerRegistry;
+    private WebObjectRegistry             webObjectRegistry;
 
     // --------- LifeCycle --------- //
     public void init() {
@@ -69,15 +66,8 @@ public class Application {
                 ((Initializable) hibernateSessionFactoryBuilder).init();
             }
 
-            webHandlerRegistry.init();
+            webObjectRegistry.init();
             
-            // register the webhandlers
-            if (webHandlers != null) {
-                for (Object webHandler : webHandlers) {
-                    webHandlerRegistry.registerWebHandlers(webHandler);
-                }
-            }
-
             // initialize freemarker
             freemarkerRenderer.init();
 
@@ -154,7 +144,7 @@ public class Application {
 
     // --------- WebHandler Processing --------- //
     WebActionResponse processWebAction(String actionName, RequestContext rc) {
-        WebActionHandlerRef webActionRef = webHandlerRegistry.getWebActionHandlerRef(actionName);
+        WebActionHandlerRef webActionRef = webObjectRegistry.getWebActionHandlerRef(actionName);
 
         if (webActionRef == null) {
             throw new SnowRuntimeException(Error.NO_WEB_ACTION, "WebAction", actionName);
@@ -190,7 +180,7 @@ public class Application {
 
     void processWebModels(RequestContext rc) {
         // get the rootModelBuilder
-        WebModelHandlerRef rootWmr = webHandlerRegistry.getWebModeHandlerlRef("/");
+        WebModelHandlerRef rootWmr = webObjectRegistry.getWebModeHandlerlRef("/");
         if (rootWmr != null) {
             invokeWebModelRef(rootWmr, rc);
         }
@@ -199,12 +189,12 @@ public class Application {
         String[] resourcePaths = rc.getResourcePaths();
         for (int i = 0; i < resourcePaths.length; i++) {
             String path = pathBuilder.append('/').append(resourcePaths[i]).toString();
-            WebModelHandlerRef webModelRef = webHandlerRegistry.getWebModeHandlerlRef(path);
+            WebModelHandlerRef webModelRef = webObjectRegistry.getWebModeHandlerlRef(path);
             invokeWebModelRef(webModelRef, rc);
         }
 
         // Match and process the "matches" webModels
-        List<WebModelHandlerRef> matchWebModelRefs = webHandlerRegistry.getMatchWebModelHandlerRef(pathBuilder.toString());
+        List<WebModelHandlerRef> matchWebModelRefs = webObjectRegistry.getMatchWebModelHandlerRef(pathBuilder.toString());
         for (WebModelHandlerRef webModelRef : matchWebModelRefs) {
             invokeWebModelRef(webModelRef, rc);
         }
@@ -239,11 +229,11 @@ public class Application {
     }
     
     boolean hasWebResourceHandlerFor(String resourcePath){
-        return (webHandlerRegistry.getWebResourceHandlerRef(resourcePath) != null);
+        return (webObjectRegistry.getWebResourceHandlerRef(resourcePath) != null);
     }
 
     void processWebResourceHandler(RequestContext rc) {
-        WebResourceHandlerRef webResourceHandlerRef = webHandlerRegistry.getWebResourceHandlerRef(rc.getResourcePath());
+        WebResourceHandlerRef webResourceHandlerRef = webObjectRegistry.getWebResourceHandlerRef(rc.getResourcePath());
         if (webResourceHandlerRef != null) {
             WebHandlerContext handlerContext = new WebHandlerContext(WebHandlerType.resource,webResourceHandlerRef.getHandlerObject(),webResourceHandlerRef.getHandlerMethod());
             
@@ -266,9 +256,23 @@ public class Application {
     }
 
     // --------- /WebHandler Processing --------- //
+    
+    // --------- WebExceptionCatcher Processing --------- //
+    public boolean processWebExceptionCatcher(Throwable t,WebHandlerContext webHandlerContext, RequestContext rc){
+        WebExceptionContext webExceptionContext = new WebExceptionContext(webHandlerContext);
+        
+        WebExceptionCatcherRef webExceptionCatcherRef = webObjectRegistry.getWebExceptionCatcherRef(t.getClass());
+        if (webExceptionCatcherRef != null){
+            webExceptionCatcherRef.invoke(t,webExceptionContext, rc);
+            return true;
+        }else{
+            return false;
+        }
+    }
+    // --------- /WebExceptionCatcher Processing --------- //
 
-    public String getTemplatePath(String resourcePath) {
-        String[] leafPaths = webHandlerRegistry.getLeafPaths();
+    String getTemplatePath(String resourcePath) {
+        String[] leafPaths = webObjectRegistry.getLeafPaths();
 
         if (leafPaths == null || leafPaths.length < 1) {
             return resourcePath;

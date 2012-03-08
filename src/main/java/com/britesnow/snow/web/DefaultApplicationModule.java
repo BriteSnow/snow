@@ -6,14 +6,15 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-
 import com.britesnow.snow.web.binding.ApplicationPackageBase;
-import com.britesnow.snow.web.binding.WebHandlerClasses;
-import com.britesnow.snow.web.binding.WebHandlers;
+import com.britesnow.snow.web.binding.WebClasses;
+import com.britesnow.snow.web.binding.WebObjects;
+import com.britesnow.snow.web.exception.annotation.WebExceptionCatcher;
 import com.britesnow.snow.web.handler.annotation.WebActionHandler;
 import com.britesnow.snow.web.handler.annotation.WebModelHandler;
 import com.britesnow.snow.web.handler.annotation.WebResourceHandler;
 import com.britesnow.snow.web.handler.annotation.WebTemplateDirectiveHandler;
+import com.britesnow.snow.web.param.resolver.annotation.WebParamResolver;
 import com.britesnow.snow.web.path.DefaultFramePathsResolver;
 import com.britesnow.snow.web.path.DefaultResourcePathResolver;
 import com.britesnow.snow.web.path.FramePathsResolver;
@@ -49,10 +50,10 @@ public class DefaultApplicationModule extends AbstractModule {
     }
 
     @Provides
-    @WebHandlers
+    @WebObjects
     @Inject
     @Nullable
-    public Object[] providesWebHandlers(Injector injector, @WebHandlerClasses Class[] webHandlerClasses) {
+    public Object[] providesWebObjects(Injector injector, @WebClasses Class[] webHandlerClasses) {
 
         if (webHandlerClasses != null) {
             Object[] webHandlers = new Object[webHandlerClasses.length];
@@ -70,8 +71,8 @@ public class DefaultApplicationModule extends AbstractModule {
     }
 
     @Provides
-    @WebHandlerClasses
-    public Class[] providesWebHandlerClasses() {
+    @WebClasses
+    public Class[] providesWebClasses() {
         if (applicationPackageBase != null) {
             ClassesInPackageScanner classScanner = new ClassesInPackageScanner();
 
@@ -82,7 +83,9 @@ public class DefaultApplicationModule extends AbstractModule {
 
                         if (method.getAnnotation(WebActionHandler.class) != null || method.getAnnotation(WebResourceHandler.class) != null
                                                 || method.getAnnotation(WebModelHandler.class) != null
-                                                || method.getAnnotation(WebTemplateDirectiveHandler.class) != null) {
+                                                || method.getAnnotation(WebTemplateDirectiveHandler.class) != null
+                                                || method.getAnnotation(WebParamResolver.class) != null
+                                                || method.getAnnotation(WebExceptionCatcher.class) != null) {
                             return true;
                         }
                     }
@@ -100,7 +103,7 @@ public class DefaultApplicationModule extends AbstractModule {
                 e.printStackTrace();
                 throw new RuntimeException("Failed to scan packages: " + applicationPackageBase);
             }
-        }else{
+        } else {
             return new Class[0];
         }
 

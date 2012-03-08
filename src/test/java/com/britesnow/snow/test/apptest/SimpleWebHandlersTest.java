@@ -12,7 +12,7 @@ import com.britesnow.snow.testsupport.mock.RequestContextMock;
 import com.britesnow.snow.testsupport.mock.RequestContextMockFactory.RequestMethod;
 import com.britesnow.snow.util.MapUtil;
 
-public class SimpleAppTest extends SnowWebApplicationTestSupport {
+public class SimpleWebHandlersTest extends SnowWebApplicationTestSupport {
 
     @BeforeClass
     public static void initTestClass() throws Exception {

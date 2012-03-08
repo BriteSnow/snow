@@ -24,6 +24,15 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
+/**
+ * For Internal use, don't use. 
+ * 
+ * This Class is responsible to Load the application, meaning it will that it will create the Guice appInjector from the system 
+ * Modules and the application modules. 
+ * 
+ * @author jeremychone
+ *
+ */
 public class ApplicationLoader {
     static private Logger  logger = LoggerFactory.getLogger(ApplicationLoader.class);
 
@@ -40,7 +49,7 @@ public class ApplicationLoader {
 
     }
 
-    public File getWebAppFolder() {
+    File getWebAppFolder() {
         return webAppFolder;
     }
     
@@ -61,7 +70,7 @@ public class ApplicationLoader {
     }
 
     @SuppressWarnings("unchecked")
-    public ApplicationLoader load() throws Exception {
+    protected ApplicationLoader load() throws Exception {
 
         Map<String,String> appProperties = loadAppProperties();
         
@@ -209,7 +218,7 @@ public class ApplicationLoader {
 
     // --------- PropertyPostProcessor Methods --------- //
 
-    public PropertyPostProcessor getPropertyPostProcessor() {
+    PropertyPostProcessor getPropertyPostProcessor() {
         return propertyPostProcessor;
     }
 
@@ -218,7 +227,7 @@ public class ApplicationLoader {
      * 
      * @param propertyPostProcessor
      */
-    public void setPropertyPostProcessor(PropertyPostProcessor propertyPostProcessor) {
+    void setPropertyPostProcessor(PropertyPostProcessor propertyPostProcessor) {
         this.propertyPostProcessor = propertyPostProcessor;
     }
 

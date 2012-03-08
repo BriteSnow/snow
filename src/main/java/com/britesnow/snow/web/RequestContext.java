@@ -59,8 +59,6 @@ public class RequestContext {
     // this is the HashMap for the "m" model map
     private Map                 webMap             = new HashMap();
 
-    private Map<Class, Object>  beanMap            = new HashMap<Class, Object>();
-
     // usually set by the WebController.service
     private WebActionResponse   webActionResponse;
 
@@ -104,33 +102,38 @@ public class RequestContext {
 
     /*--------- /Auth Methods ---------*/
 
-    // --------- Bean Methods --------- //
-    /**
-     * Add a bean for a given class.
-     * 
-     * @param <T>
-     * @param bean
-     * @return the bean for chainability
-     */
-    public <T> T addBean(T bean) {
-        if (bean != null) {
-            beanMap.put(bean.getClass(), bean);
+
+    // --------- Attribute Access --------- //
+    public void setAttribute(String name,Object obj){
+        req.setAttribute(name, obj);
+    }
+    public void removeAttribute(String name){
+        req.removeAttribute(name);
+    }
+    public Object getAttribute(String name){
+        return req.getAttribute(name);
+    }
+    
+    public <T> T getAttributeAs(String name, Class<T> cls){
+        return getAttributeAs(name,cls,null); 
+    }
+    
+    public <T> T getAttributeAs(String name, Class<T> cls, T defaultValue){
+        Object value = req.getAttribute(name);
+        if (value != null){
+            if (cls.isInstance(value)){
+                return (T)value;
+                
+            }else{
+                // otherwise, get get the toString and try to get it with the ObjectUtil. 
+                return ObjectUtil.getValue(value.toString(), cls, defaultValue);
+            }
+        }else{
+            return defaultValue;
         }
-        return bean;
     }
-
-    /**
-     * Return a bean by Class.
-     * 
-     * @param <T>
-     * @param beanClass
-     * @return
-     */
-    public <T> T getBean(Class<T> beanClass) {
-        return (T) beanMap.get(beanClass);
-    }
-
-    // --------- /Bean Methods --------- //
+    
+    // --------- /Attribute Access --------- //    
 
     /*--------- Param Methods ---------*/
 
@@ -202,7 +205,7 @@ public class RequestContext {
      * @return
      */
     public String getParam(String name) {
-        return getParam(name, String.class, null);
+        return getParamAs(name, String.class, null);
     }
 
     /**
@@ -213,8 +216,8 @@ public class RequestContext {
      * @param cls
      * @return the http param value if exist or valid, otherwise, null.
      */
-    public <T> T getParam(String name, Class<T> cls) {
-        return getParam(name, cls, null);
+    public <T> T getParamAs(String name, Class<T> cls) {
+        return getParamAs(name, cls, null);
     }
 
     /**
@@ -239,7 +242,7 @@ public class RequestContext {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public <T> T getParam(String name, Class<T> cls, T defaultValue) {
+    public <T> T getParamAs(String name, Class<T> cls, T defaultValue) {
         Map<String, Object> paramMap = getParamMap();
         if (paramMap == null) {
             return defaultValue;

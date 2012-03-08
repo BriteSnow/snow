@@ -14,6 +14,6 @@ import com.google.inject.BindingAnnotation;
 @BindingAnnotation 
 @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD }) 
 @Retention(RUNTIME)
-public @interface WebHandlers {
+public @interface WebClasses {
 
 }

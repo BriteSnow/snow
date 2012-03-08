@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.britesnow.snow.web.auth.Auth;
 
-public class ContextModelBuilder {
+class ContextModelBuilder {
 
     private static final String MODEL_KEY_REQUEST_CONTEXT = "rc";
 
@@ -30,7 +30,7 @@ public class ContextModelBuilder {
     private static final String MODEL_KEY_HTTP_REQUEST    = "req";
     private static final String MODEL_KEY_HTTP_RESPONSE   = "res";
 
-    public static Map<?, ?> buildRequestModel(RequestContext rc) {
+    static Map<?, ?> buildRequestModel(RequestContext rc) {
         HttpServletRequest request = rc.getReq();
         HttpServletResponse response = rc.getRes();
 

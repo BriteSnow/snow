@@ -23,6 +23,8 @@ import freemarker.template.TemplateModel;
 public class TemplateDirectiveProxy implements TemplateDirectiveModel {
     static private Logger logger = LoggerFactory.getLogger(TemplateDirectiveProxy.class);
     
+    static final String FREEMARKER_DIRECTIVE_CONTEXT = "freemarkerDirectiveContext";
+    
     private String name;
     private WebTemplateDirectiveHandlerRef webTemplateDirectiveRef;
     
@@ -39,9 +41,12 @@ public class TemplateDirectiveProxy implements TemplateDirectiveModel {
                             IOException {
         RequestContext rc = getDataModel("r.rc", RequestContext.class);
         try {
-            webTemplateDirectiveRef.invokeWebTemplateDirective(env, paramMap, rc);
+            rc.setAttribute(FREEMARKER_DIRECTIVE_CONTEXT, new FreemarkerDirectiveContext(env, paramMap));
+            webTemplateDirectiveRef.invoke(rc);
         } catch (Exception e) {
             logger.error(e.getMessage());
+        }finally{
+            rc.removeAttribute(FREEMARKER_DIRECTIVE_CONTEXT);
         }
     }
 

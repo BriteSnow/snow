@@ -55,7 +55,7 @@ public class WebBundleDirective implements TemplateDirectiveModel {
 
         RequestContext rc = getDataModel("r.rc", RequestContext.class);
         
-        Boolean debug_links = rc.getParam(WebBundleManager.DEBUG_LINK_STRING, Boolean.class, null);
+        Boolean debug_links = rc.getParamAs(WebBundleManager.DEBUG_LINK_STRING, Boolean.class, null);
         //if not null, make sure we set the cookie with the value
         if (debug_links != null){
             rc.setCookie(WebBundleManager.DEBUG_LINK_STRING, debug_links);

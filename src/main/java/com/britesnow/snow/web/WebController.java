@@ -28,10 +28,13 @@ import com.britesnow.snow.web.AbortWithHttpStatusException.HttpStatus;
 import com.britesnow.snow.web.auth.Auth;
 import com.britesnow.snow.web.auth.AuthService;
 import com.britesnow.snow.web.db.hibernate.HibernateSessionInViewHandler;
+import com.britesnow.snow.web.handler.WebHandlerContext;
+import com.britesnow.snow.web.handler.WebHandlerException;
 import com.britesnow.snow.web.less.LessProcessor;
 import com.britesnow.snow.web.path.FramePathsResolver;
 import com.britesnow.snow.web.path.PathFileResolver;
 import com.britesnow.snow.web.path.ResourcePathResolver;
+import com.britesnow.snow.web.renderer.HttpWriter;
 import com.britesnow.snow.web.renderer.WebBundleManager;
 import com.google.common.base.Throwables;
 import com.google.inject.Inject;
@@ -40,7 +43,7 @@ import com.google.inject.name.Named;
 
 @Singleton
 public class WebController {
-    static private Logger logger = LoggerFactory.getLogger(WebController.class);
+    static private Logger                   logger                        = LoggerFactory.getLogger(WebController.class);
 
     private static final String             CHAR_ENCODING                 = "UTF-8";
     private static final String             MODEL_KEY_REQUEST             = "r";
@@ -92,6 +95,9 @@ public class WebController {
                                                                               }
                                                                           };
 
+    @Inject
+    private LessProcessor                   lessProcessor;
+
     // will be injected from .properties file
     // FIXME: need to implement this.
     // private boolean ignoreTemplateNotFound = false;
@@ -135,51 +141,50 @@ public class WebController {
     }
 
     public void service(RequestContext rc) throws Exception {
-
-        requestContextTl.set(rc);
-
-        HttpServletRequest request = rc.getReq();
-
-        String resourcePath = resourcePathResolver.resolve(rc);
-        
-        // --------- Resolve the ResponseType --------- //
-        // determine the requestType
         ResponseType responseType = null;
-        if (application.hasWebResourceHandlerFor(resourcePath)) {
-            responseType = ResponseType.webResource;
-        } else if (isTemplatePath(resourcePath)) {
-            responseType = ResponseType.template;
-        } else if ("/_actionResponse.json".equals(resourcePath)) {
-            responseType = ResponseType.webActionResponseJson;
-        } else if (isJsonPath(resourcePath)) {
-            responseType = ResponseType.json;
-        } else if (webBundleManager.isWebBundle(resourcePath)) {
-            responseType = ResponseType.webBundle;
-        } else if (resourcePath.endsWith(".less.css")) {
-            responseType = ResponseType.lessCss;
-        } else {
-            responseType = ResponseType.file;
-        }
-     // --------- /Resolve the ResponseType --------- //
-
-        // set the resourcePath and fix it if needed
-        switch (responseType) {
-            case json:
-            case template:
-                rc.setResourcePath(fixTemplateAndJsonResourcePath(resourcePath));
-                break;
-            default:
-                rc.setResourcePath(resourcePath);
-                break;
-        }
-
-        // if we have template request, then, resolve the framePaths
-        if (responseType == ResponseType.template) {
-            String[] framePaths = framePathsResolver.resolve(rc);
-            rc.setFramePaths(framePaths);
-        }
-
         try {
+            requestContextTl.set(rc);
+
+            HttpServletRequest request = rc.getReq();
+
+            String resourcePath = resourcePathResolver.resolve(rc);
+
+            // --------- Resolve the ResponseType --------- //
+            // determine the requestType
+            if (application.hasWebResourceHandlerFor(resourcePath)) {
+                responseType = ResponseType.webResource;
+            } else if (isTemplatePath(resourcePath)) {
+                responseType = ResponseType.template;
+            } else if ("/_actionResponse.json".equals(resourcePath)) {
+                responseType = ResponseType.webActionResponseJson;
+            } else if (isJsonPath(resourcePath)) {
+                responseType = ResponseType.json;
+            } else if (webBundleManager.isWebBundle(resourcePath)) {
+                responseType = ResponseType.webBundle;
+            } else if (resourcePath.endsWith(".less.css")) {
+                responseType = ResponseType.lessCss;
+            } else {
+                responseType = ResponseType.file;
+            }
+            // --------- /Resolve the ResponseType --------- //
+
+            // set the resourcePath and fix it if needed
+            switch (responseType) {
+                case json:
+                case template:
+                    rc.setResourcePath(fixTemplateAndJsonResourcePath(resourcePath));
+                    break;
+                default:
+                    rc.setResourcePath(resourcePath);
+                    break;
+            }
+
+            // if we have template request, then, resolve the framePaths
+            if (responseType == ResponseType.template) {
+                String[] framePaths = framePathsResolver.resolve(rc);
+                rc.setFramePaths(framePaths);
+            }
+
             // --------- Open HibernateSession --------- //
             if (hibernateSessionInViewHandler != null) {
                 hibernateSessionInViewHandler.openSessionInView();
@@ -226,51 +231,42 @@ public class WebController {
             }
             // --------- /Processing the Post (if any) --------- //
 
-            switch (responseType) {
-                case template:
-                    serviceTemplate(rc);
-                    break;
-                case json:
-                    serviceJson(rc);
-                    break;
-                case webActionResponseJson:
-                    serviceWebActionResponse(rc);
-                    break;
-                case webResource:
-                    serviceWebResource(rc);
-                    break;
-                case webBundle:
-                    serviceWebBundle(rc);
-                    break;
-                case lessCss:
-                    serviceLessCss(rc);
-                    break;
-                case file:
-                    serviceFile(rc);
-                    break;
-            }
+            serviceRequestContext(responseType, rc);
 
             // this catch is for when this exception is thrown prior to entering the web handler method.
             // (e.g. a WebHandlerMethodInterceptor).
-        } catch (AbortWithHttpStatusException e) {
-            sendHttpError(rc, e.getStatus(), e.getMessage());
-        } catch (AbortWithHttpRedirectException e) {
-            sendHttpRedirect(rc, e);
-        } catch (Throwable e) {
-            if (e instanceof InvocationTargetException) {
-                e = e.getCause();
-            }
+        } catch (Throwable t) {
+            try {
+                t = findEventualInvocationTargetException(t);
 
-            // and now we have to double-handle this one b/c it will be propagated as an InvocationTargetException
-            // when it's thrown from within a web handler.
-            if (e instanceof AbortWithHttpStatusException) {
-                sendHttpError(rc, ((AbortWithHttpStatusException) e).getStatus(), e.getMessage());
-            } else if (e instanceof AbortWithHttpRedirectException) {
-                sendHttpRedirect(rc, (AbortWithHttpRedirectException) e);
-            } else {
-                // and this is the normal case...
-                sendHttpError(rc, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
-                logger.error(getLogErrorString(e));
+                WebHandlerContext webHandlerContext = null;
+                if (t instanceof WebHandlerException) {
+                    t = ((WebHandlerException) t).getCause();
+                    webHandlerContext = ((WebHandlerException) t).getWebHandlerContext();
+                }
+                // first, try to see if the application process it with its WebExceptionHandler;
+                boolean exceptionProcessed = application.processWebExceptionCatcher(t, webHandlerContext, rc);
+
+                if (!exceptionProcessed) {
+                    serviceRequestContext(responseType, rc);
+                }
+
+            } catch (AbortWithHttpStatusException e) {
+                sendHttpError(rc, e.getStatus(), e.getMessage());
+            } catch (AbortWithHttpRedirectException e) {
+                sendHttpRedirect(rc, e);
+            } catch (Throwable e) {
+                // and now we have to double-handle this one b/c it will be propagated as an InvocationTargetException
+                // when it's thrown from within a web handler.
+                if (e instanceof AbortWithHttpStatusException) {
+                    sendHttpError(rc, ((AbortWithHttpStatusException) e).getStatus(), e.getMessage());
+                } else if (e instanceof AbortWithHttpRedirectException) {
+                    sendHttpRedirect(rc, (AbortWithHttpRedirectException) e);
+                } else {
+                    // and this is the normal case...
+                    sendHttpError(rc, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
+                    logger.error(getLogErrorString(e));
+                }
             }
 
         } finally {
@@ -294,31 +290,61 @@ public class WebController {
 
     }
 
+    public void serviceRequestContext(ResponseType responseType, RequestContext rc) {
+        switch (responseType) {
+            case template:
+                serviceTemplate(rc);
+                break;
+            case json:
+                serviceJson(rc);
+                break;
+            case webActionResponseJson:
+                serviceWebActionResponse(rc);
+                break;
+            case webResource:
+                serviceWebResource(rc);
+                break;
+            case webBundle:
+                serviceWebBundle(rc);
+                break;
+            case lessCss:
+                serviceLessCss(rc);
+                break;
+            case file:
+                serviceFile(rc);
+                break;
+        }
+    }
+
     // --------- Service Request --------- //
-    private void serviceTemplate(RequestContext rc) throws Throwable {
+    private void serviceTemplate(RequestContext rc) {
         HttpServletRequest req = rc.getReq();
         HttpServletResponse res = rc.getRes();
 
-        req.setCharacterEncoding(CHAR_ENCODING);
-        Map rootModel = rc.getRootModel();
+        try {
+            req.setCharacterEncoding(CHAR_ENCODING);
+            Map rootModel = rc.getRootModel();
 
-        rootModel.put(MODEL_KEY_REQUEST, ContextModelBuilder.buildRequestModel(rc));
+            rootModel.put(MODEL_KEY_REQUEST, ContextModelBuilder.buildRequestModel(rc));
 
-        // TODO: needs to implement this
-        /*
-         * if (!ignoreTemplateNotFound && !webApplication.getPart(part.getPri()).getResourceFile().exists()) {
-         * sendHttpError(rc, HttpServletResponse.SC_NOT_FOUND, null); return; }
-         */
+            // TODO: needs to implement this
+            /*
+             * if (!ignoreTemplateNotFound && !webApplication.getPart(part.getPri()).getResourceFile().exists()) {
+             * sendHttpError(rc, HttpServletResponse.SC_NOT_FOUND, null); return; }
+             */
 
-        res.setContentType("text/html;charset=" + CHAR_ENCODING);
-        // if not cachable, then, set the appropriate headers.
-        res.setHeader("Pragma", "No-cache");
-        res.setHeader("Cache-Control", "no-cache,no-store,max-age=0");
-        res.setDateHeader("Expires", 1);
+            res.setContentType("text/html;charset=" + CHAR_ENCODING);
+            // if not cachable, then, set the appropriate headers.
+            res.setHeader("Pragma", "No-cache");
+            res.setHeader("Cache-Control", "no-cache,no-store,max-age=0");
+            res.setDateHeader("Expires", 1);
 
-        application.processTemplate(rc);
+            application.processTemplate(rc);
 
-        rc.getWriter().close();
+            rc.getWriter().close();
+        } catch (Throwable t) {
+            throw Throwables.propagate(t);
+        }
 
     }
 
@@ -408,7 +434,7 @@ public class WebController {
             // item, then, still valid
             lessResult = timeAndContent.getSecond();
         } else {
-            lessResult = new LessProcessor().compile(lessFile);
+            lessResult = lessProcessor.compile(lessFile);
             lessCache.put(lessFilePath, new Pair<Long, String>(maxTime, lessResult));
         }
         // --------- /Process the .less file --------- //
@@ -455,6 +481,24 @@ public class WebController {
             response.setStatus(e.getRedirectCode());
             response.addHeader("Location", e.getLocation());
         }
+    }
+
+    /*
+     * if it it and InvocationTargetException or RuntimeException that wrap a InvocationTargetException, then, return
+     * the target.
+     */
+    static private Throwable findEventualInvocationTargetException(Throwable t) {
+        InvocationTargetException ie = null;
+        if (t instanceof InvocationTargetException) {
+            ie = (InvocationTargetException) t;
+        } else if (t.getCause() != null && t.getCause() instanceof InvocationTargetException) {
+            ie = (InvocationTargetException) t.getCause();
+        }
+        if (ie != null) {
+            t = ie.getTargetException();
+        }
+
+        return t;
     }
 
     /*

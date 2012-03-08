@@ -5,8 +5,10 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Nullable;
 import javax.inject.Singleton;
 
+import com.britesnow.snow.web.binding.WebObjects;
 import com.britesnow.snow.web.param.annotation.WebParam;
 import com.britesnow.snow.web.param.resolver.annotation.WebParamResolver;
 import com.google.inject.Inject;
@@ -21,17 +23,30 @@ public class WebParamResolverRegistry {
     @Inject
     private SystemWebParamResolvers systemWebParamResolvers;
     
+    @Inject(optional = true)
+    @Nullable
+    @WebObjects
+    private Object[]                       webObjects;       
     
     /**
      * Must be called before calling registerResolvers. 
      * Must be called at init time, no thread safe
      */
     public void init(){
-        registerResolvers(systemWebParamResolvers);
+        // first register the SystemWebParamResolvers
+        registerWebParamResolvers(systemWebParamResolvers);
+        
+        // then, register the applicaiton WebParamResolvers
+        if (webObjects != null){
+            for (Object webObject : webObjects){
+                registerWebParamResolvers(webObject);
+            }
+        }
+        
     }
     
     
-    public void registerResolvers(Object resolversObject) {
+    final private void registerWebParamResolvers(Object resolversObject) {
 
         Class cls = resolversObject.getClass();
 
