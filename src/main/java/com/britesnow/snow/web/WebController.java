@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +33,7 @@ import com.britesnow.snow.web.path.FramePathsResolver;
 import com.britesnow.snow.web.path.PathFileResolver;
 import com.britesnow.snow.web.path.ResourcePathResolver;
 import com.britesnow.snow.web.renderer.WebBundleManager;
+import com.google.common.base.Throwables;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -39,10 +41,6 @@ import com.google.inject.name.Named;
 @Singleton
 public class WebController {
     static private Logger logger = LoggerFactory.getLogger(WebController.class);
-
-    public enum ResponseType {
-        template, json, other;
-    }
 
     private static final String             CHAR_ENCODING                 = "UTF-8";
     private static final String             MODEL_KEY_REQUEST             = "r";
@@ -73,7 +71,7 @@ public class WebController {
     private RequestLifeCycle                requestLifeCycle              = null;
 
     @Inject
-    private FramePathsResolver              framePathResolver;
+    private FramePathsResolver              framePathsResolver;
 
     @Inject
     private ResourcePathResolver            resourcePathResolver;
@@ -141,21 +139,44 @@ public class WebController {
         requestContextTl.set(rc);
 
         HttpServletRequest request = rc.getReq();
-        ResponseType responseType = null;
 
         String resourcePath = resourcePathResolver.resolve(rc);
-
-        if (isTemplatePath(resourcePath)) {
-            rc.setResourcePath(fixTemplateAndJsonResourcePath(resourcePath));
-            String[] framePaths = framePathResolver.resolve(rc);
-            rc.setFramePaths(framePaths);
+        
+        // --------- Resolve the ResponseType --------- //
+        // determine the requestType
+        ResponseType responseType = null;
+        if (application.hasWebResourceHandlerFor(resourcePath)) {
+            responseType = ResponseType.webResource;
+        } else if (isTemplatePath(resourcePath)) {
             responseType = ResponseType.template;
+        } else if ("/_actionResponse.json".equals(resourcePath)) {
+            responseType = ResponseType.webActionResponseJson;
         } else if (isJsonPath(resourcePath)) {
-            rc.setResourcePath(fixTemplateAndJsonResourcePath(resourcePath));
             responseType = ResponseType.json;
+        } else if (webBundleManager.isWebBundle(resourcePath)) {
+            responseType = ResponseType.webBundle;
+        } else if (resourcePath.endsWith(".less.css")) {
+            responseType = ResponseType.lessCss;
         } else {
-            responseType = ResponseType.other;
-            rc.setResourcePath(resourcePath);
+            responseType = ResponseType.file;
+        }
+     // --------- /Resolve the ResponseType --------- //
+
+        // set the resourcePath and fix it if needed
+        switch (responseType) {
+            case json:
+            case template:
+                rc.setResourcePath(fixTemplateAndJsonResourcePath(resourcePath));
+                break;
+            default:
+                rc.setResourcePath(resourcePath);
+                break;
+        }
+
+        // if we have template request, then, resolve the framePaths
+        if (responseType == ResponseType.template) {
+            String[] framePaths = framePathsResolver.resolve(rc);
+            rc.setFramePaths(framePaths);
         }
 
         try {
@@ -212,8 +233,20 @@ public class WebController {
                 case json:
                     serviceJson(rc);
                     break;
-                case other:
-                    serviceFallback(rc);
+                case webActionResponseJson:
+                    serviceWebActionResponse(rc);
+                    break;
+                case webResource:
+                    serviceWebResource(rc);
+                    break;
+                case webBundle:
+                    serviceWebBundle(rc);
+                    break;
+                case lessCss:
+                    serviceLessCss(rc);
+                    break;
+                case file:
+                    serviceFile(rc);
                     break;
             }
 
@@ -289,98 +322,115 @@ public class WebController {
 
     }
 
-    private void serviceJson(RequestContext rc) throws Throwable {
+    private void serviceWebActionResponse(RequestContext rc) {
+        setJsonHeaders(rc);
+
+        application.processWebActionResponseJson(rc);
+
+        try {
+            rc.getWriter().close();
+        } catch (IOException e) {
+            throw Throwables.propagate(e);
+        }
+    }
+
+    private void serviceJson(RequestContext rc) {
+        setJsonHeaders(rc);
+        application.processJson(rc);
+
+        try {
+            rc.getWriter().close();
+        } catch (IOException e) {
+            throw Throwables.propagate(e);
+        }
+    }
+
+    private void setJsonHeaders(RequestContext rc) {
         HttpServletRequest req = rc.getReq();
         HttpServletResponse res = rc.getRes();
 
-        /* --------- Set Headers --------- */
-        req.setCharacterEncoding(CHAR_ENCODING);
+        // NOTE: we might want to let the render deal with this (not sure)
+        try {
+            req.setCharacterEncoding(CHAR_ENCODING);
+        } catch (UnsupportedEncodingException e) {
+            throw Throwables.propagate(e);
+        }
         res.setContentType("application/json");
 
-        // if not cachable, then, set the appropriate headers.
+        // no cash for now.
         res.setHeader("Pragma", "No-cache");
         res.setHeader("Cache-Control", "no-cache,no-store,max-age=0");
         res.setDateHeader("Expires", 1);
-        /* --------- /Set Headers --------- */
-
-        application.processJson(rc);
-
-        rc.getWriter().close();
     }
 
-    public void serviceFallback(RequestContext rc) throws Throwable {
-
+    public void serviceWebBundle(RequestContext rc) {
         String contextPath = rc.getContextPath();
         String resourcePath = rc.getResourcePath();
 
         String href = new StringBuilder(contextPath).append(resourcePath).toString();
-
-        if (webBundleManager.isWebBundle(resourcePath)) {
-            String content = webBundleManager.getContent(resourcePath);
-            StringReader reader = new StringReader(content);
-            httpWriter.writeStringContent(rc, href, reader, true, null);
-        } else {
-            // First, see and process the eventual WebFileHandler
-            boolean webFileProcessed = application.processWebResourceHandler(rc);
-
-            // if not processed, then, default processing
-            if (!webFileProcessed) {
-
-                // if it is a ".less.css" we need to process the .less file
-                if (resourcePath.endsWith(".less.css")) {
-                    String lessFilePath = resourcePath.substring(0, resourcePath.length() - 4);
-                    Reader contentReader = new StringReader(processLessFile(lessFilePath));
-
-                    String fileName = FileUtil.getFilePathAndName(resourcePath)[1];
-                    httpWriter.writeStringContent(rc, fileName, contentReader, true, null);
-                } else {
-                    File resourceFile = pathFileResolver.resolve(resourcePath);
-                    if (resourceFile.exists()) {
-                        boolean isCachable = isCachable(resourcePath);
-                        httpWriter.writeFile(rc, resourceFile, isCachable, null);
-                    } else {
-                        sendHttpError(rc, HttpServletResponse.SC_NOT_FOUND, null);
-                    }
-                }
-            }
-
-        }
+        String content = webBundleManager.getContent(resourcePath);
+        StringReader reader = new StringReader(content);
+        httpWriter.writeStringContent(rc, href, reader, true, null);
     }
 
-    // --------- /Service Request --------- //
+    private void serviceWebResource(RequestContext rc) {
+        application.processWebResourceHandler(rc);
+    }
 
-    private String processLessFile(String lessFilePath){
+    private void serviceLessCss(RequestContext rc) {
+        String resourcePath = rc.getResourcePath();
+
+        // --------- Process the .less file --------- //
+        String lessFilePath = resourcePath.substring(0, resourcePath.length() - 4);
+
         File lessFile = pathFileResolver.resolve(lessFilePath);
-        if (!lessFile.exists()){
-            throw new AbortWithHttpStatusException(HttpStatus.NOT_FOUND,"File " + lessFilePath + " not found");
+        if (!lessFile.exists()) {
+            throw new AbortWithHttpStatusException(HttpStatus.NOT_FOUND, "File " + lessFilePath + " not found");
         }
-        
+
         // Now, determine the youngest .less file
         long maxTime = 0;
         File lessFolder = lessFile.getParentFile();
-        for (File file : lessFolder.listFiles()){
+        for (File file : lessFolder.listFiles()) {
             String name = file.getName().toLowerCase();
-            if (name.endsWith(".less")){
+            if (name.endsWith(".less")) {
                 long time = file.lastModified();
-                if (time > maxTime){
+                if (time > maxTime) {
                     maxTime = time;
                 }
             }
         }
-        
+
         String lessResult = null;
-        Pair<Long,String> timeAndContent = lessCache.get(lessFilePath);
-        if (timeAndContent != null && maxTime <= timeAndContent.getFirst()){
-            // if we have a match, and none of the maxTime of all the .less file still smaller or equal than the cache item, then, still valid
+        Pair<Long, String> timeAndContent = lessCache.get(lessFilePath);
+        if (timeAndContent != null && maxTime <= timeAndContent.getFirst()) {
+            // if we have a match, and none of the maxTime of all the .less file still smaller or equal than the cache
+            // item, then, still valid
             lessResult = timeAndContent.getSecond();
-        }else{
+        } else {
             lessResult = new LessProcessor().compile(lessFile);
-            lessCache.put(lessFilePath,new Pair<Long,String>(maxTime,lessResult));
+            lessCache.put(lessFilePath, new Pair<Long, String>(maxTime, lessResult));
         }
-        return lessResult;
+        // --------- /Process the .less file --------- //
+
+        Reader contentReader = new StringReader(lessResult);
+        String fileName = FileUtil.getFilePathAndName(resourcePath)[1];
+        httpWriter.writeStringContent(rc, fileName, contentReader, true, null);
     }
 
-    private void sendHttpError(RequestContext rc, int errorCode, String message) throws IOException {
+    private void serviceFile(RequestContext rc) {
+        String resourcePath = rc.getResourcePath();
+        File resourceFile = pathFileResolver.resolve(resourcePath);
+        if (resourceFile.exists()) {
+            boolean isCachable = isCachable(resourcePath);
+            httpWriter.writeFile(rc, resourceFile, isCachable, null);
+        } else {
+            sendHttpError(rc, HttpServletResponse.SC_NOT_FOUND, null);
+        }
+    }
+
+    // --------- /Service Request --------- //
+    private void sendHttpError(RequestContext rc, int errorCode, String message) {
 
         // if the response has already been committed, there's not much we can do about it at this point...just let it
         // go.
@@ -388,7 +438,11 @@ public class WebController {
         // originates while processing a template. the template will usually have already output enough html so that
         // the container has already started writing back to the client.
         if (!rc.getRes().isCommitted()) {
-            rc.getRes().sendError(errorCode, message);
+            try {
+                rc.getRes().sendError(errorCode, message);
+            } catch (IOException e) {
+                throw Throwables.propagate(e);
+            }
         }
     }
 
@@ -412,7 +466,6 @@ public class WebController {
     }
 
     static Set cachableExtension = MapUtil.setIt(".css", ".less", ".js", ".png", ".gif", ".jpeg");
-
 
     /**
      * Return true if the content pointed by the pathInfo is static.<br>

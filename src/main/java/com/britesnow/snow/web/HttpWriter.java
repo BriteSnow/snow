@@ -44,15 +44,18 @@ public class HttpWriter {
         return contentType;
     }
 
-    public void writeFile(RequestContext rc, File file, boolean cache, Map options) throws Throwable {
+    public void writeFile(RequestContext rc, File file, boolean cache, Map options) {
         String contentType = FileUtil.getExtraMimeType(file.getAbsolutePath());
-
+        try{
         if (contentType != null && (contentType.startsWith("text") || contentType.indexOf("javascript") != -1)) {
             FileReader reader = new FileReader(file);
             writeStringContent(rc, file.getName(), reader, cache, options);
         } else {
             InputStream fileIs = new FileInputStream(file);
             writeBinaryContent(rc, file.getName(), fileIs, cache, options);
+        }
+        }catch (Exception e){
+            throw Throwables.propagate(e);
         }
     }
 

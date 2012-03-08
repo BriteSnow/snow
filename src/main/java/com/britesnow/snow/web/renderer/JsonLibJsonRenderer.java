@@ -21,7 +21,6 @@ public class JsonLibJsonRenderer implements JsonRenderer{
             jsonConfig.setCycleDetectionStrategy(CycleDetectionStrategy.LENIENT);
             Object jsObj = JSONSerializer.toJSON(data,jsonConfig);
             jsonString = jsObj.toString();
-            
         }
 
         try {

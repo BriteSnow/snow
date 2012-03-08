@@ -32,8 +32,6 @@ public class Application {
         NO_WEB_ACTION
     }
 
-    static final String                    PATH_ACTION_RESPONSE_JSON   = "/_actionResponse";
-
     // just to make sure we initialize only onces
     private boolean                        initialized                 = false;
 
@@ -72,6 +70,7 @@ public class Application {
             }
 
             webHandlerRegistry.init();
+            
             // register the webhandlers
             if (webHandlers != null) {
                 for (Object webHandler : webHandlers) {
@@ -118,38 +117,36 @@ public class Application {
 
         freemarkerRenderer.render(path, rootModel, rc.getWriter());
     }
+    
+    public void processWebActionResponseJson(RequestContext rc){
+        Object data = null;
+        
+        // quick hack for now. 
+        // Return raw result if no exception. otherwise, return WEbActionResponse
+        WebActionResponse actionResponse = rc.getWebActionResponse();
+        if (actionResponse.getError() == null){
+            data = actionResponse.getResult();
+        }else{
+            data = actionResponse;
+        }    
+        
+        jsonRenderer.render(data, rc.getWriter());
+    }
 
-    public void processJson(RequestContext rc) throws Throwable {
-        String resourcePath = rc.getResourcePath();
-
+    public void processJson(RequestContext rc) {
         Object data;
 
-        // if the resourcePath is the actionResponse path, then the data is the WebActionResponse
-        if (resourcePath.equals(PATH_ACTION_RESPONSE_JSON)) {
-            // quick hack for now. 
-            // Return raw result if no exception. otherwise, return WEbActionResponse
-            WebActionResponse actionResponse = rc.getWebActionResponse();
-            if (actionResponse.getError() == null){
-                data = actionResponse.getResult();
-            }else{
-                data = actionResponse;
-            }
-            
+        processWebModels(rc);
+        Map m = rc.getWebModel();
+
+        // first try to get the _jsonData
+        data = m.get("_jsonData");
+
+        // if no _jsonData is not set, then, take the model as the data
+        if (data == null) {
+            data = m;
         }
-        // otherwise, we process the webmodels
-        else {
-            processWebModels(rc);
-
-            Map m = rc.getWebModel();
-
-            // first try to get the _jsonData
-            data = m.get("_jsonData");
-
-            // if no _jsonData is not set, then, take the model as the data
-            if (data == null) {
-                data = m;
-            }
-        }
+        
         jsonRenderer.render(data, rc.getWriter());
     }
 
@@ -191,7 +188,7 @@ public class Application {
         return response;
     }
 
-    void processWebModels(RequestContext rc) throws Throwable {
+    void processWebModels(RequestContext rc) {
         // get the rootModelBuilder
         WebModelHandlerRef rootWmr = webHandlerRegistry.getWebModeHandlerlRef("/");
         if (rootWmr != null) {
@@ -240,8 +237,12 @@ public class Application {
 
         }
     }
+    
+    boolean hasWebResourceHandlerFor(String resourcePath){
+        return (webHandlerRegistry.getWebResourceHandlerRef(resourcePath) != null);
+    }
 
-    boolean processWebResourceHandler(RequestContext rc) {
+    void processWebResourceHandler(RequestContext rc) {
         WebResourceHandlerRef webResourceHandlerRef = webHandlerRegistry.getWebResourceHandlerRef(rc.getResourcePath());
         if (webResourceHandlerRef != null) {
             WebHandlerContext handlerContext = new WebHandlerContext(WebHandlerType.resource,webResourceHandlerRef.getHandlerObject(),webResourceHandlerRef.getHandlerMethod());
@@ -259,10 +260,8 @@ public class Application {
             if (invokeWebResource && webHandlerInterceptor != null) {
                 webHandlerInterceptor.afterWebHandler(handlerContext, rc);
             }            
-            
-            return true;
         } else {
-            return false;
+            throw new RuntimeException("No WebResourceHandler for " + rc.getResourcePath());
         }
     }
 
