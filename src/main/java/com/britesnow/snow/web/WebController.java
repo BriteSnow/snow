@@ -34,7 +34,6 @@ import com.britesnow.snow.web.less.LessProcessor;
 import com.britesnow.snow.web.path.FramePathsResolver;
 import com.britesnow.snow.web.path.PathFileResolver;
 import com.britesnow.snow.web.path.ResourcePathResolver;
-import com.britesnow.snow.web.renderer.HttpWriter;
 import com.britesnow.snow.web.renderer.WebBundleManager;
 import com.google.common.base.Throwables;
 import com.google.inject.Inject;
@@ -46,7 +45,7 @@ public class WebController {
     static private Logger                   logger                        = LoggerFactory.getLogger(WebController.class);
 
     private static final String             CHAR_ENCODING                 = "UTF-8";
-    private static final String             MODEL_KEY_REQUEST             = "r";
+    
     public static int                       BUFFER_SIZE                   = 2048 * 2;
 
     private ServletFileUpload               fileUploader;
@@ -71,7 +70,7 @@ public class WebController {
     private HibernateSessionInViewHandler   hibernateSessionInViewHandler = null;
 
     @Inject(optional = true)
-    private RequestLifeCycle                requestLifeCycle              = null;
+    private RequestLifecycle                requestLifeCycle              = null;
 
     @Inject
     private FramePathsResolver              framePathsResolver;
@@ -322,10 +321,10 @@ public class WebController {
         HttpServletResponse res = rc.getRes();
 
         try {
+            
+            // TODO: probably need to remove this, not sure it does anything here (or it even should be here.
             req.setCharacterEncoding(CHAR_ENCODING);
-            Map rootModel = rc.getRootModel();
-
-            rootModel.put(MODEL_KEY_REQUEST, ContextModelBuilder.buildRequestModel(rc));
+            
 
             // TODO: needs to implement this
             /*

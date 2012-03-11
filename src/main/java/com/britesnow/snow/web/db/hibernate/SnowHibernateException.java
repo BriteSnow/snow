@@ -4,9 +4,9 @@ import java.sql.SQLException;
 
 import org.hibernate.JDBCException;
 
-import com.britesnow.snow.SnowRuntimeException;
+import com.britesnow.snow.SnowException;
 
-public class SnowHibernateException extends SnowRuntimeException {
+public class SnowHibernateException extends SnowException {
 
     public SnowHibernateException(Throwable t) {
         super(t);

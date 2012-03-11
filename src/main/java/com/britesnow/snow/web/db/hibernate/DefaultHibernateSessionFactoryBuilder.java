@@ -1,6 +1,6 @@
 package com.britesnow.snow.web.db.hibernate;
 
-import java.util.Properties;
+import java.util.Map;
 
 import javax.inject.Singleton;
 
@@ -9,7 +9,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;
 import org.hibernate.cfg.NamingStrategy;
 
-import com.britesnow.snow.SnowRuntimeException;
+import com.britesnow.snow.SnowException;
 import com.britesnow.snow.web.Initializable;
 import com.britesnow.snow.web.binding.ApplicationProperties;
 import com.britesnow.snow.web.binding.EntityClasses;
@@ -25,7 +25,7 @@ public class DefaultHibernateSessionFactoryBuilder implements HibernateSessionFa
     private SessionFactory sessionFactory;
     
     @Inject
-    private @ApplicationProperties Properties properties;
+    private @ApplicationProperties Map properties;
 
     @Inject(optional=true)
     private @HibernateInterceptorBinding Interceptor hibernateInterceptor;
@@ -59,7 +59,7 @@ public class DefaultHibernateSessionFactoryBuilder implements HibernateSessionFa
                 NamingStrategy namingStrategy = (NamingStrategy) namingStrategyClass.newInstance();
                 cfg.setNamingStrategy(namingStrategy);
             } catch (Exception e) {
-                throw new SnowRuntimeException(Error.ERROR_INITIALIZING_NAMING_STRATEGY_CLASS,e, "namingStrategyClass",
+                throw new SnowException(Error.ERROR_INITIALIZING_NAMING_STRATEGY_CLASS,e, "namingStrategyClass",
                                         namingStrategyClassStr);
             }
 

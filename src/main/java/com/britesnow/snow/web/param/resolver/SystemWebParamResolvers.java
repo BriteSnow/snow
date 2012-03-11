@@ -7,6 +7,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.fileupload.FileItem;
+
 import com.britesnow.snow.util.AnnotationMap;
 import com.britesnow.snow.util.ObjectUtil;
 import com.britesnow.snow.web.RequestContext;
@@ -54,6 +56,12 @@ public class SystemWebParamResolvers {
         return rc.getParamMap(webParam.value());
     }
     
+    @WebParamResolver
+    public FileItem resolveFileItem(AnnotationMap annotationMap, Class paramType, RequestContext rc) {
+        WebParam webParam = annotationMap.get(WebParam.class);
+        return rc.getParamAs(webParam.value(), FileItem.class);
+    }
+    
     @WebParamResolver(annotatedWith=WebUser.class)
     public Object resolveUser(AnnotationMap annotationMap, Class paramType, RequestContext rc){
         if (rc.getAuth() != null) {
@@ -68,6 +76,8 @@ public class SystemWebParamResolvers {
     public Map resolveWebModel(AnnotationMap annotationMap, Class paramType, RequestContext rc){
         return rc.getWebModel();
     }
+    
+    
     
     @WebParamResolver(annotatedWith=WebPath.class)
     public Object resolveWebpath(AnnotationMap annotationMap, Class paramType, RequestContext rc){

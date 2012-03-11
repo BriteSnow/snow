@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.britesnow.snow.web.auth.Auth;
 
-class ContextModelBuilder {
+class RequestInfoMapBuilder {
 
     private static final String MODEL_KEY_REQUEST_CONTEXT = "rc";
 
@@ -22,9 +22,9 @@ class ContextModelBuilder {
     private static final String MODEL_KEY_FULL_PATH       = "fullPath";
     private static final String MODEL_KEY_QUERY_STRING    = "queryString";
     private static final String MODEL_KEY_HREF            = "href";
-    private static final String MODEL_KEY_PARAMS          = "p";
-    private static final String MODEL_KEY_COOKIES         = "c";
-    private static final String MODEL_KEY_HEADERS         = "h";
+    private static final String MODEL_KEY_PARAMS          = "param";
+    private static final String MODEL_KEY_COOKIES         = "cookie";
+    private static final String MODEL_KEY_HEADERS         = "header";
     private static final String MODEL_KEY_USER            = "user";
     private static final String MODEL_KEY_AUTH            = "auth";
     private static final String MODEL_KEY_HTTP_REQUEST    = "req";

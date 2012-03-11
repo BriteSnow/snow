@@ -7,7 +7,7 @@ import java.util.Map;
 
 import com.britesnow.snow.util.MapUtil;
 
-public class SnowRuntimeException extends RuntimeException {
+public class SnowException extends RuntimeException {
 
     private static final long serialVersionUID = 6761082312332003153L;
 
@@ -19,29 +19,29 @@ public class SnowRuntimeException extends RuntimeException {
 
     protected Throwable       usefulCause;
 
-    public SnowRuntimeException(Throwable cause) {
+    public SnowException(Throwable cause) {
         super(cause);
     }
 
-    public SnowRuntimeException(Enum errorEnum, Throwable cause, Object... nameAndValueArray) {
+    public SnowException(Enum errorEnum, Throwable cause, Object... nameAndValueArray) {
         super(errorEnum.name(), cause);
         this.errorEnum = errorEnum;
         this.nameAndValueArray = nameAndValueArray;
     }
 
-    public SnowRuntimeException(Enum causeEnum, Object... nameAndValueArray) {
+    public SnowException(Enum causeEnum, Object... nameAndValueArray) {
         super(causeEnum.name());
         this.errorEnum = causeEnum;
         this.nameAndValueArray = nameAndValueArray;
     }
 
-    public SnowRuntimeException(Enum errorEnum, Object errorData) {
+    public SnowException(Enum errorEnum, Object errorData) {
         super(errorEnum.name());
         this.errorData = errorData;
     }
     
 
-    public SnowRuntimeException setErrorData(Object errorData) {
+    public SnowException setErrorData(Object errorData) {
         this.errorData = errorData;
         return this;
     }

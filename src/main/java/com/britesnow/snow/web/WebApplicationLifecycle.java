@@ -3,7 +3,7 @@
  */
 package com.britesnow.snow.web;
 
-public interface WebApplicationLifeCycle {
+public interface WebApplicationLifecycle {
 
     public void init();
     

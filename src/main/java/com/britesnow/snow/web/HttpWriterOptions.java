@@ -1,4 +1,4 @@
-package com.britesnow.snow.web.renderer;
+package com.britesnow.snow.web;
 
 public class HttpWriterOptions {
 

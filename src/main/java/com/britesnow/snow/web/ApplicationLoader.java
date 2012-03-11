@@ -77,7 +77,7 @@ public class ApplicationLoader {
         /*--------- Load WebApplication ---------*/
         // Building the root modules
         // rootModules cannot be overrided
-        String applicationConfigClassStr = appProperties.get("snow.applicationModuleClasses");
+        String applicationConfigClassStr = appProperties.get("snow.webApplicationModules");
         Iterable<String> applicationClassNames = Splitter.on(",").split(applicationConfigClassStr);
         List<Module> applicationModules = buildApplicationModules(applicationClassNames);
         
@@ -86,6 +86,9 @@ public class ApplicationLoader {
 
     }
     
+    /**
+     * Protected so that we can subclass it in testsupport for programmatic configuration
+     */
     protected ApplicationLoader load(List<Module> applicationModules, Map<String,String> appProperties){
 
         // build the rootModules
@@ -235,7 +238,7 @@ public class ApplicationLoader {
 
     private File getWebInfPropertiesFile() {
         File webAppFolder = getWebAppFolder();
-        return new File(webAppFolder, "WEB-INF/snow/application.properties");
+        return new File(webAppFolder, "WEB-INF/snow.properties");
     }
 
     private File fixWebAppFolder(File webAppFolder) {

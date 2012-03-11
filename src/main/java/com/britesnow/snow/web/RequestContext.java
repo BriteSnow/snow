@@ -54,10 +54,8 @@ public class RequestContext {
     private String              resourcePath;
     private Deque<String>       framePathsStack;
 
-    // this is the roo model for the container the "r" map (for the request) and "m" for the model (i.e. WebMap)
-    private Map                 rootModel          = new HashMap();
     // this is the HashMap for the "m" model map
-    private Map                 webMap             = new HashMap();
+    private Map                 webModel           = new HashMap();
 
     // usually set by the WebController.service
     private WebActionResponse   webActionResponse;
@@ -78,7 +76,6 @@ public class RequestContext {
     }
 
     protected void init() {
-        rootModel.put("m", webMap);
     }
 
     /*--------- Auth Methods ---------*/
@@ -102,38 +99,39 @@ public class RequestContext {
 
     /*--------- /Auth Methods ---------*/
 
-
     // --------- Attribute Access --------- //
-    public void setAttribute(String name,Object obj){
+    public void setAttribute(String name, Object obj) {
         req.setAttribute(name, obj);
     }
-    public void removeAttribute(String name){
+
+    public void removeAttribute(String name) {
         req.removeAttribute(name);
     }
-    public Object getAttribute(String name){
+
+    public Object getAttribute(String name) {
         return req.getAttribute(name);
     }
-    
-    public <T> T getAttributeAs(String name, Class<T> cls){
-        return getAttributeAs(name,cls,null); 
+
+    public <T> T getAttributeAs(String name, Class<T> cls) {
+        return getAttributeAs(name, cls, null);
     }
-    
-    public <T> T getAttributeAs(String name, Class<T> cls, T defaultValue){
+
+    public <T> T getAttributeAs(String name, Class<T> cls, T defaultValue) {
         Object value = req.getAttribute(name);
-        if (value != null){
-            if (cls.isInstance(value)){
-                return (T)value;
-                
-            }else{
-                // otherwise, get get the toString and try to get it with the ObjectUtil. 
+        if (value != null) {
+            if (cls.isInstance(value)) {
+                return (T) value;
+
+            } else {
+                // otherwise, get get the toString and try to get it with the ObjectUtil.
                 return ObjectUtil.getValue(value.toString(), cls, defaultValue);
             }
-        }else{
+        } else {
             return defaultValue;
         }
     }
-    
-    // --------- /Attribute Access --------- //    
+
+    // --------- /Attribute Access --------- //
 
     /*--------- Param Methods ---------*/
 
@@ -525,9 +523,9 @@ public class RequestContext {
         String valueStr = pathAt(paths, i);
         return ObjectUtil.getValue(valueStr, cls, defaultValue);
     }
+
     // --------- /Utilities for Paths --------- //
-    
-    
+
     /*--------- Writer ---------*/
     public Writer getWriter() {
         try {
@@ -562,18 +560,14 @@ public class RequestContext {
      * @return
      */
     public <T> T getModelValue(String namePath, Class<T> cls, T defaultValue) {
-        return MapUtil.getDeepValue(webMap, namePath, cls, defaultValue);
-    }
-
-    public Map getRootModel() {
-        return rootModel;
+        return MapUtil.getDeepValue(webModel, namePath, cls, defaultValue);
     }
 
     /**
      * @return the Model M (use for the page model "m")
      */
     public Map getWebModel() {
-        return webMap;
+        return webModel;
     }
 
     /*--------- /RootModel ---------*/

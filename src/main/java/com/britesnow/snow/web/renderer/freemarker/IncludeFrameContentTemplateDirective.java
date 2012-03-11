@@ -33,7 +33,7 @@ public class IncludeFrameContentTemplateDirective extends IncludeTemplateBase im
     public void execute(Environment env, Map args, TemplateModel[] arg2, TemplateDirectiveBody arg3)
                             throws TemplateException, IOException {
 
-        RequestContext rc = getDataModel("r.rc", RequestContext.class);
+        RequestContext rc = getDataModel("_r.rc", RequestContext.class);
         
         String path = rc.popFramePath();
         if (path == null){

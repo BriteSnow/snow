@@ -1,1 +1,1 @@
-Hello ${m.contact.name}
+Hello ${contact.name}

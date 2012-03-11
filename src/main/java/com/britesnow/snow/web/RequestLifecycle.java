@@ -14,7 +14,7 @@ package com.britesnow.snow.web;
  * @author Jeremy Chone
  * @date May 2, 2010
  */
-public interface RequestLifeCycle {
+public interface RequestLifecycle {
 
     /**
      * Get called after the Hibernate openSessionView and the Authentication process.

@@ -24,7 +24,7 @@ public class PathInfoMatcherTemplateMethod implements TemplateMethodModelEx {
     
     @Override
     public Object exec(List args) throws TemplateModelException {
-        String pathInfo = FreemarkerUtil.getDataModel("r.pathInfo",String.class);
+        String pathInfo = FreemarkerUtil.getDataModel("_r.pathInfo",String.class);
         
         String pathInfoMatch = FreemarkerUtil.getParam(args.get(0),String.class);
         
@@ -66,23 +66,5 @@ public class PathInfoMatcherTemplateMethod implements TemplateMethodModelEx {
         }
 
     }
-    /*
-    private Object execStartWith(String pathInfo, String pathInfoMatch, String trueValue, String falseValue) throws TemplateModelException{
-        
-        if (pathInfo.startsWith(pathInfoMatch)){
-            return trueValue;
-        }else{
-            return falseValue;
-        }        
-    }
-    
-    private Object execIs(String pathInfo, String pathInfoMatch, String trueValue, String falseValue) throws TemplateModelException{
-        
-        if (pathInfo.equals(pathInfoMatch)){
-            return trueValue;
-        }else{
-            return falseValue;
-        }        
-    }*/
 
 }

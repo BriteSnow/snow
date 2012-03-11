@@ -1,4 +1,4 @@
-package com.britesnow.snow.web.renderer;
+package com.britesnow.snow.web;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.britesnow.snow.util.FileUtil;
-import com.britesnow.snow.web.RequestContext;
 import com.google.common.base.Throwables;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

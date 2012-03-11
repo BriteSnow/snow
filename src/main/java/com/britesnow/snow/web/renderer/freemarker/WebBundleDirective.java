@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 
-import com.britesnow.snow.SnowRuntimeException;
+import com.britesnow.snow.SnowException;
 import com.britesnow.snow.util.ObjectUtil;
 import com.britesnow.snow.web.RequestContext;
 import com.britesnow.snow.web.path.PathFileResolver;
@@ -53,7 +53,7 @@ public class WebBundleDirective implements TemplateDirectiveModel {
     public void execute(Environment env, Map args, TemplateModel[] tms, TemplateDirectiveBody body)
                             throws TemplateException, IOException {
 
-        RequestContext rc = getDataModel("r.rc", RequestContext.class);
+        RequestContext rc = getDataModel("_r.rc", RequestContext.class);
         
         Boolean debug_links = rc.getParamAs(WebBundleManager.DEBUG_LINK_STRING, Boolean.class, null);
         //if not null, make sure we set the cookie with the value
@@ -81,7 +81,7 @@ public class WebBundleDirective implements TemplateDirectiveModel {
         LinkType linkType = ObjectUtil.getValue(typeStr, LinkType.class, null);
         
         if (linkType == null){
-            throw new SnowRuntimeException(Alert.NOT_VALID_WEBBUNDLE_TYPE,"type",typeStr);
+            throw new SnowException(Alert.NOT_VALID_WEBBUNDLE_TYPE,"type",typeStr);
         }
         
         String fileExt = "." + linkType.name();
@@ -93,7 +93,7 @@ public class WebBundleDirective implements TemplateDirectiveModel {
         File folder = pathFileResolver.resolve(path);
         
         if (!folder.exists()){
-            throw new SnowRuntimeException(Alert.NOT_VALID_WEBBUNDLE_PATH,"path",folder.getAbsolutePath());
+            throw new SnowException(Alert.NOT_VALID_WEBBUNDLE_PATH,"path",folder.getAbsolutePath());
         }
         
         StringBuilder sb = new StringBuilder();

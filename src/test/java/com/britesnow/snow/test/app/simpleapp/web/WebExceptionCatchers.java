@@ -5,10 +5,10 @@ import java.io.StringReader;
 import javax.inject.Singleton;
 
 import com.britesnow.snow.test.app.simpleapp.dao.DaoException;
+import com.britesnow.snow.web.HttpWriter;
 import com.britesnow.snow.web.RequestContext;
 import com.britesnow.snow.web.exception.WebExceptionContext;
 import com.britesnow.snow.web.exception.annotation.WebExceptionCatcher;
-import com.britesnow.snow.web.renderer.HttpWriter;
 import com.google.inject.Inject;
 
 @Singleton

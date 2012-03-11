@@ -1,5 +1,6 @@
 package com.britesnow.snow.web;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -8,7 +9,7 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.britesnow.snow.SnowRuntimeException;
+import com.britesnow.snow.SnowException;
 import com.britesnow.snow.web.db.hibernate.HibernateSessionFactoryBuilder;
 import com.britesnow.snow.web.exception.WebExceptionCatcherRef;
 import com.britesnow.snow.web.exception.WebExceptionContext;
@@ -31,6 +32,8 @@ public class Application {
     public enum Error {
         NO_WEB_ACTION
     }
+    
+    private static final String             MODEL_KEY_REQUEST             = "_r";    
 
     // just to make sure we initialize only onces
     private boolean                        initialized                 = false;
@@ -39,7 +42,7 @@ public class Application {
     private WebHandlerInterceptor    webHandlerInterceptor = null;
 
     @Inject(optional = true)
-    private WebApplicationLifeCycle        webApplicationLifeCycle     = null;
+    private WebApplicationLifecycle        webApplicationLifeCycle     = null;
 
     @Inject(optional = true)
     private HibernateSessionFactoryBuilder hibernateSessionFactoryBuilder;
@@ -94,18 +97,28 @@ public class Application {
 
     // --------- Content Processing --------- //
     public void processTemplate(RequestContext rc) throws Throwable {
-        // build the new model
-        Map rootModel = rc.getRootModel();
+        
+        
 
         processWebModels(rc);
 
+        Map templateModel = new HashMap();
+        
+        // Copy the model map and extend it with the _r request info
+        Map model = rc.getWebModel();
+        for(Object key : model.keySet()){
+            templateModel.put(key, model.get(key));
+        }
+        templateModel.put(MODEL_KEY_REQUEST, RequestInfoMapBuilder.buildRequestModel(rc));
+        
+        
         String path = rc.popFramePath();
         if (path == null) {
             path = rc.getResourcePath();
             path = getTemplatePath(path);
         }
 
-        freemarkerRenderer.render(path, rootModel, rc.getWriter());
+        freemarkerRenderer.render(path, templateModel, rc.getWriter());
     }
     
     public void processWebActionResponseJson(RequestContext rc){
@@ -147,7 +160,7 @@ public class Application {
         WebActionHandlerRef webActionRef = webObjectRegistry.getWebActionHandlerRef(actionName);
 
         if (webActionRef == null) {
-            throw new SnowRuntimeException(Error.NO_WEB_ACTION, "WebAction", actionName);
+            throw new SnowException(Error.NO_WEB_ACTION, "WebAction", actionName);
         }
 
         // --------- Invoke Method --------- //

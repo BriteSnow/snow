@@ -15,8 +15,6 @@ public class EmployeeDao {
     private Long idSeq = 1L;
 
     public EmployeeDao(){
-        Employee emp;
-        
         createNewEmployee("Mike","Donavan");
         createNewEmployee("Dylan","Brown");
         

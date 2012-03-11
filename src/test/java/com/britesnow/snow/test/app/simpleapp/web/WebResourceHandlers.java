@@ -4,10 +4,10 @@ import java.io.StringReader;
 
 import javax.inject.Singleton;
 
+import com.britesnow.snow.web.HttpWriter;
 import com.britesnow.snow.web.RequestContext;
 import com.britesnow.snow.web.handler.annotation.WebResourceHandler;
 import com.britesnow.snow.web.param.annotation.WebPath;
-import com.britesnow.snow.web.renderer.HttpWriter;
 import com.google.inject.Inject;
 
 /**
