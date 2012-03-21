@@ -1,11 +1,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  
   <groupId>com.britesnow</groupId>
   <artifactId>snow</artifactId>
-  <packaging>jar</packaging>
   <version>1.9.7.SNAPSHOT</version>
   <name>snow</name>
+  
+  <packaging>jar</packaging>
+  
   <url>http://britesnow.com/snow</url>
   
   <licenses>
@@ -15,10 +18,21 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
-  
+
   <scm>
-    <url>https://github.com/N2NApps/SMR</url>
+    <url>https://github.com/BriteSnow/snow</url>
+    <connection>scm:git:git@github.com:BriteSnow/snow.git</connection>
+    <developerConnection>scm:git:git@github.com:BriteSnow/snow.git</developerConnection>
   </scm>
+  
+  <developers>
+    <developer>
+      <id>jeremychone</id>
+      <name>Jeremy Chone</name>
+      <email>jeremy.chone@gmail.com</email>
+    </developer>
+  </developers>
+    
   
   <build>
     <plugins>
@@ -207,26 +221,6 @@
     </dependency>
     
   </dependencies>
-  
-  
-  
-  <repositories>
-    <repository>
-      <id>jboss-repository-group</id>
-      <name>jboss-repository-group</name>
-      <url>https://repository.jboss.org/nexus/content/groups/public/</url>
-      <layout>default</layout>
-    </repository>
-    
-    <repository>
-      <id>ibiblio</id>
-      <url>http://www.ibiblio.org/maven</url>
-    </repository>
-    
-    <repository>
-      <id>snowfk.org</id>
-      <url>http://mvnrep.snowfk.org/snowfk</url>
-    </repository>
-  </repositories>
+
   
 </project>
