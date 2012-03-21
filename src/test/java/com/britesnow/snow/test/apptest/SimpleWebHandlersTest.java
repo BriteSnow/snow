@@ -19,7 +19,7 @@ public class SimpleWebHandlersTest extends SnowWebApplicationTestSupport {
         SnowWebApplicationTestSupport.initWebApplication("src/test/resources/simpleApp");
     }
 
-    //@Test
+    @Test
     public void testHelloPage() throws Exception {
 
         RequestContextMock rc = requestContextFactory.createRequestContext(RequestMethod.GET, "/helloPage");
@@ -33,7 +33,7 @@ public class SimpleWebHandlersTest extends SnowWebApplicationTestSupport {
         assertEquals("---Hello John---", result);
     }
 
-    //@Test
+    @Test
     public void testContactJson() throws Exception {
         Map result;
         RequestContextMock rc;
@@ -74,7 +74,7 @@ public class SimpleWebHandlersTest extends SnowWebApplicationTestSupport {
         assertEquals("---Hello Mike---", result);
     }
 
-    //@Test
+    @Test
     public void testNotesIndexPage() throws Exception {
         String result;
         RequestContextMock rc;
@@ -87,7 +87,7 @@ public class SimpleWebHandlersTest extends SnowWebApplicationTestSupport {
         assertEquals("---!!!notes/_frame!!!This is the notes/index.ftl page!!!/notes/_frame!!!---", result);
     }
 
-    //@Test
+    @Test
     public void testAddContactAction() throws Exception {
         Map result;
         RequestContextMock rc;

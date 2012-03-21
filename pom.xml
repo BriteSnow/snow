@@ -4,7 +4,7 @@
   <groupId>com.britesnow</groupId>
   <artifactId>snow</artifactId>
   <packaging>jar</packaging>
-  <version>1.9.6</version>
+  <version>1.9.7.SNAPSHOT</version>
   <name>snow</name>
   <url>http://britesnow.com/snow</url>
   
