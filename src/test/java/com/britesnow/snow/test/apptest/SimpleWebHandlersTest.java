@@ -87,6 +87,30 @@ public class SimpleWebHandlersTest extends SnowWebApplicationTestSupport {
         assertEquals("---!!!notes/_frame!!!This is the notes/index.ftl page!!!/notes/_frame!!!---", result);
     }
 
+    /**
+     * The .do notation is recommended over the _actionResponse.json (which is deprecated)
+     * @throws Exception
+     */
+    @Test
+    public void testAddContactActionDo() throws Exception {
+        Map result;
+        RequestContextMock rc;
+
+        // test add contact
+        rc = requestContextFactory.createRequestContext(RequestMethod.POST, "/addContact.do");
+        rc.setParamMap(MapUtil.mapIt("action", "addContact", "name", "Jennifer"));
+        webController.service(rc);
+        result = rc.getResponseAsJson();
+        assertEquals("Jennifer",result.get("name"));
+        
+        String newContactId = MapUtil.getDeepValue(result, "id");
+        rc = requestContextFactory.createRequestContext(RequestMethod.GET, "/contact.json");
+        rc.setParamMap(MapUtil.mapIt("id", newContactId));
+        webController.service(rc);
+        result = rc.getResponseAsJson();
+        assertEquals("Jennifer", MapUtil.getDeepValue(result, "contact.name"));        
+    }      
+    
     @Test
     public void testAddContactAction() throws Exception {
         Map result;
@@ -108,17 +132,7 @@ public class SimpleWebHandlersTest extends SnowWebApplicationTestSupport {
     }
     
     
-    @Test
-    public void testAddContactActionDo() throws Exception {
-        Map result;
-        RequestContextMock rc;
-
-        // test add contact
-        rc = requestContextFactory.createRequestContext(RequestMethod.POST, "/addContact.do");
-        rc.setParamMap(MapUtil.mapIt("action", "addContact", "name", "Jennifer"));
-        webController.service(rc);
-        result = rc.getResponseAsJson();
-        assertEquals("Jennifer",result.get("name"));
-    }    
+    
+  
 
 }
