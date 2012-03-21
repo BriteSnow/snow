@@ -41,7 +41,6 @@ public class DefaultApplicationModule extends AbstractModule {
     protected void configure() {
         bind(FramePathsResolver.class).to(DefaultFramePathsResolver.class);
         bind(ResourcePathResolver.class).to(DefaultResourcePathResolver.class);
-        bind(ActionNameResolver.class).to(DefaultActionNameResolver.class);
         bind(JsonRenderer.class).to(JsonLibJsonRenderer.class);
 
         if (applicationPackageBase != null) {

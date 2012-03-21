@@ -81,9 +81,6 @@ public class WebController {
     @Inject
     private PathFileResolver                pathFileResolver;
 
-    @Inject
-    private ActionNameResolver              actionNameResolver;
-
     private ThreadLocal<RequestContext>     requestContextTl              = new ThreadLocal<RequestContext>();
 
     private CurrentRequestContextHolder     currentRequestContextHolder   = new CurrentRequestContextHolder() {
@@ -154,7 +151,7 @@ public class WebController {
                 responseType = ResponseType.webResource;
             } else if (isTemplatePath(resourcePath)) {
                 responseType = ResponseType.template;
-            } else if ("/_actionResponse.json".equals(resourcePath)) {
+            } else if (isWebActionResponseJson(resourcePath,rc)) {
                 responseType = ResponseType.webActionResponseJson;
             } else if (isJsonPath(resourcePath)) {
                 responseType = ResponseType.json;
@@ -205,7 +202,7 @@ public class WebController {
 
             // --------- Processing the Post (if any) --------- //
             if ("POST".equals(request.getMethod())) {
-                String actionName = actionNameResolver.resolve(rc);
+                String actionName = resolveWebActionName(rc);
                 if (actionName != null) {
                     WebActionResponse webActionResponse = null;
                     try {
@@ -532,6 +529,26 @@ public class WebController {
         } else {
             return false;
         }
+    }
+    
+    static private final boolean isWebActionResponseJson(String resourcePath, RequestContext rc){
+        if (rc.getReq().getMethod().equals("POST")){
+            if (resourcePath.endsWith(".do") || "/_actionResponse.json".equals(resourcePath)){
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    static private final String resolveWebActionName(RequestContext rc){
+        String resourcePath = rc.getResourcePath();
+        
+        // if it is a .do request
+        if (resourcePath.endsWith(".do")){
+            return resourcePath.substring(1,resourcePath.length() - 3);
+        }
+        
+        return rc.getParam("action");
     }
 
     static final private boolean isCachable(String pathInfo) {
