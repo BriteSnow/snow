@@ -59,7 +59,7 @@ public class EmployeeWebHandlersTest extends SnowWebApplicationTestSupport{
     
     
     @Test
-    public void textDaoException() throws Exception{
+    public void testDaoException() throws Exception{
         String result;
         RequestContextMock rc;
         

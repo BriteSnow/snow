@@ -98,7 +98,7 @@ public class SimpleWebHandlersTest extends SnowWebApplicationTestSupport {
 
         // test add contact
         rc = requestContextFactory.createRequestContext(RequestMethod.POST, "/addContact.do");
-        rc.setParamMap(MapUtil.mapIt("action", "addContact", "name", "Jennifer"));
+        rc.setParamMap(MapUtil.mapIt("name", "Jennifer"));
         webController.service(rc);
         result = rc.getResponseAsJson();
         assertEquals("Jennifer",result.get("name"));
