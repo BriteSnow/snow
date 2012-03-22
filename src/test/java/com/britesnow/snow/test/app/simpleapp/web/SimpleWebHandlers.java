@@ -37,5 +37,15 @@ public class SimpleWebHandlers {
         contactIdSeq++;
         return newContact;
     }
+    
+    
+    @WebModelHandler(startsWith = "/testBool")
+    public void testBool(@WebModel Map m,@WebParam("boolTrue") Boolean boolTrue,
+                            @WebParam("boolFalse") Boolean boolFalse){
+        
+        m.put("boolTrue", boolTrue);
+        m.put("boolFalse", boolFalse);
+    }
+    
 
 }

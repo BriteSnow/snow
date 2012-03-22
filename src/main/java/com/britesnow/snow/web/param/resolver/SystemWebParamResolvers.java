@@ -48,6 +48,14 @@ public class SystemWebParamResolvers {
         WebParam webParam = annotationMap.get(WebParam.class);
         return rc.getParam(webParam.value());
     }
+    
+    @WebParamResolver
+    public Boolean resolveBoolean(AnnotationMap annotationMap, Class paramType, RequestContext rc) {
+        WebParam webParam = annotationMap.get(WebParam.class);
+        String val = rc.getParam(webParam.value());
+        return ObjectUtil.getValue(val,Boolean.class,null);
+    }
+    
     // --------- /Primary Type Resolvers --------- //
 
     @WebParamResolver

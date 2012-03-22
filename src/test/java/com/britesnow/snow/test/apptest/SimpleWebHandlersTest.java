@@ -34,6 +34,23 @@ public class SimpleWebHandlersTest extends SnowWebApplicationTestSupport {
     }
 
     @Test
+    public void testBool() throws Exception {
+        // ,"boolTrue","true","boolFalse","false"
+        Map result;
+
+        RequestContextMock rc = requestContextFactory.createRequestContext(RequestMethod.GET, "/testBool.json");
+        Map<String, Object> paramMap = (Map<String, Object>) MapUtil.mapIt("boolTrue", "true", "boolFalse", "false");
+        rc.setParamMap(paramMap);
+
+        webController.service(rc);
+
+        result = rc.getResponseAsJson();
+        
+        assertEquals("true", result.get("boolTrue").toString());
+        assertEquals("false", result.get("boolFalse").toString());
+    }
+
+    @Test
     public void testContactJson() throws Exception {
         Map result;
         RequestContextMock rc;
@@ -89,6 +106,7 @@ public class SimpleWebHandlersTest extends SnowWebApplicationTestSupport {
 
     /**
      * The .do notation is recommended over the _actionResponse.json (which is deprecated)
+     * 
      * @throws Exception
      */
     @Test
@@ -101,16 +119,16 @@ public class SimpleWebHandlersTest extends SnowWebApplicationTestSupport {
         rc.setParamMap(MapUtil.mapIt("name", "Jennifer"));
         webController.service(rc);
         result = rc.getResponseAsJson();
-        assertEquals("Jennifer",result.get("name"));
-        
+        assertEquals("Jennifer", result.get("name"));
+
         String newContactId = MapUtil.getDeepValue(result, "id");
         rc = requestContextFactory.createRequestContext(RequestMethod.GET, "/contact.json");
         rc.setParamMap(MapUtil.mapIt("id", newContactId));
         webController.service(rc);
         result = rc.getResponseAsJson();
-        assertEquals("Jennifer", MapUtil.getDeepValue(result, "contact.name"));        
-    }      
-    
+        assertEquals("Jennifer", MapUtil.getDeepValue(result, "contact.name"));
+    }
+
     @Test
     public void testAddContactAction() throws Exception {
         Map result;
@@ -121,7 +139,7 @@ public class SimpleWebHandlersTest extends SnowWebApplicationTestSupport {
         rc.setParamMap(MapUtil.mapIt("action", "addContact", "name", "Jennifer"));
         webController.service(rc);
         result = rc.getResponseAsJson();
-        assertEquals("Jennifer",result.get("name"));
+        assertEquals("Jennifer", result.get("name"));
 
         String newContactId = MapUtil.getDeepValue(result, "id");
         rc = requestContextFactory.createRequestContext(RequestMethod.GET, "/contact.json");
@@ -130,9 +148,5 @@ public class SimpleWebHandlersTest extends SnowWebApplicationTestSupport {
         result = rc.getResponseAsJson();
         assertEquals("Jennifer", MapUtil.getDeepValue(result, "contact.name"));
     }
-    
-    
-    
-  
 
 }
