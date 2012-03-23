@@ -152,7 +152,7 @@ public class WebObjectRegistry {
                 // if this is for a leaf path, grab the startWith values from the
                 // the web model handler annotation.
                 // todo - warn if startsWith has no entries which has no effect?
-                if (webModelHandlerAnnotation.leafPath()) {
+                if (webModelHandlerAnnotation.leaf()) {
                     String[] leafPaths = webModelHandlerAnnotation.startsWith();
                     // make sure they all have trailing slashes...
                     for (int i = 0; i < leafPaths.length; i++) {
