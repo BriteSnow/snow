@@ -6,7 +6,7 @@ package com.britesnow.snow.web.auth;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Auth<T> {
+public class AuthToken<T> {
 
     public enum Type {
         root, admin, user, visitor;
@@ -16,11 +16,11 @@ public class Auth<T> {
     private T                   user;
     private Map<String, String> groupNames = new HashMap<String, String>();
 
-    public Auth() {
+    public AuthToken() {
 
     }
 
-    public Auth(Type type) {
+    public AuthToken(Type type) {
         setType(type);
     }
 

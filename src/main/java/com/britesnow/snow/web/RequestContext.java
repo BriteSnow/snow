@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 import com.britesnow.snow.util.HttpRequestUtil;
 import com.britesnow.snow.util.MapUtil;
 import com.britesnow.snow.util.ObjectUtil;
-import com.britesnow.snow.web.auth.Auth;
+import com.britesnow.snow.web.auth.AuthToken;
 import com.google.common.base.Throwables;
 
 public class RequestContext {
@@ -64,7 +64,7 @@ public class RequestContext {
     private String              pathInfo;
 
     // set by AuthService.authRequest
-    private Auth<?>             auth;
+    private AuthToken<?>             authToken;
 
     public RequestContext(HttpServletRequest req, HttpServletResponse res, ServletContext servletContext,
                             ServletFileUpload fileUploader) {
@@ -80,18 +80,18 @@ public class RequestContext {
 
     /*--------- Auth Methods ---------*/
 
-    public Auth<?> getAuth() {
-        return auth;
+    public AuthToken<?> getAuthToken() {
+        return authToken;
     }
 
-    public void setAuth(Auth<?> auth) {
-        this.auth = auth;
+    public void setAuthToken(AuthToken<?> auth) {
+        this.authToken = auth;
     }
 
     @SuppressWarnings("unchecked")
     public <T> T getUser(Class<T> userClass) {
-        if (auth != null && userClass.isInstance(auth.getUser())) {
-            return (T) auth.getUser();
+        if (authToken != null && userClass.isInstance(authToken.getUser())) {
+            return (T) authToken.getUser();
         } else {
             return null;
         }

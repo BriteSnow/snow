@@ -25,8 +25,8 @@ import com.britesnow.snow.util.FileUtil;
 import com.britesnow.snow.util.MapUtil;
 import com.britesnow.snow.util.Pair;
 import com.britesnow.snow.web.AbortWithHttpStatusException.HttpStatus;
-import com.britesnow.snow.web.auth.Auth;
-import com.britesnow.snow.web.auth.AuthService;
+import com.britesnow.snow.web.auth.AuthToken;
+import com.britesnow.snow.web.auth.AuthRequest;
 import com.britesnow.snow.web.db.hibernate.HibernateSessionInViewHandler;
 import com.britesnow.snow.web.handler.WebHandlerContext;
 import com.britesnow.snow.web.handler.WebHandlerException;
@@ -64,7 +64,7 @@ public class WebController {
     private WebBundleManager                webBundleManager;
 
     @Inject(optional = true)
-    private AuthService                     authService;
+    private AuthRequest                     authService;
 
     @Inject(optional = true)
     private HibernateSessionInViewHandler   hibernateSessionInViewHandler = null;
@@ -189,8 +189,8 @@ public class WebController {
 
             // --------- Auth --------- //
             if (authService != null) {
-                Auth<?> auth = authService.authRequest(rc);
-                rc.setAuth(auth);
+                AuthToken<?> auth = authService.authRequest(rc);
+                rc.setAuthToken(auth);
             }
             // --------- /Auth --------- //
 

@@ -10,7 +10,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.britesnow.snow.web.auth.Auth;
+import com.britesnow.snow.web.auth.AuthToken;
 
 class RequestInfoMapBuilder {
 
@@ -40,7 +40,7 @@ class RequestInfoMapBuilder {
 
         /*--------- Include user and auth ---------*/
         /**/
-        Auth<?> auth = rc.getAuth();
+        AuthToken<?> auth = rc.getAuthToken();
         if (auth != null) {
             requestMap.put(MODEL_KEY_AUTH, auth);
             requestMap.put(MODEL_KEY_USER, auth.getUser());

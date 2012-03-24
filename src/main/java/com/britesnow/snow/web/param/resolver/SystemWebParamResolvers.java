@@ -72,9 +72,9 @@ public class SystemWebParamResolvers {
     
     @WebParamResolver(annotatedWith=WebUser.class)
     public Object resolveUser(AnnotationMap annotationMap, Class paramType, RequestContext rc){
-        if (rc.getAuth() != null) {
+        if (rc.getAuthToken() != null) {
             // TODO: probly need to check that the paramType match the getUser
-            return rc.getAuth().getUser();
+            return rc.getAuthToken().getUser();
         }else{
             return null;
         }

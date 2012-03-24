@@ -14,7 +14,7 @@ import com.britesnow.snow.web.RequestContext;
  * @author Jeremy Chone
  * 
  */
-public interface AuthService<U> {
+public interface AuthRequest<U> {
 
     
     /**
@@ -23,7 +23,7 @@ public interface AuthService<U> {
      * @param rc
      * @return
      */
-    public Auth<U> authRequest(RequestContext rc);
+    public AuthToken<U> authRequest(RequestContext rc);
     
 
     
