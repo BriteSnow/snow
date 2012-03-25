@@ -4,12 +4,19 @@
   
   <groupId>com.britesnow</groupId>
   <artifactId>snow</artifactId>
-  <version>1.9.7.SNAPSHOT</version>
+  <version>1.9.7</version>
   <name>snow</name>
   
   <packaging>jar</packaging>
   
   <url>http://britesnow.com/snow</url>
+  
+    <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
+  
   
   <licenses>
     <license>
@@ -107,6 +114,37 @@
       
     </plugins>
   </build>
+  
+  <profiles>
+    <profile>
+      <id>release-sign-artifacts</id>
+      <activation>
+        <property>
+          <name>performRelease</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.1</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+  
   
   <dependencies>
     
