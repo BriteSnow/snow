@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import javax.inject.Singleton;
 
 import com.britesnow.snow.web.binding.WebObjects;
+import com.britesnow.snow.web.handler.WebObjectRegistry;
 import com.britesnow.snow.web.param.annotation.WebParam;
 import com.britesnow.snow.web.param.resolver.annotation.WebParamResolver;
 import com.google.inject.Inject;
@@ -48,7 +49,7 @@ public class WebParamResolverRegistry {
     
     final private void registerWebParamResolvers(Object resolversObject) {
 
-        Class cls = resolversObject.getClass();
+        Class cls = WebObjectRegistry.getNonGuiceEnhancedClass(resolversObject);
 
         for (Method method : cls.getMethods()) {
             WebParamResolver webParamResolver = method.getAnnotation(WebParamResolver.class);

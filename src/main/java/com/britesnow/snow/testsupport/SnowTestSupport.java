@@ -3,7 +3,6 @@ package com.britesnow.snow.testsupport;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.util.List;
 import java.util.Map;
 
 import org.junit.AfterClass;
@@ -15,7 +14,7 @@ import com.britesnow.snow.web.WebController;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 
-public class SnowWebApplicationTestSupport {
+public class SnowTestSupport {
     protected static String       SNOW_FOLDER_SAMPLE1_PATH = "TOOVERRIDE";
 
     protected static ApplicationLoaderMock appLoader;
@@ -32,12 +31,28 @@ public class SnowWebApplicationTestSupport {
      * @param webAppFolderStr
      */
     public static void initWebApplication(String webAppFolderStr) throws Exception {
+        initWebApplication(webAppFolderStr, null, (Module[])null);
+    }
+    
+    public static void initWebApplication(String webAppFolderStr, Module... applicationModules) throws Exception{
+        initWebApplication(webAppFolderStr,null,applicationModules);
+    }
+
+    public static void initWebApplication(String webAppFolderStr, Map properties) throws Exception{
+        initWebApplication(webAppFolderStr,properties);
+    }
+    
+    /**
+     * Same as  initWebApplication, but with all the overrides
+     */
+    public static void initWebApplication(String webAppFolderStr,Map properties, Module... applicationModules) throws Exception{
         File webappFolder = new File(webAppFolderStr);
         
         assertTrue("WebApp Folder " + webappFolder.getAbsolutePath() + " does not exist", webappFolder.exists());
-
+        
+        
         // load this application
-        appLoader = new ApplicationLoaderMock(webappFolder).load();
+        appLoader = new ApplicationLoaderMock(webappFolder).loadWithOverrides(properties,applicationModules);
         
         // init the application
         webController = appLoader.getWebController();
@@ -47,19 +62,7 @@ public class SnowWebApplicationTestSupport {
         appInjector = appLoader.getApplicationInjector();
         
         // for convenience create a RequestContextMockFactory
-        requestContextFactory = new RequestContextMockFactory();
-    }
-    
-    /**
-     * Alternative way to load an application by setting directly the applicationModules and properties
-     * Must be called by the TestUnit class from the @BeforeClass method
-     */
-    public static void initWebApplication(String webAppFolderStr,List<Module> applicationModules,Map properties) throws Exception{
-        File webappFolder = new File(webAppFolderStr);
-        assertTrue("WebApp Folder " + webappFolder.getAbsolutePath() + " does not exist", webappFolder.exists());
-        
-        appLoader = new ApplicationLoaderMock(webappFolder).load(applicationModules,properties);
-        
+        requestContextFactory = new RequestContextMockFactory();       
     }
 
     @AfterClass

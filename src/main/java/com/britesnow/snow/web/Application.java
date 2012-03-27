@@ -14,10 +14,8 @@ import com.britesnow.snow.web.db.hibernate.HibernateSessionFactoryBuilder;
 import com.britesnow.snow.web.exception.WebExceptionCatcherRef;
 import com.britesnow.snow.web.exception.WebExceptionContext;
 import com.britesnow.snow.web.handler.WebActionHandlerRef;
-import com.britesnow.snow.web.handler.WebHandlerInterceptor;
 import com.britesnow.snow.web.handler.WebHandlerContext;
 import com.britesnow.snow.web.handler.WebObjectRegistry;
-import com.britesnow.snow.web.handler.WebHandlerType;
 import com.britesnow.snow.web.handler.WebResourceHandlerRef;
 import com.britesnow.snow.web.handler.WebModelHandlerRef;
 import com.britesnow.snow.web.renderer.JsonRenderer;
@@ -32,17 +30,14 @@ public class Application {
     public enum Error {
         NO_WEB_ACTION
     }
-    
-    private static final String             MODEL_KEY_REQUEST             = "_r";    
+
+    private static final String            MODEL_KEY_REQUEST       = "_r";
 
     // just to make sure we initialize only onces
-    private boolean                        initialized                 = false;
+    private boolean                        initialized             = false;
 
     @Inject(optional = true)
-    private WebHandlerInterceptor    webHandlerInterceptor = null;
-
-    @Inject(optional = true)
-    private WebApplicationLifecycle        webApplicationLifeCycle     = null;
+    private WebApplicationLifecycle        webApplicationLifeCycle = null;
 
     @Inject(optional = true)
     private HibernateSessionFactoryBuilder hibernateSessionFactoryBuilder;
@@ -55,10 +50,8 @@ public class Application {
     @Inject
     private JsonRenderer                   jsonRenderer;
 
-
-
     @Inject
-    private WebObjectRegistry             webObjectRegistry;
+    private WebObjectRegistry              webObjectRegistry;
 
     // --------- LifeCycle --------- //
     public void init() {
@@ -70,7 +63,7 @@ public class Application {
             }
 
             webObjectRegistry.init();
-            
+
             // initialize freemarker
             freemarkerRenderer.init();
 
@@ -97,21 +90,18 @@ public class Application {
 
     // --------- Content Processing --------- //
     public void processTemplate(RequestContext rc) throws Throwable {
-        
-        
 
         processWebModels(rc);
 
         Map templateModel = new HashMap();
-        
+
         // Copy the model map and extend it with the _r request info
         Map model = rc.getWebModel();
-        for(Object key : model.keySet()){
+        for (Object key : model.keySet()) {
             templateModel.put(key, model.get(key));
         }
         templateModel.put(MODEL_KEY_REQUEST, RequestInfoMapBuilder.buildRequestModel(rc));
-        
-        
+
         String path = rc.popFramePath();
         if (path == null) {
             path = rc.getResourcePath();
@@ -120,19 +110,19 @@ public class Application {
 
         freemarkerRenderer.render(path, templateModel, rc.getWriter());
     }
-    
-    public void processWebActionResponseJson(RequestContext rc){
+
+    public void processWebActionResponseJson(RequestContext rc) {
         Object data = null;
-        
-        // quick hack for now. 
+
+        // quick hack for now.
         // Return raw result if no exception. otherwise, return WEbActionResponse
         WebActionResponse actionResponse = rc.getWebActionResponse();
-        if (actionResponse.getError() == null){
+        if (actionResponse.getError() == null) {
             data = actionResponse.getResult();
-        }else{
+        } else {
             data = actionResponse;
-        }    
-        
+        }
+
         jsonRenderer.render(data, rc.getWriter());
     }
 
@@ -149,7 +139,7 @@ public class Application {
         if (data == null) {
             data = m;
         }
-        
+
         jsonRenderer.render(data, rc.getWriter());
     }
 
@@ -164,23 +154,11 @@ public class Application {
         }
 
         // --------- Invoke Method --------- //
-        boolean invokeWebAction = true;
 
         Object result = null;
 
         try {
-            WebHandlerContext handlerContext = new WebHandlerContext(WebHandlerType.action,webActionRef.getHandlerObject(),webActionRef.getHandlerMethod());
-            if (webHandlerInterceptor != null) {
-                invokeWebAction = webHandlerInterceptor.beforeWebHandler(handlerContext,rc);
-            }
-
-            if (invokeWebAction) {
-                result = webActionRef.invoke(rc);
-            }
-
-            if (invokeWebAction && webHandlerInterceptor != null) {
-                webHandlerInterceptor.afterWebHandler(handlerContext, rc);
-            }
+            result = webActionRef.invoke(rc);
         } catch (Throwable t) {
             // TODO: add support for WebExceptionCatcher
             throw Throwables.propagate(t);
@@ -217,22 +195,10 @@ public class Application {
 
         if (webModelRef != null) {
 
-            boolean invokeWebModel = true;
-
             try {
-                WebHandlerContext handlerContext = new WebHandlerContext(WebHandlerType.model,webModelRef.getHandlerObject(),webModelRef.getHandlerMethod());
-                
-                if (webHandlerInterceptor != null) {
-                   invokeWebModel = webHandlerInterceptor.beforeWebHandler(handlerContext, rc);
-                }
 
-                if (invokeWebModel) {
-                    webModelRef.invoke(rc);
-                }
+                webModelRef.invoke(rc);
 
-                if (invokeWebModel && webHandlerInterceptor != null) {
-                    webHandlerInterceptor.afterWebHandler(handlerContext, rc);
-                }
             } catch (Exception e) {
                 // TODO: needs to add the support for WebExceptionCatcher
                 throw Throwables.propagate(e);
@@ -240,48 +206,35 @@ public class Application {
 
         }
     }
-    
-    boolean hasWebResourceHandlerFor(String resourcePath){
+
+    boolean hasWebResourceHandlerFor(String resourcePath) {
         return (webObjectRegistry.getWebResourceHandlerRef(resourcePath) != null);
     }
 
     void processWebResourceHandler(RequestContext rc) {
         WebResourceHandlerRef webResourceHandlerRef = webObjectRegistry.getWebResourceHandlerRef(rc.getResourcePath());
         if (webResourceHandlerRef != null) {
-            WebHandlerContext handlerContext = new WebHandlerContext(WebHandlerType.resource,webResourceHandlerRef.getHandlerObject(),webResourceHandlerRef.getHandlerMethod());
-            
-            boolean invokeWebResource = true;
-            
-            if (webHandlerInterceptor != null) {
-                invokeWebResource = webHandlerInterceptor.beforeWebHandler(handlerContext, rc);
-            }
-            
-            if (invokeWebResource){
-                webResourceHandlerRef.invoke(rc);
-            }
-            
-            if (invokeWebResource && webHandlerInterceptor != null) {
-                webHandlerInterceptor.afterWebHandler(handlerContext, rc);
-            }            
+            webResourceHandlerRef.invoke(rc);
         } else {
             throw new RuntimeException("No WebResourceHandler for " + rc.getResourcePath());
         }
     }
 
     // --------- /WebHandler Processing --------- //
-    
+
     // --------- WebExceptionCatcher Processing --------- //
-    public boolean processWebExceptionCatcher(Throwable t,WebHandlerContext webHandlerContext, RequestContext rc){
+    public boolean processWebExceptionCatcher(Throwable t, WebHandlerContext webHandlerContext, RequestContext rc) {
         WebExceptionContext webExceptionContext = new WebExceptionContext(webHandlerContext);
-        
+
         WebExceptionCatcherRef webExceptionCatcherRef = webObjectRegistry.getWebExceptionCatcherRef(t.getClass());
-        if (webExceptionCatcherRef != null){
-            webExceptionCatcherRef.invoke(t,webExceptionContext, rc);
+        if (webExceptionCatcherRef != null) {
+            webExceptionCatcherRef.invoke(t, webExceptionContext, rc);
             return true;
-        }else{
+        } else {
             return false;
         }
     }
+
     // --------- /WebExceptionCatcher Processing --------- //
 
     String getTemplatePath(String resourcePath) {

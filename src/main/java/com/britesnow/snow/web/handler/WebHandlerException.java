@@ -4,7 +4,7 @@ public class WebHandlerException extends RuntimeException {
 
     private WebHandlerContext webHandlerContext;
     private Throwable cause;
-
+    
     public WebHandlerException(WebHandlerContext webHandlerContext, Throwable cause){
         this.webHandlerContext = webHandlerContext;
         this.cause = cause;

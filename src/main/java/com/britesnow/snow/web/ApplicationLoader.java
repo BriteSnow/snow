@@ -72,16 +72,14 @@ public class ApplicationLoader {
     @SuppressWarnings("unchecked")
     protected ApplicationLoader load() throws Exception {
 
-        Map<String,String> appProperties = loadAppProperties();
+        
         
         /*--------- Load WebApplication ---------*/
         // Building the root modules
         // rootModules cannot be overrided
-        String applicationConfigClassStr = appProperties.get("snow.webApplicationModules");
-        Iterable<String> applicationClassNames = Splitter.on(",").split(applicationConfigClassStr);
-        List<Module> applicationModules = buildApplicationModules(applicationClassNames);
+
         
-        return load(applicationModules,appProperties);
+        return load(null,(Module[])null);
         /*--------- /Load WebApplication ---------*/
 
     }
@@ -89,8 +87,27 @@ public class ApplicationLoader {
     /**
      * Protected so that we can subclass it in testsupport for programmatic configuration
      */
-    protected ApplicationLoader load(List<Module> applicationModules, Map<String,String> appProperties){
-
+    protected ApplicationLoader load(Map<String,String> overrideProperties, Module... overrideModules){
+        Map<String,String> appProperties = loadAppProperties();
+        
+        // override the properties if defined
+        if (overrideProperties != null){
+            for (String key : overrideProperties.keySet()){
+                appProperties.put(key, overrideProperties.get(key));
+            }
+        }
+        
+        // build the webApplicationModules from the properties
+        String applicationConfigClassStr = appProperties.get("snow.webApplicationModules");
+        Iterable<String> applicationClassNames = Splitter.on(",").split(applicationConfigClassStr);
+        List<Module> appModules = buildApplicationModules(applicationClassNames);
+        
+        Module combinedAppModule = Modules.combine(appModules);
+        if (overrideModules != null){
+            combinedAppModule = Modules.override(combinedAppModule).with(overrideModules);
+        }
+        
+        
         // build the rootModules
         List<Module> rootModules = new ArrayList<Module>();
         rootModules.add(new RootWebModule(servletContext));
@@ -98,8 +115,8 @@ public class ApplicationLoader {
 
         // get the applicationPackageBase
         String applicationPackageBase = null;
-        if (applicationModules != null && applicationModules.size() > 0) {
-            applicationPackageBase = applicationModules.get(0).getClass().getPackage().getName();
+        if (appModules != null && appModules.size() > 0) {
+            applicationPackageBase = appModules.get(0).getClass().getPackage().getName();
         }
         
         // build the defaultModules
@@ -112,14 +129,14 @@ public class ApplicationLoader {
         }
         
 
-        Module combineAppModule;
-        if (applicationModules != null) {
-            combineAppModule = Modules.override(defaultModules).with(applicationModules);
+        Module combinedDefaultAndAppModule;
+        if (combinedAppModule != null) {
+            combinedDefaultAndAppModule = Modules.override(defaultModules).with(combinedAppModule);
         } else {
-            combineAppModule = Modules.combine(defaultModules);
+            combinedDefaultAndAppModule = Modules.combine(defaultModules);
         }
 
-        rootModules.add(combineAppModule);
+        rootModules.add(combinedDefaultAndAppModule);
 
         appInjector = Guice.createInjector(rootModules);        
         
@@ -148,6 +165,7 @@ public class ApplicationLoader {
         return modules;
     }
     
+    // protected so that we can call it in the Mock
     protected Map loadAppProperties() {
         // First load the application.properties
         Map appProperties = new Properties();

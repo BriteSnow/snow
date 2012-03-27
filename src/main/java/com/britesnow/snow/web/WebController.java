@@ -136,7 +136,7 @@ public class WebController {
         service(rc);
     }
 
-    public void service(RequestContext rc) throws Exception {
+    public void service(RequestContext rc) {
         ResponseType responseType = null;
         try {
             requestContextTl.set(rc);
@@ -468,7 +468,7 @@ public class WebController {
         }
     }
 
-    private void sendHttpRedirect(RequestContext rc, AbortWithHttpRedirectException e) throws IOException {
+    private void sendHttpRedirect(RequestContext rc, AbortWithHttpRedirectException e){
 
         // like above, there's not much we can do if the response has already been committed. in that case,
         // we'll just silently ignore the exception.

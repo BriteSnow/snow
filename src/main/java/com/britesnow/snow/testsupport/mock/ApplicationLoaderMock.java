@@ -1,7 +1,6 @@
 package com.britesnow.snow.testsupport.mock;
 
 import java.io.File;
-import java.util.List;
 import java.util.Map;
 
 import com.britesnow.snow.web.Application;
@@ -25,13 +24,15 @@ public class ApplicationLoaderMock extends ApplicationLoader {
         return appInjector;
     }
     
+    // Standard load
     public ApplicationLoaderMock load() throws Exception{
         super.load();
         return this;
     }
     
-    public ApplicationLoaderMock load(List<Module> applicationModules,Map appProperties){
-        super.load(applicationModules, appProperties);
+    // Load with overrides
+    public ApplicationLoaderMock loadWithOverrides(Map testOverrideProperties, Module... testOverrideModules){
+        super.load(testOverrideProperties, testOverrideModules);
         return this;
     }
 

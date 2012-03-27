@@ -127,14 +127,20 @@ public class WebObjectRegistry {
     
     // --------- Private Registration Methods (call at init() time) --------- //
     private final void registerWebHandlerMethods(Object targetObject) {
-        Class c = targetObject.getClass();
+        
+        Class c =  getNonGuiceEnhancedClass(targetObject);
 
         Method methods[] = c.getMethods();
         List<String> additionalLeafPaths = new ArrayList<String>();
 
         for (Method m : methods) {
             // Annotation[] as = m.getAnnotations();
-
+            
+            
+            if (targetObject.getClass().getName().indexOf("SimpleWebHandlers") > -1 && m.getName().equals("contactPage") ){
+                System.out.println("SimpleWebHandlers.contact: " + targetObject.getClass().getName() + m.getAnnotation(WebModelHandler.class));
+            }
+            
             // --------- Register WebActionHandler --------- //
             WebActionHandler webActionHandlerAnnotation = m.getAnnotation(WebActionHandler.class);
             // if it is an action method, then, add the WebAction Object and
@@ -147,6 +153,7 @@ public class WebObjectRegistry {
             // --------- Register WebModelHandler --------- //
             WebModelHandler webModelHandlerAnnotation = m.getAnnotation(WebModelHandler.class);
             if (webModelHandlerAnnotation != null) {
+                
                 registerWebModel(targetObject, m, webModelHandlerAnnotation);
 
                 // if this is for a leaf path, grab the startWith values from the
@@ -276,5 +283,15 @@ public class WebObjectRegistry {
         return webParamResolverRefs;
     }
     
+    
+    
+    public static Class getNonGuiceEnhancedClass(Object obj){
+        String className = obj.getClass().getName();
+        if (className.indexOf("$$EnhancerByGuice$$") > -1){
+            return obj.getClass().getSuperclass();
+        }else{
+            return obj.getClass();
+        }
+    }
     
 }

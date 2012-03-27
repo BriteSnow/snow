@@ -5,15 +5,15 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-import com.britesnow.snow.testsupport.SnowWebApplicationTestSupport;
+import com.britesnow.snow.testsupport.SnowTestSupport;
 import com.britesnow.snow.testsupport.mock.RequestContextMock;
 import com.britesnow.snow.testsupport.mock.RequestContextMockFactory.RequestMethod;
 
-public class WebResourceHandlerTest extends SnowWebApplicationTestSupport {
+public class WebResourceHandlerTest extends SnowTestSupport {
     
     @BeforeClass
     public static void initTestClass() throws Exception {
-        SnowWebApplicationTestSupport.initWebApplication("src/test/resources/simpleApp");
+        SnowTestSupport.initWebApplication("src/test/resources/simpleApp");
     }
     
     @Test

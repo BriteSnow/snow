@@ -7,16 +7,16 @@ import java.util.Map;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.britesnow.snow.testsupport.SnowWebApplicationTestSupport;
+import com.britesnow.snow.testsupport.SnowTestSupport;
 import com.britesnow.snow.testsupport.mock.RequestContextMock;
 import com.britesnow.snow.testsupport.mock.RequestContextMockFactory.RequestMethod;
 import com.britesnow.snow.util.MapUtil;
 
-public class EmployeeWebHandlersTest extends SnowWebApplicationTestSupport{
+public class EmployeeWebHandlersTest extends SnowTestSupport{
 
     @BeforeClass
     public static void initTestClass() throws Exception {
-        SnowWebApplicationTestSupport.initWebApplication("src/test/resources/simpleApp");
+        SnowTestSupport.initWebApplication("src/test/resources/simpleApp");
     }
     
     @Test

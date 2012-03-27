@@ -4,15 +4,15 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.britesnow.snow.testsupport.SnowWebApplicationTestSupport;
+import com.britesnow.snow.testsupport.SnowTestSupport;
 import com.britesnow.snow.testsupport.mock.RequestContextMock;
 import com.britesnow.snow.testsupport.mock.RequestContextMockFactory.RequestMethod;
 
-public class LessWebRequestTest  extends SnowWebApplicationTestSupport {
+public class LessWebRequestTest  extends SnowTestSupport {
     
     @BeforeClass
     public static void initTestClass() throws Exception {
-        SnowWebApplicationTestSupport.initWebApplication("src/test/resources/simpleApp");
+        SnowTestSupport.initWebApplication("src/test/resources/simpleApp");
     }
     
     
