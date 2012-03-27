@@ -40,7 +40,6 @@ public class GuiceInterceptorTest extends SnowTestSupport{
         webController.service(rc);
         result = rc.getResponseAsJson();
         
-        System.out.println(result);
         // assert that it worked normally
         assertEquals("Mike", MapUtil.getDeepValue(result, "contact.name"));
         // assert we got the WebModelHandler Interceptor working

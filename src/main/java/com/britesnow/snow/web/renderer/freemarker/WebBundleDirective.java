@@ -135,8 +135,6 @@ public class WebBundleDirective implements TemplateDirectiveModel {
         
         bw.write(sb.toString());
         
-        //System.out.println("WebBundleTest... " + path + " " + type + " " + part.getResourceFile().getAbsolutePath());
-        
         bw.flush();
     }
 

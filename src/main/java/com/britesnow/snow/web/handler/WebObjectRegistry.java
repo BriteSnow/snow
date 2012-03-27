@@ -82,8 +82,6 @@ public class WebObjectRegistry {
         List<WebModelHandlerRef> matchWebModelRefs = new ArrayList<WebModelHandlerRef>();
 
         for (WebModelHandlerRef webModelRef : webModelHandlerRefList) {
-            // System.out.println("WebModule.getMatchWebModeulRef: " +
-            // webModelRef.toString());
             boolean match = webModelRef.matchesPath(path);
             if (match) {
                 matchWebModelRefs.add(webModelRef);
@@ -134,13 +132,6 @@ public class WebObjectRegistry {
         List<String> additionalLeafPaths = new ArrayList<String>();
 
         for (Method m : methods) {
-            // Annotation[] as = m.getAnnotations();
-            
-            
-            if (targetObject.getClass().getName().indexOf("SimpleWebHandlers") > -1 && m.getName().equals("contactPage") ){
-                System.out.println("SimpleWebHandlers.contact: " + targetObject.getClass().getName() + m.getAnnotation(WebModelHandler.class));
-            }
-            
             // --------- Register WebActionHandler --------- //
             WebActionHandler webActionHandlerAnnotation = m.getAnnotation(WebActionHandler.class);
             // if it is an action method, then, add the WebAction Object and
@@ -208,8 +199,6 @@ public class WebObjectRegistry {
     }
 
     private final void registerWebModel(Object webHandler, Method m, WebModelHandler webModel) {
-        // System.out.println("Register WebModel " + getName() + " - " +
-        // m.getName());
         WebParamResolverRef webParamResolverRefs[] = buildWebParamResolverRefs(m);
         WebModelHandlerRef webModelRef = new WebModelHandlerRef(webHandler, m, webParamResolverRefs,webModel);
         webModelHandlerRefList.add(webModelRef);
@@ -237,8 +226,6 @@ public class WebObjectRegistry {
             throw new RuntimeException("Action Name Already Exist: " + actionName);
         }
         // if not found, create an empty list
-        // System.out.println("WebModule.registerWebAction: " + getName() + ":"
-        // + actionName);
         // add this object and method to the list
         WebParamResolverRef webParamResolverRefs[] = buildWebParamResolverRefs(m);
         webActionHandlerDic.put(actionName, new WebActionHandlerRef(webHandler, m,webParamResolverRefs, webAction));
