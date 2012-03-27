@@ -1,41 +1,16 @@
-/* Copyright 2009 Jeremy Chone - Licensed under the Apache License, Version 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
- */
 package com.britesnow.snow.web.db.hibernate;
 
-import org.aspectj.lang.annotation.SuppressAjWarnings;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.britesnow.snow.web.WebController;
-import com.britesnow.snow.web.db.hibernate.annotation.Transactional;
 
+public class TransactionalInterceptor implements MethodInterceptor {
 
-public aspect ATransactional {
-
-    /*
-     * Matches the execution of any public method in a type with the
-     * Transactional annotation, or any subtype of a type with the Transactional
-     * annotation.
-     * SEE: http://fisheye1.atlassian.com/browse/springframework/spring/aspectj/src/org/springframework/transaction/aspectj/AnnotationTransactionAspect.aj?r=HEAD
-      private pointcut executionOfAnyPublicMethodInAtTransactionalType() :
-         execution(public * ((@Transactional *)+).*(..)) && @this(Transactional);
-         
-     */
-	static private Logger logger = LoggerFactory.getLogger(WebController.class);
-	
-    /**
-     * The execution of any method that has the @Tx annotation
-     */
+    static private Logger logger = LoggerFactory.getLogger(TransactionalInterceptor.class);
     
-    pointcut transactionalMethodExecution(Transactional transactional) :
-        execution(* *(..)) && @annotation(transactional);
-
-    /**
-     * Implementating the transaction policies  
-     */    
-    @SuppressAjWarnings({"adviceDidNotMatch"})
-    Object around(Transactional transactional) : transactionalMethodExecution(transactional) {
-    	
+    @Override
+    public Object invoke(MethodInvocation invoc) throws Throwable {
         //get the sessionHolder
         SessionHolder sessionHolder = SessionHolder.getThreadSessionHolder();
 
@@ -46,7 +21,7 @@ public aspect ATransactional {
         // 2010-10-21-Jeremy: For now, if the sessionHolder is not found (unitTesting), we just ignore
         
         if (sessionHolder != null && !sessionHolder.isTxOpen()) {
-        	logger.debug("..... Transaction Start");
+            logger.debug("..... Transaction Start");
             sessionHolder.beginTransaction();
             txOwner = true;
         }
@@ -57,7 +32,7 @@ public aspect ATransactional {
             
             //// proceed to call
             //System.out.println("..... before");
-            ret = proceed(transactional);
+            ret = invoc.proceed();
             //System.out.println("..... after");
             //// if this call had begun the transaction, then commit it
             if (sessionHolder != null && txOwner) {
@@ -92,4 +67,5 @@ public aspect ATransactional {
         
         return ret;
     }
+
 }
