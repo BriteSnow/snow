@@ -44,11 +44,10 @@
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
         <configuration>
           <source>1.6</source>
           <target>1.6</target>
-          <!-- Temporary fix for supporting aspectJ -->
-          <failOnError>false</failOnError>
         </configuration>
       </plugin>
       
@@ -201,7 +200,7 @@
 	    <groupId>com.google.guava</groupId>
 	    <artifactId>guava</artifactId>
 	    <version>11.0.2</version>
-	</dependency>
+	   </dependency>
     
     <dependency>
       <groupId>org.freemarker</groupId>
