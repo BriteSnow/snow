@@ -60,7 +60,7 @@ public class SystemWebParamResolvers {
     public Enum resolveEnum(AnnotationMap annotationMap, Class paramType, RequestContext rc) {
         WebParam webParam = annotationMap.get(WebParam.class);
         String val = rc.getParam(webParam.value());
-        return ObjectUtil.getValue(val, paramType, null);
+        return (Enum)ObjectUtil.getValue(val, paramType, null);
     }
     // --------- /Primary Type Resolvers --------- //
 
