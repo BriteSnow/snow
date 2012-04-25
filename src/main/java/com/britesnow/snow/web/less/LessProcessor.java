@@ -45,7 +45,8 @@ public class LessProcessor {
             logger.debug("Initializing LESS Engine.");
             classLoader = getClass().getClassLoader();
             //URL less = classLoader.getResource(JS_ROOT + "less.js");
-            URL less = classLoader.getResource(JS_ROOT + "less-rhino-1.2.2.js");
+//            URL less = classLoader.getResource(JS_ROOT + "less-rhino-1.2.2.js");
+            URL less = classLoader.getResource(JS_ROOT + "less-rhino-1.3.0.js");
             URL env = classLoader.getResource(JS_ROOT + "env.js");
             URL engine = classLoader.getResource(JS_ROOT + "engine.js");
             Context cx = Context.enter();
