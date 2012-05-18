@@ -22,7 +22,10 @@ public class FeemarkerTemplateNameResolver {
         if (resourcePath.endsWith("/")){
             resourcePath += "index";
         }
-        File resourceFile = new File(webAppFolder,resourcePath + ".ftl");
+        if (!resourcePath.endsWith(".ftl")){
+            resourcePath += ".ftl";
+        }
+        File resourceFile = new File(webAppFolder,resourcePath);
         
         return getTemplateName(resourceFile);
     }

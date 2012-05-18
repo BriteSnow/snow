@@ -7,6 +7,13 @@ import javax.inject.Singleton;
 
 import com.britesnow.snow.web.binding.WebAppFolder;
 
+/**
+ * Resolve File from a path (usually a resourcePath). Note that the resourcePath might be resolved should have been 
+ * resolved by a ResourcePathResolver first.  
+ * 
+ * @author jeremychone
+ *
+ */
 @Singleton
 public class PathFileResolver {
 

@@ -143,7 +143,8 @@ public class WebController {
 
             HttpServletRequest request = rc.getReq();
 
-            String resourcePath = resourcePathResolver.resolve(rc);
+            // get the request resourcePath
+            String resourcePath = resourcePathResolver.resolve(rc,rc.getPathInfo());
 
             // --------- Resolve the ResponseType --------- //
             // determine the requestType

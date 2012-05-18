@@ -8,6 +8,8 @@ import java.util.Map;
 
 
 import com.britesnow.snow.web.RequestContext;
+import com.britesnow.snow.web.path.ResourcePathResolver;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 
@@ -25,16 +27,26 @@ import freemarker.template.TemplateModel;
 public class IncludeTemplateDirective extends IncludeTemplateBase implements TemplateDirectiveModel {
 
     
-
+    @Inject
+    private FeemarkerTemplateNameResolver templateNameResolver;
+    
+    @Inject
+    private ResourcePathResolver resourcePathResolver;
     
     @Override
     public void execute(Environment env, Map args, TemplateModel[] arg2, TemplateDirectiveBody arg3)
                             throws TemplateException, IOException {
 
-        String templateName = getParam(args,"name",String.class); 
-        RequestContext rc = getDataModel("r.rc", RequestContext.class);
+        String path = getParam(args,"name",String.class); 
+        RequestContext rc = getDataModel("_r.rc", RequestContext.class);
+        
+        path = resourcePathResolver.resolve(rc, path);
+        
+        String templateName = templateNameResolver.resolve(path);
         
         includeTemplate(rc,templateName,env);
+        
+        
     }
 
 }
