@@ -5,6 +5,8 @@ package com.britesnow.snow.web.renderer.freemarker;
 
 import java.util.List;
 
+import com.britesnow.snow.web.RequestContext;
+
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModelException;
 
@@ -24,7 +26,9 @@ public class PathInfoMatcherTemplateMethod implements TemplateMethodModelEx {
     
     @Override
     public Object exec(List args) throws TemplateModelException {
-        String pathInfo = FreemarkerUtil.getDataModel("_r.pathInfo",String.class);
+        // old way: resourcePath = FreemarkerUtil.getDataModel("_r.pathInfo",String.class);
+        RequestContext rc = FreemarkerUtil.getDataModel("_r.rc",RequestContext.class);
+        String resourcePath = rc.getResourcePath();
         
         String pathInfoMatch = FreemarkerUtil.getParam(args.get(0),String.class);
         
@@ -45,12 +49,12 @@ public class PathInfoMatcherTemplateMethod implements TemplateMethodModelEx {
         boolean match = false;
         switch(mode){
             case IS:
-                if (pathInfo.equals(pathInfoMatch)){
+                if (resourcePath.equals(pathInfoMatch)){
                     match= true;
                 }
                 break;
             case STARTS_WITH:
-                if (pathInfo.startsWith(pathInfoMatch)){
+                if (resourcePath.startsWith(pathInfoMatch)){
                     match = true;
                 }
                 break;
