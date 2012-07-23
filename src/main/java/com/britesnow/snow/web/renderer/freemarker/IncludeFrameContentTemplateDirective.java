@@ -39,7 +39,7 @@ public class IncludeFrameContentTemplateDirective extends IncludeTemplateBase im
         if (path == null){
             path = rc.getResourcePath();
         }
-        String templateName = templateNameResolver.resolve(path);
+        String templateName = templateNameResolver.resolve(path,rc);
         
         includeTemplate(rc,templateName,env);
     }

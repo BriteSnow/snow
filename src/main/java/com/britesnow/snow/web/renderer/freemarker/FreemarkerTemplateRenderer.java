@@ -12,6 +12,7 @@ import javax.servlet.ServletContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.britesnow.snow.web.RequestContext;
 import com.britesnow.snow.web.binding.WebAppFolder;
 import com.britesnow.snow.web.renderer.TemplateRenderer;
 import com.google.inject.Inject;
@@ -132,7 +133,7 @@ public class FreemarkerTemplateRenderer implements TemplateRenderer {
     }
 
     @Override
-    public void render(String path, Object data, Writer out) {
+    public void render(String resourcePath, Object data, Writer out, RequestContext rc) {
         
         if (!(data instanceof Map)) {
             throw new RuntimeException("FreemarkerRenderer.processPart requires 'data' to be of type 'Map'. Current data type " + ((data != null) ? data.getClass()
@@ -141,19 +142,19 @@ public class FreemarkerTemplateRenderer implements TemplateRenderer {
 
         Map model = (Map) data;
         
-        String templateName = templateNameResolver.resolve(path);
+        String templateName = templateNameResolver.resolve(resourcePath,rc);
         
         if (templateName != null){
             try{
                 Template template = conf.getTemplate(templateName);
                 template.process(model, out);
             }catch(Exception e){
-                logger.error("Error while rendering freemarker template " + path + " (" + templateName + ") because " + e.getMessage());
+                logger.error("Error while rendering freemarker template " + resourcePath + " (" + templateName + ") because " + e.getMessage());
                 e.printStackTrace();
             }
         }else{
             // DO nothing, if we are here, the flag ignoreTemplateNotFound was set to true, so, it is expected to silently ignore.
-            logger.error("Template not found for path: " + path + " (" + templateName + ")");
+            logger.error("Template not found for path: " + resourcePath + " (" + templateName + ")");
             // TODO: need to decide a strategy here. 
         }
     }

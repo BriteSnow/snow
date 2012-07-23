@@ -16,8 +16,10 @@ import com.britesnow.snow.web.handler.annotation.WebResourceHandler;
 import com.britesnow.snow.web.handler.annotation.WebTemplateDirectiveHandler;
 import com.britesnow.snow.web.param.resolver.annotation.WebParamResolver;
 import com.britesnow.snow.web.path.DefaultFramePathsResolver;
+import com.britesnow.snow.web.path.DefaultResourceFileResolver;
 import com.britesnow.snow.web.path.DefaultResourcePathResolver;
 import com.britesnow.snow.web.path.FramePathsResolver;
+import com.britesnow.snow.web.path.ResourceFileResolver;
 import com.britesnow.snow.web.path.ResourcePathResolver;
 import com.britesnow.snow.web.renderer.JsonLibJsonRenderer;
 import com.britesnow.snow.web.renderer.JsonRenderer;
@@ -40,7 +42,10 @@ public class DefaultApplicationModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(FramePathsResolver.class).to(DefaultFramePathsResolver.class);
+        
         bind(ResourcePathResolver.class).to(DefaultResourcePathResolver.class);
+        bind(ResourceFileResolver.class).to(DefaultResourceFileResolver.class);
+        
         bind(JsonRenderer.class).to(JsonLibJsonRenderer.class);
 
         if (applicationPackageBase != null) {

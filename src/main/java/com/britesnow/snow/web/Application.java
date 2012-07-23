@@ -108,7 +108,7 @@ public class Application {
             path = getTemplatePath(path);
         }
 
-        freemarkerRenderer.render(path, templateModel, rc.getWriter());
+        freemarkerRenderer.render(path, templateModel, rc.getWriter(),rc);
     }
 
     public void processWebActionResponseJson(RequestContext rc) {

@@ -2,6 +2,11 @@ package com.britesnow.snow.test.app.simpleapp.dao;
 
 public class DaoException extends RuntimeException {
     
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -8102985585954767305L;
+
     public enum Error{
         ENTITY_NOT_FOUND;
     }

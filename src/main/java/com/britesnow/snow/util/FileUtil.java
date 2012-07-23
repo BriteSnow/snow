@@ -125,6 +125,7 @@ public class FileUtil {
 			pw.flush();
 		} finally {
 			sr.close();
+			out.close();
 			try {
 				pw.close();
 			} catch (Exception e) {

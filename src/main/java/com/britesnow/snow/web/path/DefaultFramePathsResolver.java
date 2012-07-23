@@ -14,7 +14,7 @@ public class DefaultFramePathsResolver implements FramePathsResolver {
     static final private String   FRAME_NAME          = "_frame";
 
     @Inject
-    private PathFileResolver      pathFileResolver;
+    private ResourceFileResolver      pathFileResolver;
 
     @Override
     public String[] resolve(RequestContext rc) {
@@ -34,7 +34,7 @@ public class DefaultFramePathsResolver implements FramePathsResolver {
             }
             
             // TODO: need to change this harcoded ".ftl" when we support multi template types
-            if (pathFileResolver.resolve(framePath + ".ftl").exists()){
+            if (pathFileResolver.resolve(framePath + ".ftl",rc).exists()){
                 framePaths.add(framePath);
             }
         }

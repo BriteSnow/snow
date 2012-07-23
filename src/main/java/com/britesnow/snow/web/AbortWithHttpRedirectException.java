@@ -4,6 +4,8 @@ import javax.servlet.http.HttpServletResponse;
 
 public class AbortWithHttpRedirectException extends RuntimeException {
 
+    private static final long serialVersionUID = 4403962118229585702L;
+    
     private String location;
     private int redirectCode;
 

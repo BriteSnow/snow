@@ -32,7 +32,7 @@ import com.britesnow.snow.web.handler.WebHandlerContext;
 import com.britesnow.snow.web.handler.WebHandlerException;
 import com.britesnow.snow.web.less.LessProcessor;
 import com.britesnow.snow.web.path.FramePathsResolver;
-import com.britesnow.snow.web.path.PathFileResolver;
+import com.britesnow.snow.web.path.ResourceFileResolver;
 import com.britesnow.snow.web.path.ResourcePathResolver;
 import com.britesnow.snow.web.renderer.WebBundleManager;
 import com.google.common.base.Throwables;
@@ -79,7 +79,7 @@ public class WebController {
     private ResourcePathResolver            resourcePathResolver;
 
     @Inject
-    private PathFileResolver                pathFileResolver;
+    private ResourceFileResolver                pathFileResolver;
 
     private ThreadLocal<RequestContext>     requestContextTl              = new ThreadLocal<RequestContext>();
 
@@ -144,7 +144,7 @@ public class WebController {
             HttpServletRequest request = rc.getReq();
 
             // get the request resourcePath
-            String resourcePath = resourcePathResolver.resolve(rc,rc.getPathInfo());
+            String resourcePath = resourcePathResolver.resolve(rc.getPathInfo(),rc);
 
             // --------- Resolve the ResponseType --------- //
             // determine the requestType
@@ -406,7 +406,7 @@ public class WebController {
         // --------- Process the .less file --------- //
         String lessFilePath = resourcePath.substring(0, resourcePath.length() - 4);
 
-        File lessFile = pathFileResolver.resolve(lessFilePath);
+        File lessFile = pathFileResolver.resolve(lessFilePath,rc);
         if (!lessFile.exists()) {
             throw new AbortWithHttpStatusException(HttpStatus.NOT_FOUND, "File " + lessFilePath + " not found");
         }
@@ -443,7 +443,7 @@ public class WebController {
 
     private void serviceFile(RequestContext rc) {
         String resourcePath = rc.getResourcePath();
-        File resourceFile = pathFileResolver.resolve(resourcePath);
+        File resourceFile = pathFileResolver.resolve(resourcePath,rc);
         if (resourceFile.exists()) {
             boolean isCachable = isCachable(resourcePath);
             httpWriter.writeFile(rc, resourceFile, isCachable, null);

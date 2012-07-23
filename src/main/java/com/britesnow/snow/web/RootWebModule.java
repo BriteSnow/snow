@@ -17,10 +17,8 @@ import com.google.inject.Provides;
  * Provide the following: 
  * 
  * - ServletContext
- * - @WebAppFolder
- * - @AppFolder
- * - CurenteRequestContextHolder
- * - Current
+ * - CurrentRequestContextHolder
+ * - CurrentRequestContext
  * 
  * @author jeremychone
  *

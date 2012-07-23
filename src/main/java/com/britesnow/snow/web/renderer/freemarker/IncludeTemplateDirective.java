@@ -40,9 +40,9 @@ public class IncludeTemplateDirective extends IncludeTemplateBase implements Tem
         String path = getParam(args,"name",String.class); 
         RequestContext rc = getDataModel("_r.rc", RequestContext.class);
         
-        path = resourcePathResolver.resolve(rc, path);
+        String resourcePath = resourcePathResolver.resolve(path, rc);
         
-        String templateName = templateNameResolver.resolve(path);
+        String templateName = templateNameResolver.resolve(resourcePath,rc);
         
         includeTemplate(rc,templateName,env);
         

@@ -74,6 +74,8 @@ public class AuthToken<T> {
                 case admin:
                     groupNames.put("admin", "admin");
                     break;
+                default:
+                    break;
 
             }
         }
