@@ -391,7 +391,7 @@ public class WebController {
         String resourcePath = rc.getResourcePath();
 
         String href = new StringBuilder(contextPath).append(resourcePath).toString();
-        String content = webBundleManager.getContent(resourcePath);
+        String content = webBundleManager.getContent(resourcePath, rc);
         StringReader reader = new StringReader(content);
         httpWriter.writeStringContent(rc, href, reader, true, null);
     }

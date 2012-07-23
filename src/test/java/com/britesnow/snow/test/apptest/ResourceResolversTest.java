@@ -32,7 +32,7 @@ public class ResourceResolversTest extends SnowTestSupport {
         });
     }
 
-    @Test
+    //@Test
     public void testResourceFileResolver() throws Exception {
         String result;
         RequestContextMock rc;
@@ -44,6 +44,18 @@ public class ResourceResolversTest extends SnowTestSupport {
         System.out.println(result);
         assertEquals("---!!!notes/_frame!!!This is the notes/index.ftl page!!!/notes/_frame!!!---", result);
     }
+    
+    @Test
+    public void testJsWebBundleResult() throws Exception{
+        String result;
+        RequestContextMock rc;        
+        
+        // test the get on a _web_bundle_all__.... request.
+        rc = requestContextFactory.createRequestContext(RequestMethod.GET, IGNORE_PREFIX + "/js/_web_bundle_all__anykey__.js");
+        webController.service(rc);
+        result = rc.getResponseAsString();
+        assertContains(new String[]{"var js1","var js2"},result);
+    }    
 
 }
 
@@ -57,6 +69,7 @@ class CustomResourceFileResolver implements ResourceFileResolver {
         // incase there is teh ignore this prefix, remove it (note that sometime we will have // in the resourcePath,
         // but this works)
         resourcePath = resourcePath.replace(ResourceResolversTest.IGNORE_PREFIX, "");
+        System.out.println("new resourcePath: " + resourcePath);
         return new File(webAppFolder, resourcePath);
     }
 
