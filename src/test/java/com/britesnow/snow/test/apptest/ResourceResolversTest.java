@@ -32,16 +32,15 @@ public class ResourceResolversTest extends SnowTestSupport {
         });
     }
 
-    //@Test
+    @Test
     public void testResourceFileResolver() throws Exception {
         String result;
         RequestContextMock rc;
 
-        // test with the /contact path
+        // test 
         rc = requestContextFactory.createRequestContext(RequestMethod.GET, IGNORE_PREFIX + "/notes/index");
         webController.service(rc);
         result = rc.getResponseAsString();
-        System.out.println(result);
         assertEquals("---!!!notes/_frame!!!This is the notes/index.ftl page!!!/notes/_frame!!!---", result);
     }
     
@@ -69,7 +68,6 @@ class CustomResourceFileResolver implements ResourceFileResolver {
         // incase there is teh ignore this prefix, remove it (note that sometime we will have // in the resourcePath,
         // but this works)
         resourcePath = resourcePath.replace(ResourceResolversTest.IGNORE_PREFIX, "");
-        System.out.println("new resourcePath: " + resourcePath);
         return new File(webAppFolder, resourcePath);
     }
 

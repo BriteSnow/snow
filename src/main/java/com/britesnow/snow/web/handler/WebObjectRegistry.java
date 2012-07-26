@@ -12,64 +12,69 @@ import javax.annotation.Nullable;
 import com.britesnow.snow.web.binding.WebObjects;
 import com.britesnow.snow.web.exception.WebExceptionCatcherRef;
 import com.britesnow.snow.web.exception.annotation.WebExceptionCatcher;
+import com.britesnow.snow.web.handler.annotation.FreemarkerMethodHandler;
 import com.britesnow.snow.web.handler.annotation.WebActionHandler;
 import com.britesnow.snow.web.handler.annotation.WebModelHandler;
 import com.britesnow.snow.web.handler.annotation.WebResourceHandler;
-import com.britesnow.snow.web.handler.annotation.WebTemplateDirectiveHandler;
+import com.britesnow.snow.web.handler.annotation.FreemarkerDirectiveHandler;
 import com.britesnow.snow.web.param.resolver.WebParamResolverRef;
 import com.britesnow.snow.web.param.resolver.WebParamResolverRegistry;
-import com.britesnow.snow.web.renderer.freemarker.TemplateDirectiveProxy;
+import com.britesnow.snow.web.renderer.freemarker.FreemarkerDirectiveProxy;
+import com.britesnow.snow.web.renderer.freemarker.FreemarkerMethodProxy;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-
 @Singleton
 public class WebObjectRegistry {
-    
-    private String[]                         leafPaths;
-    
-    private Map<String, WebModelHandlerRef>  webModelHandlerByStartsWithMap = new HashMap<String, WebModelHandlerRef>();
-    private List<WebModelHandlerRef>         webModelHandlerRefList         = new ArrayList<WebModelHandlerRef>();
-    private Map<String, WebActionHandlerRef> webActionHandlerDic            = new HashMap<String, WebActionHandlerRef>();
-    private List<WebResourceHandlerRef>      webResourceHandlerList         = new ArrayList<WebResourceHandlerRef>();
-    private List<TemplateDirectiveProxy>     templateDirectiveProxyList     = new ArrayList<TemplateDirectiveProxy>();
-    private Map<Class<? extends Throwable>, WebExceptionCatcherRef> webExceptionCatcherMap      = new HashMap<Class<? extends Throwable>, WebExceptionCatcherRef>();
-    
+
+    private String[]                                                leafPaths;
+
+    private Map<String, WebModelHandlerRef>                         webModelHandlerByStartsWithMap = new HashMap<String, WebModelHandlerRef>();
+    private List<WebModelHandlerRef>                                webModelHandlerRefList         = new ArrayList<WebModelHandlerRef>();
+    private Map<String, WebActionHandlerRef>                        webActionHandlerDic            = new HashMap<String, WebActionHandlerRef>();
+    private List<WebResourceHandlerRef>                             webResourceHandlerList         = new ArrayList<WebResourceHandlerRef>();
+    private List<FreemarkerDirectiveProxy>                          freemarkerDirectiveProxyList   = new ArrayList<FreemarkerDirectiveProxy>();
+    private List<FreemarkerMethodProxy>                             freemarkerMethodProxyList      = new ArrayList<FreemarkerMethodProxy>();
+    private Map<Class<? extends Throwable>, WebExceptionCatcherRef> webExceptionCatcherMap         = new HashMap<Class<? extends Throwable>, WebExceptionCatcherRef>();
+
     @Inject
-    private WebParamResolverRegistry webParamResolverRegistry;
-    
+    private WebParamResolverRegistry                                webParamResolverRegistry;
+
     @Inject(optional = true)
     @Nullable
     @WebObjects
-    private Object[]                       webObjects;    
+    private Object[]                                                webObjects;
+    
+
+
     
     /**
      * Must be called before calling registerWebHandlers.<br />
      * Must be called before at application init time (not thread safe). <br />
      */
-    public void init(){
+    public void init() {
         webParamResolverRegistry.init();
-        
-        if (webObjects != null){
-            for (Object webObject : webObjects){
+
+        if (webObjects != null) {
+            for (Object webObject : webObjects) {
                 registerWebObject(webObject);
             }
         }
     }
-    
-    
-    private void registerWebObject(Object webHandler){
+
+    private void registerWebObject(Object webHandler) {
         registerWebHandlerMethods(webHandler);
     }
-    
+
     /**
-     * Get the leafPaths (probably 
+     * Get the leafPaths (probably
+     * 
      * @return
      */
-    public String[] getLeafPaths(){
+    public String[] getLeafPaths() {
         return leafPaths;
     }
-    
+
     public WebActionHandlerRef getWebActionHandlerRef(String actionName) {
         return webActionHandlerDic.get(actionName);
     }
@@ -100,33 +105,54 @@ public class WebObjectRegistry {
         }
         return null;
     }
+
+    /**
+     * Do not call. Internal to Snow.
+     * 
+     * (used by the FreemarkerTemplateRenderer)
+     * 
+     * @return
+     */
+    public List<FreemarkerDirectiveProxy> getFreemarkerDirectiveProxyList() {
+        return freemarkerDirectiveProxyList;
+    }
     
-    public WebExceptionCatcherRef getWebExceptionCatcherRef(Class<? extends Throwable> exceptionClass){
+    /**
+     * Do not call. Internal to Snow. 
+     * 
+     * @param exceptionClass
+     * @return
+     */
+    public List<FreemarkerMethodProxy> getFreemarkerMethodProxyList(){
+        return freemarkerMethodProxyList;
+    }
+
+    public WebExceptionCatcherRef getWebExceptionCatcherRef(Class<? extends Throwable> exceptionClass) {
         WebExceptionCatcherRef ref = null;
 
-        // if there is a direct match, return it. 
+        // if there is a direct match, return it.
         ref = webExceptionCatcherMap.get(exceptionClass);
         if (ref != null) {
             return ref;
         }
-        
+
         Class cls = exceptionClass.getSuperclass();
-        
-        while (cls != Object.class){
+
+        while (cls != Object.class) {
             ref = webExceptionCatcherMap.get(cls);
-            if (ref != null){
+            if (ref != null) {
                 return ref;
             }
             cls = cls.getSuperclass();
         }
-        
-        return null;        
+
+        return null;
     }
-    
+
     // --------- Private Registration Methods (call at init() time) --------- //
     private final void registerWebHandlerMethods(Object targetObject) {
-        
-        Class c =  getNonGuiceEnhancedClass(targetObject);
+
+        Class c = getNonGuiceEnhancedClass(targetObject);
 
         Method methods[] = c.getMethods();
         List<String> additionalLeafPaths = new ArrayList<String>();
@@ -144,7 +170,7 @@ public class WebObjectRegistry {
             // --------- Register WebModelHandler --------- //
             WebModelHandler webModelHandlerAnnotation = m.getAnnotation(WebModelHandler.class);
             if (webModelHandlerAnnotation != null) {
-                
+
                 registerWebModel(targetObject, m, webModelHandlerAnnotation);
 
                 // if this is for a leaf path, grab the startWith values from the
@@ -171,20 +197,25 @@ public class WebObjectRegistry {
             }
             // --------- /Register WebResourceHandler --------- //
 
-            // --------- Register Web Template Directive --------- //
-            WebTemplateDirectiveHandler webTemplateDirective = m.getAnnotation(WebTemplateDirectiveHandler.class);
+            // --------- Freemarker handlers --------- //
+            FreemarkerDirectiveHandler webTemplateDirective = m.getAnnotation(FreemarkerDirectiveHandler.class);
             if (webTemplateDirective != null) {
-                registerWebTemplateDirective(targetObject, m, webTemplateDirective);
+                registerFreemarkerDirective(targetObject, m, webTemplateDirective);
             }
-            // --------- /Register Web Template Directive --------- //
             
+            FreemarkerMethodHandler freemarkerMethodHandler = m.getAnnotation(FreemarkerMethodHandler.class);
+            if (freemarkerMethodHandler != null){
+                registerFreemarkerMethod(targetObject, m, freemarkerMethodHandler);
+            }
+            // --------- /Freemarker handlers --------- //
+
             // --------- Register WebException --------- //
             WebExceptionCatcher webExceptionHandler = m.getAnnotation(WebExceptionCatcher.class);
             if (webExceptionHandler != null) {
                 registerWebExceptionCatcher(targetObject, m, webExceptionHandler);
             }
             // --------- /Register WebException --------- //
-            
+
         }
 
         // if we have any declared leaf paths, add them into the array. they come after
@@ -200,7 +231,7 @@ public class WebObjectRegistry {
 
     private final void registerWebModel(Object webHandler, Method m, WebModelHandler webModel) {
         WebParamResolverRef webParamResolverRefs[] = buildWebParamResolverRefs(m);
-        WebModelHandlerRef webModelRef = new WebModelHandlerRef(webHandler, m, webParamResolverRefs,webModel);
+        WebModelHandlerRef webModelRef = new WebModelHandlerRef(webHandler, m, webParamResolverRefs, webModel);
         webModelHandlerRefList.add(webModelRef);
 
         String startWithArray[] = webModel.startsWith();
@@ -228,7 +259,7 @@ public class WebObjectRegistry {
         // if not found, create an empty list
         // add this object and method to the list
         WebParamResolverRef webParamResolverRefs[] = buildWebParamResolverRefs(m);
-        webActionHandlerDic.put(actionName, new WebActionHandlerRef(webHandler, m,webParamResolverRefs, webAction));
+        webActionHandlerDic.put(actionName, new WebActionHandlerRef(webHandler, m, webParamResolverRefs, webAction));
     }
 
     private final void registerWebResourceHandler(Object webHandler, Method m, WebResourceHandler webResourceHandler) {
@@ -237,48 +268,58 @@ public class WebObjectRegistry {
         webResourceHandlerList.add(webFileRef);
     }
 
-    private final void registerWebTemplateDirective(Object webHandler, Method m,
-                            WebTemplateDirectiveHandler webTemplateDirective) {
-        String templateMethodName = webTemplateDirective.name();
+    private final void registerFreemarkerDirective(Object webHandler, Method m,
+                            FreemarkerDirectiveHandler freemarkerDirectiveHandler) {
+        String templateMethodName = freemarkerDirectiveHandler.name();
         // if the action does have an empty name, then, take the name of the
         // method
         if (templateMethodName.length() == 0) {
             templateMethodName = m.getName();
         }
-        
+
         WebParamResolverRef webParamResolverRefs[] = buildWebParamResolverRefs(m);
-        WebTemplateDirectiveHandlerRef directiveRef = new WebTemplateDirectiveHandlerRef(webHandler, m,webParamResolverRefs,webTemplateDirective);
-        TemplateDirectiveProxy directiveProxy = new TemplateDirectiveProxy(templateMethodName, directiveRef);
-        templateDirectiveProxyList.add(directiveProxy);
+        FreemakerDirectiveHandlerRef directiveRef = new FreemakerDirectiveHandlerRef(webHandler, m, webParamResolverRefs, freemarkerDirectiveHandler);
+        FreemarkerDirectiveProxy directiveProxy = new FreemarkerDirectiveProxy(templateMethodName, directiveRef);
+        freemarkerDirectiveProxyList.add(directiveProxy);
     }
     
+    private final void registerFreemarkerMethod(Object webHandler, Method m, FreemarkerMethodHandler freemarkerMethodHandler){
+        String name = freemarkerMethodHandler.name();
+        if (name.length() == 0){
+            name = m.getName();
+        }
+        WebParamResolverRef webParamResolverRefs[] = buildWebParamResolverRefs(m);
+        FreemarkerMethodHandlerRef ref = new FreemarkerMethodHandlerRef(webHandler,m, webParamResolverRefs,freemarkerMethodHandler);
+        FreemarkerMethodProxy proxy = new FreemarkerMethodProxy(name,ref);
+        freemarkerMethodProxyList.add(proxy);
+        
+    }
+
     private final void registerWebExceptionCatcher(Object webHandler, Method m, WebExceptionCatcher webExceptionHandler) {
         WebExceptionCatcherRef webExcpetionCatcherRef = new WebExceptionCatcherRef(webHandler, m, webExceptionHandler);
         webExceptionCatcherMap.put(webExcpetionCatcherRef.getThrowableClass(), webExcpetionCatcherRef);
     }
 
     // --------- /Private Registration Methods (call at init() time) --------- //
-    
-    private WebParamResolverRef[] buildWebParamResolverRefs(Method webHandlerMethod){
+
+    private WebParamResolverRef[] buildWebParamResolverRefs(Method webHandlerMethod) {
         Class[] paramTypes = webHandlerMethod.getParameterTypes();
         WebParamResolverRef[] webParamResolverRefs = new WebParamResolverRef[paramTypes.length];
-        
-        for (int i = 0; i < paramTypes.length; i++){
+
+        for (int i = 0; i < paramTypes.length; i++) {
             webParamResolverRefs[i] = webParamResolverRegistry.getWebParamResolverRef(webHandlerMethod, i);
         }
-        
+
         return webParamResolverRefs;
     }
-    
-    
-    
-    public static Class getNonGuiceEnhancedClass(Object obj){
+
+    public static Class getNonGuiceEnhancedClass(Object obj) {
         String className = obj.getClass().getName();
-        if (className.indexOf("$$EnhancerByGuice$$") > -1){
+        if (className.indexOf("$$EnhancerByGuice$$") > -1) {
             return obj.getClass().getSuperclass();
-        }else{
+        } else {
             return obj.getClass();
         }
     }
-    
+
 }

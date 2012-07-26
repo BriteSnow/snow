@@ -56,22 +56,25 @@ public class Application {
     // --------- LifeCycle --------- //
     public void init() {
         if (!initialized) {
+            try {
+                // initialize the hibernateSessionFactoryBuilder
+                if (hibernateSessionFactoryBuilder != null && hibernateSessionFactoryBuilder instanceof Initializable) {
+                    ((Initializable) hibernateSessionFactoryBuilder).init();
+                }
 
-            // initialize the hibernateSessionFactoryBuilder
-            if (hibernateSessionFactoryBuilder != null && hibernateSessionFactoryBuilder instanceof Initializable) {
-                ((Initializable) hibernateSessionFactoryBuilder).init();
+                webObjectRegistry.init();
+
+                // initialize freemarker
+                freemarkerRenderer.init();
+
+                // initialize the webApplicationLifeCycle if present
+                if (webApplicationLifeCycle != null) {
+                    webApplicationLifeCycle.init();
+                }
+            } catch (Throwable e) {
+                logger.error("Snow - Application init failed: " + e.getMessage());
+                e.printStackTrace();
             }
-
-            webObjectRegistry.init();
-
-            // initialize freemarker
-            freemarkerRenderer.init();
-
-            // initialize the webApplicationLifeCycle if present
-            if (webApplicationLifeCycle != null) {
-                webApplicationLifeCycle.init();
-            }
-
             initialized = false;
 
         } else {
@@ -108,7 +111,7 @@ public class Application {
             path = getTemplatePath(path);
         }
 
-        freemarkerRenderer.render(path, templateModel, rc.getWriter(),rc);
+        freemarkerRenderer.render(path, templateModel, rc.getWriter(), rc);
     }
 
     public void processWebActionResponseJson(RequestContext rc) {

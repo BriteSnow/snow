@@ -14,7 +14,7 @@ import com.google.inject.Singleton;
 
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModelException;
-import static com.britesnow.snow.web.renderer.freemarker.FreemarkerUtil.getParam;
+import static com.britesnow.snow.web.renderer.freemarker.FreemarkerUtil.getParamAs;
 
 @Singleton
 public class HrefPartTemplateMethod implements TemplateMethodModelEx {
@@ -27,7 +27,7 @@ public class HrefPartTemplateMethod implements TemplateMethodModelEx {
     @Override
     public Object exec(List args) throws TemplateModelException {
 
-        String path = getParam(args.get(0),String.class);
+        String path = getParamAs(args.get(0),String.class);
         
         RequestContext rc = currentRCHolder.getCurrentRequestContext();
         

@@ -30,18 +30,18 @@ public class PathInfoMatcherTemplateMethod implements TemplateMethodModelEx {
         RequestContext rc = FreemarkerUtil.getDataModel("_r.rc",RequestContext.class);
         String resourcePath = rc.getResourcePath();
         
-        String pathInfoMatch = FreemarkerUtil.getParam(args.get(0),String.class);
+        String pathInfoMatch = FreemarkerUtil.getParamAs(args.get(0),String.class);
         
         /*--------- Get the eventual true/false values ---------*/
         String trueValue = null;
         String falseValue = null;
         if (args.size() > 1){
-            trueValue = FreemarkerUtil.getParam(args.get(1),String.class);
+            trueValue = FreemarkerUtil.getParamAs(args.get(1),String.class);
             falseValue = ""; //by default the false value will be empty
         }
         
         if (args.size() > 2){
-            falseValue = FreemarkerUtil.getParam(args.get(2),String.class);
+            falseValue = FreemarkerUtil.getParamAs(args.get(2),String.class);
         }
         /*--------- /Get the eventual true/false values ---------*/
         

@@ -8,21 +8,31 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.britesnow.snow.web.binding.WebObjects;
 import com.britesnow.snow.web.handler.WebObjectRegistry;
 import com.britesnow.snow.web.param.annotation.WebParam;
 import com.britesnow.snow.web.param.resolver.annotation.WebParamResolver;
+import com.britesnow.snow.web.renderer.freemarker.FreemarkerParamResolvers;
 import com.google.inject.Inject;
 
 @Singleton
 public class WebParamResolverRegistry {
 
+    static private final Logger logger = LoggerFactory.getLogger(WebParamResolverRegistry.class);
+    
     private Map<Class, WebParamResolverRef> refByReturnType = new HashMap<Class, WebParamResolverRef>();
     // for now, just support one annotation (ignore the WebParam)
     private Map<Class, WebParamResolverRef> refByAnnotation = new HashMap<Class, WebParamResolverRef>();
 
     @Inject
     private SystemWebParamResolvers systemWebParamResolvers;
+    
+    @Inject
+    private FreemarkerParamResolvers freemarkerParamResolvers;
+    
     
     @Inject(optional = true)
     @Nullable
@@ -36,6 +46,8 @@ public class WebParamResolverRegistry {
     public void init(){
         // first register the SystemWebParamResolvers
         registerWebParamResolvers(systemWebParamResolvers);
+        
+        registerWebParamResolvers(freemarkerParamResolvers);
         
         // then, register the applicaiton WebParamResolvers
         if (webObjects != null){
@@ -106,8 +118,9 @@ public class WebParamResolverRegistry {
         // if still null, then, check the parent classes
         if (ref == null){
             Class parentClass = paramType.getSuperclass();
-            while (ref == null && parentClass != Object.class){
+            while (parentClass != null && ref == null && parentClass != Object.class){
                 ref = refByReturnType.get(parentClass);
+                parentClass = parentClass.getSuperclass();
             }
         }
         
@@ -119,6 +132,12 @@ public class WebParamResolverRegistry {
                     break;
                 }
             }
+        }
+        
+        if (ref == null){
+            logger.error("Snow Fatal Error: No Param Resolver found for param type '" + paramType.getCanonicalName() + 
+                "' or annotation '" + paramAnnotation.toString() + "' in the method '" + webHandlerMethod.getName() + "' of the class '" + webHandlerMethod.getDeclaringClass().getName() +
+                "'. Make sure to have the appropriate @ParamResolver for the param type or associated annotations");
         }
         
         return ref;

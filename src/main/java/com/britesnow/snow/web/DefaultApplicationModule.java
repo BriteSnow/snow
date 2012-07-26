@@ -10,10 +10,11 @@ import com.britesnow.snow.web.binding.ApplicationPackageBase;
 import com.britesnow.snow.web.binding.WebClasses;
 import com.britesnow.snow.web.binding.WebObjects;
 import com.britesnow.snow.web.exception.annotation.WebExceptionCatcher;
+import com.britesnow.snow.web.handler.annotation.FreemarkerMethodHandler;
 import com.britesnow.snow.web.handler.annotation.WebActionHandler;
 import com.britesnow.snow.web.handler.annotation.WebModelHandler;
 import com.britesnow.snow.web.handler.annotation.WebResourceHandler;
-import com.britesnow.snow.web.handler.annotation.WebTemplateDirectiveHandler;
+import com.britesnow.snow.web.handler.annotation.FreemarkerDirectiveHandler;
 import com.britesnow.snow.web.param.resolver.annotation.WebParamResolver;
 import com.britesnow.snow.web.path.DefaultFramePathsResolver;
 import com.britesnow.snow.web.path.DefaultResourceFileResolver;
@@ -87,9 +88,10 @@ public class DefaultApplicationModule extends AbstractModule {
 
                         if (method.getAnnotation(WebActionHandler.class) != null || method.getAnnotation(WebResourceHandler.class) != null
                                                 || method.getAnnotation(WebModelHandler.class) != null
-                                                || method.getAnnotation(WebTemplateDirectiveHandler.class) != null
+                                                || method.getAnnotation(FreemarkerDirectiveHandler.class) != null
                                                 || method.getAnnotation(WebParamResolver.class) != null
-                                                || method.getAnnotation(WebExceptionCatcher.class) != null) {
+                                                || method.getAnnotation(WebExceptionCatcher.class) != null
+                                                || method.getAnnotation(FreemarkerMethodHandler.class) != null) {
                             return true;
                         }
                     }

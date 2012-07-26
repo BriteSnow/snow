@@ -3,7 +3,7 @@
  */
 package com.britesnow.snow.web.renderer.freemarker;
 
-import static com.britesnow.snow.web.renderer.freemarker.FreemarkerUtil.getParam;
+import static com.britesnow.snow.web.renderer.freemarker.FreemarkerUtil.getParamAs;
 
 import java.util.List;
 
@@ -18,8 +18,8 @@ public class MaxTemplateMethod implements TemplateMethodModelEx {
     @Override
     public Object exec(List args) throws TemplateModelException {
         
-        String content = getParam(args.get(0),String.class);
-        Integer max = getParam(args.get(1),Integer.class);
+        String content = getParamAs(args.get(0),String.class);
+        Integer max = getParamAs(args.get(1),Integer.class);
         
         if (content.length() < max){
             return content;

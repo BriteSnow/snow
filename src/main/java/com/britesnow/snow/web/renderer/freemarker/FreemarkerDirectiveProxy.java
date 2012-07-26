@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.britesnow.snow.web.RequestContext;
-import com.britesnow.snow.web.handler.WebTemplateDirectiveHandlerRef;
+import com.britesnow.snow.web.handler.FreemakerDirectiveHandlerRef;
 
 import freemarker.core.Environment;
 import freemarker.template.TemplateDirectiveBody;
@@ -20,17 +20,17 @@ import freemarker.template.TemplateDirectiveModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 
-public class TemplateDirectiveProxy implements TemplateDirectiveModel {
-    static private Logger logger = LoggerFactory.getLogger(TemplateDirectiveProxy.class);
+public class FreemarkerDirectiveProxy implements TemplateDirectiveModel {
+    static private Logger logger = LoggerFactory.getLogger(FreemarkerDirectiveProxy.class);
     
     static final String FREEMARKER_DIRECTIVE_CONTEXT = "freemarkerDirectiveContext";
     
     private String name;
-    private WebTemplateDirectiveHandlerRef webTemplateDirectiveRef;
+    private FreemakerDirectiveHandlerRef freemarkerDirectiveRef;
     
-    public TemplateDirectiveProxy(String name,WebTemplateDirectiveHandlerRef webTemplateDirectiveRef){
+    public FreemarkerDirectiveProxy(String name,FreemakerDirectiveHandlerRef webTemplateDirectiveRef){
         this.name = name;
-        this.webTemplateDirectiveRef = webTemplateDirectiveRef;
+        this.freemarkerDirectiveRef = webTemplateDirectiveRef;
     }
 
     public String getName(){
@@ -39,10 +39,11 @@ public class TemplateDirectiveProxy implements TemplateDirectiveModel {
     
     public void execute(Environment env, Map paramMap, TemplateModel[] model, TemplateDirectiveBody body) throws TemplateException,
                             IOException {
-        RequestContext rc = getDataModel("r.rc", RequestContext.class);
+        
+        RequestContext rc = getDataModel("_r.rc", RequestContext.class);
         try {
             rc.setAttribute(FREEMARKER_DIRECTIVE_CONTEXT, new FreemarkerDirectiveContext(env, paramMap));
-            webTemplateDirectiveRef.invoke(rc);
+            freemarkerDirectiveRef.invoke(rc);
         } catch (Exception e) {
             logger.error(e.getMessage());
         }finally{

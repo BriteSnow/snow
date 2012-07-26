@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import com.britesnow.snow.web.RequestContext;
 import com.britesnow.snow.web.binding.WebAppFolder;
+import com.britesnow.snow.web.handler.WebObjectRegistry;
 import com.britesnow.snow.web.renderer.TemplateRenderer;
 import com.google.inject.Inject;
 
@@ -52,7 +53,10 @@ public class FreemarkerTemplateRenderer implements TemplateRenderer {
     @Inject
     private ParseJsonTemplateMethod parseJsonTemplateMethod;
     @Inject
-    private WebBundleDirective webBundleDirective;    
+    private WebBundleDirective webBundleDirective;
+    
+    @Inject
+    private WebObjectRegistry webObjectRegistry;
     
     public void init() {
         File rootFile = webAppFolder.getAbsoluteFile();
@@ -121,15 +125,14 @@ public class FreemarkerTemplateRenderer implements TemplateRenderer {
 
         conf.setSharedVariable("piStarts", new PathInfoMatcherTemplateMethod(PathInfoMatcherTemplateMethod.Mode.STARTS_WITH));
         
-        // TODO: need to set the templateDirectiveProxy
-        /*
-        for (WebModule module : webApplication.getWebModules()) {
-            for (TemplateDirectiveProxy directiveProxy : module.getTemplateDirectiveProxyList()) {
-                conf.setSharedVariable(directiveProxy.getName(), directiveProxy);
-            }
-        }  
-        */      
+        // register the application FreemarkerDirectiveHandler (they are wrapped in a Proxy)
+        for (FreemarkerDirectiveProxy directiveProxy: webObjectRegistry.getFreemarkerDirectiveProxyList()){
+            conf.setSharedVariable(directiveProxy.getName(), directiveProxy);
+        }
         
+        for (FreemarkerMethodProxy methodProxy: webObjectRegistry.getFreemarkerMethodProxyList()){
+            conf.setSharedVariable(methodProxy.getName(), methodProxy);
+        }
     }
 
     @Override

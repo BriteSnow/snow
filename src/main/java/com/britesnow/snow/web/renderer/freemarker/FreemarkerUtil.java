@@ -37,7 +37,7 @@ public class FreemarkerUtil {
             tmpObj = null;
         }
 
-        return getParam(tmpObj, c);
+        return getParamAs(tmpObj, c);
     }
 
     /**
@@ -59,11 +59,11 @@ public class FreemarkerUtil {
 
         Object value = params.get(name);
 
-        return getParam(value, c);
+        return getParamAs(value, c);
     }
 
     @SuppressWarnings("unchecked")
-    static public <C> C getParam(Object value, Class<C> c) {
+    static public <C> C getParamAs(Object value, Class<C> c) {
         try {
             if (value instanceof SimpleScalar) {
                 return (C) value.toString();
@@ -83,6 +83,26 @@ public class FreemarkerUtil {
             logger.error(e.getMessage());
         }
         return null;
+    }
+    
+    
+    static public Object getValue(Object freemarkerValue){
+        Object value = null;
+        try {
+            if (freemarkerValue instanceof SimpleScalar) {
+                value = freemarkerValue.toString();
+            } else if (value instanceof BeanModel) {
+                value =  ((BeanModel) value).getWrappedObject();
+            } else if (value instanceof TemplateBooleanModel) {
+                value = new Boolean(((TemplateBooleanModel) value).getAsBoolean());
+            } else if (value instanceof SimpleNumber){
+                value = new Long(((SimpleNumber)value).getAsNumber().intValue());
+            }
+        } catch (TemplateModelException e) {
+            // TODO Auto-generated catch block
+            logger.error(e.getMessage());
+        }
+        return value;        
     }
 
 }
