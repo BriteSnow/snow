@@ -226,6 +226,7 @@ public class WebController {
             try {
                 t = findEventualInvocationTargetException(t);
 
+                // TODO: need to check if we still need this.
                 WebHandlerContext webHandlerContext = null;
                 if (t instanceof WebHandlerException) {
                     t = ((WebHandlerException) t).getCause();

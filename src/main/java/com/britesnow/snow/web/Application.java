@@ -120,13 +120,14 @@ public class Application {
         // quick hack for now.
         // Return raw result if no exception. otherwise, return WEbActionResponse
         WebActionResponse actionResponse = rc.getWebActionResponse();
-        if (actionResponse.getError() == null) {
+        if (actionResponse != null && actionResponse.getError() == null) {
             data = actionResponse.getResult();
-        } else {
+        } else if (actionResponse != null){
             data = actionResponse;
         }
-
-        jsonRenderer.render(data, rc.getWriter());
+        if (data != null){
+            jsonRenderer.render(data, rc.getWriter());
+        }
     }
 
     public void processJson(RequestContext rc) {
