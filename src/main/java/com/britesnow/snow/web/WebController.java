@@ -245,7 +245,7 @@ public class WebController {
                 boolean exceptionProcessed = application.processWebExceptionCatcher(t, webHandlerContext, rc);
 
                 if (!exceptionProcessed) {
-                    serviceRequestContext(responseType, rc);
+                    throw t;
                 }
 
             } catch (AbortWithHttpStatusException e) {
@@ -253,17 +253,9 @@ public class WebController {
             } catch (AbortWithHttpRedirectException e) {
                 sendHttpRedirect(rc, e);
             } catch (Throwable e) {
-                // and now we have to double-handle this one b/c it will be propagated as an InvocationTargetException
-                // when it's thrown from within a web handler.
-                if (e instanceof AbortWithHttpStatusException) {
-                    sendHttpError(rc, ((AbortWithHttpStatusException) e).getStatus(), e.getMessage());
-                } else if (e instanceof AbortWithHttpRedirectException) {
-                    sendHttpRedirect(rc, (AbortWithHttpRedirectException) e);
-                } else {
                     // and this is the normal case...
                     sendHttpError(rc, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
                     logger.error(getLogErrorString(e));
-                }
             }
 
         } finally {
