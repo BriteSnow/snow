@@ -205,18 +205,8 @@ public class WebController {
             if ("POST".equals(request.getMethod())) {
                 String actionName = resolveWebActionName(rc);
                 if (actionName != null) {
-                    WebActionResponse webActionResponse = null;
-                    try {
-                        webActionResponse = application.processWebAction(actionName, rc);
-
-                    } catch (Throwable e) {
-                        if (e instanceof InvocationTargetException) {
-                            e = e.getCause();
-                        }
-                        // TODO Need to handle exception
-                        logger.error(getLogErrorString(e));
-                        webActionResponse = new WebActionResponse(e);
-                    }
+                    WebActionResponse webActionResponse = null;                    
+                    webActionResponse = application.processWebAction(actionName, rc);
                     rc.setWebActionResponse(webActionResponse);
                 }
 
