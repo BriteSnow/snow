@@ -71,4 +71,18 @@ public class EmployeeWebHandlersTest extends SnowTestSupport{
         
     }
 
+@Test
+    public void testDaoExceptionPost() throws Exception{
+        Map result;
+        RequestContextMock rc;
+        
+        
+        rc = requestContextFactory.createRequestContext(RequestMethod.POST, "/_actionResponse.json");
+        rc.setParamMap(MapUtil.mapIt("action","addEmployee","firstName",null,"lastName",null));
+        webController.service(rc);
+        result = rc.getResponseAsJson();
+        System.out.println("RESULT is "+result);
+        assertEquals("From WebExceptionCatchers.catchDaoException: ENTITY_NOT_FOUND First Names Cannot be null",result);
+        
+    }
 }
