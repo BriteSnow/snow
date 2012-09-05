@@ -81,7 +81,8 @@ public class EmployeeWebHandlersTest extends SnowTestSupport{
         rc.setParamMap(MapUtil.mapIt("action","addEmployee","firstName",null,"lastName",null));
         webController.service(rc);
         result = rc.getResponseAsJson();
-        assertEquals("From WebExceptionCatchers.catchDaoException: ENTITY_NOT_FOUND Employee is null",result);
+        System.out.println("RESULT is "+result);
+        assertEquals("From WebExceptionCatchers.catchDaoException: ENTITY_NOT_FOUND First Names Cannot be null",result);
         
     }
 }
