@@ -21,7 +21,12 @@ public class EmployeeDao {
     }
     
     public Employee createNewEmployee(String firstName, String lastName){
+      if (firstName == null){
+            throw new DaoException(DaoException.Error.ENTITY_NOT_FOUND,"First Names Cannot be null");
+        }
+        
         Employee emp = new Employee();
+        
         emp.setId(idSeq);
         emp.setFirstName(firstName);
         emp.setLastName(lastName);
