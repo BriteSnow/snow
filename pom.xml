@@ -3,7 +3,7 @@
   
   <groupId>com.britesnow</groupId>
   <artifactId>snow</artifactId>
-  <version>1.9.9</version>
+  <version>1.9.9-SNAPSHOT</version>
   <name>snow</name>
   
   <packaging>jar</packaging>
