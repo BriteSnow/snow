@@ -6,7 +6,7 @@ import javax.inject.Singleton;
 
 import org.hibernate.Interceptor;
 import org.hibernate.SessionFactory;
-import org.hibernate.cfg.AnnotationConfiguration;
+import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.NamingStrategy;
 
 import com.britesnow.snow.SnowException;
@@ -36,7 +36,7 @@ public class DefaultHibernateSessionFactoryBuilder implements HibernateSessionFa
     @Override
     public void init() {
         
-        AnnotationConfiguration cfg = new AnnotationConfiguration();
+        Configuration cfg = new Configuration();
         for (Class cls : entityClasses) {
             cfg.addAnnotatedClass(cls);
         }

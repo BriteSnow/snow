@@ -12,6 +12,8 @@ import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.service.jdbc.connections.spi.ConnectionProvider;
 
 import com.britesnow.snow.web.db.hibernate.annotation.Transactional;
 import com.google.inject.Singleton;
@@ -304,7 +306,14 @@ public class HibernateDaoHelperImpl implements HibernateDaoHelper {
      */
     @SuppressWarnings("deprecation")
     public Connection getConnection() {
-        return getSession().connection();
+        try {
+            ConnectionProvider cp =((SessionFactoryImplementor)getSession().getSessionFactory()).getConnectionProvider();  
+            return cp.getConnection();    
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+          return null;
+//        return getSession().connection();
     }
 
 }

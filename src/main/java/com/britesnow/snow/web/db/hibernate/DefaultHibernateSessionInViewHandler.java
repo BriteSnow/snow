@@ -23,7 +23,7 @@ public class DefaultHibernateSessionInViewHandler implements HibernateSessionInV
     @Inject(optional=true)
     public void injectFlushMode(@Named("snow.hibernate.flushMode")String flushModeStr){
         if (flushModeStr != null) {
-            FlushMode flushMode = FlushMode.parse(flushModeStr.toUpperCase());
+            FlushMode flushMode = FlushMode.valueOf(flushModeStr.toUpperCase());
             if(flushMode != null) {
                 this.flushMode = flushMode;
             }
