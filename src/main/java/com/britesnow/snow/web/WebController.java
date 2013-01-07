@@ -236,6 +236,7 @@ public class WebController {
                 boolean exceptionProcessed = application.processWebExceptionCatcher(t, webHandlerContext, rc);
 
                 if (!exceptionProcessed) {
+                    logger.error("Error while processing request : " + rc.getPathInfo() + " because: " + t.getMessage(),t);
                     throw t;
                 }
 
