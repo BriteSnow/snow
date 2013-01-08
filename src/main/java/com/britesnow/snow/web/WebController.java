@@ -236,7 +236,6 @@ public class WebController {
                 boolean exceptionProcessed = application.processWebExceptionCatcher(t, webHandlerContext, rc);
 
                 if (!exceptionProcessed) {
-                    logger.error("Error while processing request : " + rc.getPathInfo() + " because: " + t.getMessage(),t);
                     throw t;
                 }
 
@@ -247,7 +246,7 @@ public class WebController {
             } catch (Throwable e) {
                     // and this is the normal case...
                     sendHttpError(rc, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
-                    logger.error(getLogErrorString(e));
+                    logger.error("Error while processing request : " + rc.getPathInfo() + " because: " + t.getMessage(),t);
             }
 
         } finally {
