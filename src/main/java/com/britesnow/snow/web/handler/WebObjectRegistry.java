@@ -44,8 +44,6 @@ public class WebObjectRegistry {
     @Nullable
     @WebObjects
     private Object[]                                                webObjects;
-    
-
 
     
     /**
@@ -54,14 +52,42 @@ public class WebObjectRegistry {
      */
     public void init() {
         webParamResolverRegistry.init();
-
+        
+        WebObjectValidationExceptions exs = new WebObjectValidationExceptions();
+        
         if (webObjects != null) {
             for (Object webObject : webObjects) {
-                registerWebObject(webObject);
+                try{
+                    validateWebObject(webObject);
+                    registerWebObject(webObject);
+                }catch (WebObjectValidationException ex){
+                    exs.addWebException(ex);
+                }
             }
+        }
+        if (exs.hasExceptions()){
+            throw exs;
         }
     }
 
+    /**
+     * Validate that the 
+     * @param webObject
+     * @since 2.0.0
+     */
+    private void validateWebObject(Object webObject) throws WebObjectValidationException {
+        Class cls = getNonGuiceEnhancedClass(webObject);
+        
+        Object an = cls.getAnnotation(Singleton.class);
+        if (an == null){
+            an = cls.getAnnotation(javax.inject.Singleton.class);
+        }
+        if (an == null){
+            WebObjectValidationException ex = new WebObjectValidationException(cls,WebObjectValidationException.ERROR.NO_SINGLETON);
+            throw ex;
+        }
+    }
+    
     private void registerWebObject(Object webHandler) {
         registerWebHandlerMethods(webHandler);
     }

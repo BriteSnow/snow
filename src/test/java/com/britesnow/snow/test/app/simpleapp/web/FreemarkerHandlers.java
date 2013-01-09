@@ -2,10 +2,13 @@ package com.britesnow.snow.test.app.simpleapp.web;
 
 import java.util.List;
 
+import javax.inject.Singleton;
+
 import com.britesnow.snow.web.handler.annotation.FreemarkerDirectiveHandler;
 import com.britesnow.snow.web.handler.annotation.FreemarkerMethodHandler;
 import com.britesnow.snow.web.renderer.freemarker.annotation.FreemarkerMethodArguments;
 
+@Singleton
 public class FreemarkerHandlers {
 
     

@@ -33,8 +33,8 @@ public class Application {
 
     private static final String            MODEL_KEY_REQUEST       = "_r";
 
-    // just to make sure we initialize only onces
-    private boolean                        initialized             = false;
+    // just to make sure we initialize only once
+    private volatile boolean                        initialized             = false;
 
     @Inject(optional = true)
     private WebApplicationLifecycle        webApplicationLifeCycle = null;
@@ -54,7 +54,7 @@ public class Application {
     private WebObjectRegistry              webObjectRegistry;
 
     // --------- LifeCycle --------- //
-    public void init() {
+    public synchronized void  init() {
         if (!initialized) {
             try {
                 // initialize the hibernateSessionFactoryBuilder

@@ -71,14 +71,9 @@ public class ApplicationLoader {
 
     @SuppressWarnings("unchecked")
     protected ApplicationLoader load() throws Exception {
-
-        
-        
         /*--------- Load WebApplication ---------*/
         // Building the root modules
         // rootModules cannot be overrided
-
-        
         return load(null,(Module[])null);
         /*--------- /Load WebApplication ---------*/
 

@@ -2,6 +2,8 @@ package com.britesnow.snow.test.app.simpleapp.web;
 
 import java.util.Map;
 
+import javax.inject.Singleton;
+
 import com.britesnow.snow.test.app.simpleapp.dao.EmployeeDao;
 import com.britesnow.snow.test.app.simpleapp.entity.Employee;
 import com.britesnow.snow.web.handler.annotation.WebActionHandler;
@@ -10,6 +12,7 @@ import com.britesnow.snow.web.param.annotation.WebModel;
 import com.britesnow.snow.web.param.annotation.WebParam;
 import com.google.inject.Inject;
 
+@Singleton
 public class EmployeeWebHandlers {
 
     @Inject

@@ -7,7 +7,9 @@ import com.britesnow.snow.web.RequestContext;
 import com.britesnow.snow.web.param.annotation.WebParam;
 import com.britesnow.snow.web.param.resolver.annotation.WebParamResolver;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
+@Singleton
 public class EntityWebParamResolvers {
 
     @Inject
