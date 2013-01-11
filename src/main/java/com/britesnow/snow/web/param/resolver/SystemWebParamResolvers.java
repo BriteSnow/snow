@@ -22,41 +22,41 @@ import com.britesnow.snow.web.param.resolver.annotation.WebParamResolver;
 public class SystemWebParamResolvers {
 
     // --------- Primary Type Resolvers --------- //
-    @WebParamResolver
+    @WebParamResolver(annotatedWith=WebParam.class)
     public Long resolveLong(AnnotationMap annotationMap, Class paramType, RequestContext rc) {
         WebParam webParam = annotationMap.get(WebParam.class);
         String id = rc.getParam(webParam.value());
         return ObjectUtil.getValue(id, Long.class, null);
     }
 
-    @WebParamResolver
+    @WebParamResolver(annotatedWith=WebParam.class)
     public Integer resolveInteger(AnnotationMap annotationMap, Class paramType, RequestContext rc) {
         WebParam webParam = annotationMap.get(WebParam.class);
         String id = rc.getParam(webParam.value());
         return ObjectUtil.getValue(id, Integer.class, null);
     }
 
-    @WebParamResolver
+    @WebParamResolver(annotatedWith=WebParam.class)
     public Double resolveDouble(AnnotationMap annotationMap, Class paramType, RequestContext rc) {
         WebParam webParam = annotationMap.get(WebParam.class);
         String id = rc.getParam(webParam.value());
         return ObjectUtil.getValue(id, Double.class, null);
     }
 
-    @WebParamResolver
+    @WebParamResolver(annotatedWith=WebParam.class)
     public String resolveString(AnnotationMap annotationMap, Class paramType, RequestContext rc) {
         WebParam webParam = annotationMap.get(WebParam.class);
         return rc.getParam(webParam.value());
     }
     
-    @WebParamResolver
+    @WebParamResolver(annotatedWith=WebParam.class)
     public Boolean resolveBoolean(AnnotationMap annotationMap, Class paramType, RequestContext rc) {
         WebParam webParam = annotationMap.get(WebParam.class);
         String val = rc.getParam(webParam.value());
         return ObjectUtil.getValue(val,Boolean.class,null);
     }
     
-    @WebParamResolver
+    @WebParamResolver(annotatedWith=WebParam.class)
     public Enum resolveEnum(AnnotationMap annotationMap, Class paramType, RequestContext rc) {
         WebParam webParam = annotationMap.get(WebParam.class);
         String val = rc.getParam(webParam.value());
@@ -64,13 +64,13 @@ public class SystemWebParamResolvers {
     }
     // --------- /Primary Type Resolvers --------- //
 
-    @WebParamResolver
+    @WebParamResolver(annotatedWith=WebParam.class)
     public Map resolveMap(AnnotationMap annotationMap, Class paramType, RequestContext rc) {
         WebParam webParam = annotationMap.get(WebParam.class);
         return rc.getParamMap(webParam.value());
     }
     
-    @WebParamResolver
+    @WebParamResolver(annotatedWith=WebParam.class)
     public FileItem resolveFileItem(AnnotationMap annotationMap, Class paramType, RequestContext rc) {
         WebParam webParam = annotationMap.get(WebParam.class);
         return rc.getParamAs(webParam.value(), FileItem.class);

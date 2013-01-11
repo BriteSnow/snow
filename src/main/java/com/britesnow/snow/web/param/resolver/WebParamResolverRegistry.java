@@ -21,44 +21,43 @@ import com.google.inject.Inject;
 @Singleton
 public class WebParamResolverRegistry {
 
-    static private final Logger logger = LoggerFactory.getLogger(WebParamResolverRegistry.class);
-    
-    private Map<Class, WebParamResolverRef> refByReturnType = new HashMap<Class, WebParamResolverRef>();
-    // for now, just support one annotation (ignore the WebParam)
-    private Map<Class, WebParamResolverRef> refByAnnotation = new HashMap<Class, WebParamResolverRef>();
+    @SuppressWarnings("unused")
+    static private final Logger                                               logger          = LoggerFactory.getLogger(WebParamResolverRegistry.class);
+
+    private Map<Class, WebParamResolverRef>                                   refByReturnType = new HashMap<Class, WebParamResolverRef>();
+
+    // for now, just support one annotation
+    private Map<Class<? extends Annotation>, Map<Class, WebParamResolverRef>> refByAnnotation = new HashMap<Class<? extends Annotation>, Map<Class, WebParamResolverRef>>();
 
     @Inject
-    private SystemWebParamResolvers systemWebParamResolvers;
-    
+    private SystemWebParamResolvers                                           systemWebParamResolvers;
+
     @Inject
-    private FreemarkerParamResolvers freemarkerParamResolvers;
-    
-    
+    private FreemarkerParamResolvers                                          freemarkerParamResolvers;
+
     @Inject(optional = true)
     @Nullable
     @WebObjects
-    private Object[]                       webObjects;       
-    
+    private Object[]                                                          webObjects;
+
     /**
-     * Must be called before calling registerResolvers. 
-     * Must be called at init time, no thread safe
+     * Must be called before calling registerResolvers. Must be called at init time, no thread safe
      */
-    public void init(){
+    public void init() {
         // first register the SystemWebParamResolvers
         registerWebParamResolvers(systemWebParamResolvers);
-        
+
         registerWebParamResolvers(freemarkerParamResolvers);
-        
+
         // then, register the applicaiton WebParamResolvers
-        if (webObjects != null){
-            for (Object webObject : webObjects){
+        if (webObjects != null) {
+            for (Object webObject : webObjects) {
                 registerWebParamResolvers(webObject);
             }
         }
-        
+
     }
-    
-    
+
     final private void registerWebParamResolvers(Object resolversObject) {
 
         Class cls = WebObjectRegistry.getNonGuiceEnhancedClass(resolversObject);
@@ -73,17 +72,23 @@ public class WebParamResolverRegistry {
 
                 if (annotatedWith.length == 0) {
                     refByReturnType.put(returnType, ref);
-                }else{
+                } else {
                     // for now, support only one annotation
                     // TODO: need to add support for multi annotation
-                    refByAnnotation.put(annotatedWith[0],ref);
+                    Class<? extends Annotation> anCls = annotatedWith[0];
+                    Map<Class, WebParamResolverRef> refByType = refByAnnotation.get(anCls);
+                    if (refByType == null) {
+                        refByType = new HashMap<Class, WebParamResolverRef>();
+                        refByAnnotation.put(anCls, refByType);
+                    }
+                    refByType.put(returnType, ref);
                 }
             }
 
         }
 
     }
-    
+
     /**
      * This will return the WebParamResolverRef for webHandlerMethod param at the index paramIdx
      * 
@@ -94,64 +99,70 @@ public class WebParamResolverRegistry {
     public WebParamResolverRef getWebParamResolverRef(Method webHandlerMethod, int paramIdx) {
         WebParamResolverRef ref = null;
 
-        
         Class paramType = webHandlerMethod.getParameterTypes()[paramIdx];
 
         Annotation[] paramAnnotations = webHandlerMethod.getParameterAnnotations()[paramIdx];
         Annotation paramAnnotation = getFirstAnnotationButWebParam(paramAnnotations);
-        
+
         // if we have an annotation, it takes precedence
-        
-        // first try to get the annotation 
+
+        // first try to get the annotation
         // TODO: need to support multiple annotations
-        if (paramAnnotation != null){
-            ref = refByAnnotation.get(paramAnnotation.annotationType());
+        if (paramAnnotation != null) {
+            Map<Class, WebParamResolverRef> refByType = refByAnnotation.get(paramAnnotation.annotationType());
+            if (refByType != null) {
+                for (Class type : refByType.keySet()) {
+                    if (type.isAssignableFrom(paramType)) {
+                        ref = findRefForType(paramType,refByType);
+                        if (ref != null) {
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
-        // TODO: probably need to mature this logic to make sure the system is the most predictable. 
-        
-        // if not found, then, got with the paramType
-        if (ref == null){
-            ref = refByReturnType.get(paramType);
+        // if could not resolve it with the annotation, try with the type only.
+        if (ref == null) {
+            ref = findRefForType(paramType,refByReturnType);
         }
-        
+
+        return ref;
+    }
+
+    private WebParamResolverRef findRefForType(Class paramType,Map<Class,WebParamResolverRef> refByType) {
+        WebParamResolverRef ref = null;
+        ref = refByType.get(paramType);
+
         // if still null, then, check the parent classes
-        if (ref == null){
+        if (ref == null) {
             Class parentClass = paramType.getSuperclass();
-            while (parentClass != null && ref == null && parentClass != Object.class){
-                ref = refByReturnType.get(parentClass);
+            while (parentClass != null && ref == null && parentClass != Object.class) {
+                ref = refByType.get(parentClass);
                 parentClass = parentClass.getSuperclass();
             }
         }
-        
+
         // if still null, then, check with the interfaces
-        if (ref == null){
-            for (Class interfaceClass : paramType.getInterfaces()){
-                ref = refByReturnType.get(interfaceClass);
-                if (ref != null){
+        if (ref == null) {
+            for (Class interfaceClass : paramType.getInterfaces()) {
+                ref = refByType.get(interfaceClass);
+                if (ref != null) {
                     break;
                 }
             }
         }
-        
-        if (ref == null){
-            logger.error("Snow Fatal Error: No Param Resolver found for param type '" + paramType.getCanonicalName() + 
-                "' or annotation '" + paramAnnotation.toString() + "' in the method '" + webHandlerMethod.getName() + "' of the class '" + webHandlerMethod.getDeclaringClass().getName() +
-                "'. Make sure to have the appropriate @ParamResolver for the param type or associated annotations");
-        }
-        
+
         return ref;
     }
-    
-    
-    private static Annotation getFirstAnnotationButWebParam(Annotation[] paramAnnotations){
-        for (Annotation a : paramAnnotations){
-            if (a.annotationType() != WebParam.class){
+
+    private static Annotation getFirstAnnotationButWebParam(Annotation[] paramAnnotations) {
+        for (Annotation a : paramAnnotations) {
+            if (a.annotationType() != WebParam.class) {
                 return a;
             }
         }
         return null;
     }
-    
-    
+
 }

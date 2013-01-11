@@ -15,6 +15,8 @@ import com.britesnow.snow.web.handler.annotation.WebActionHandler;
 import com.britesnow.snow.web.handler.annotation.WebModelHandler;
 import com.britesnow.snow.web.handler.annotation.WebResourceHandler;
 import com.britesnow.snow.web.handler.annotation.FreemarkerDirectiveHandler;
+import com.britesnow.snow.web.hook.annotation.WebApplicationHook;
+import com.britesnow.snow.web.hook.annotation.WebRequestHook;
 import com.britesnow.snow.web.param.resolver.annotation.WebParamResolver;
 import com.britesnow.snow.web.path.DefaultFramePathsResolver;
 import com.britesnow.snow.web.path.DefaultResourceFileResolver;
@@ -88,9 +90,11 @@ public class DefaultApplicationModule extends AbstractModule {
 
                         if (method.getAnnotation(WebActionHandler.class) != null || method.getAnnotation(WebResourceHandler.class) != null
                                                 || method.getAnnotation(WebModelHandler.class) != null
-                                                || method.getAnnotation(FreemarkerDirectiveHandler.class) != null
                                                 || method.getAnnotation(WebParamResolver.class) != null
                                                 || method.getAnnotation(WebExceptionCatcher.class) != null
+                                                || method.getAnnotation(WebApplicationHook.class) != null
+                                                || method.getAnnotation(WebRequestHook.class) != null
+                                                || method.getAnnotation(FreemarkerDirectiveHandler.class) != null                                                
                                                 || method.getAnnotation(FreemarkerMethodHandler.class) != null) {
                             return true;
                         }

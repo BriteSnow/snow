@@ -66,12 +66,14 @@ public class SnowTestSupport {
     }
 
     @AfterClass
-    public static void releaseWebApplicaton() throws Exception {
-        ////not supported yet
-        webController.destroy();
-        appInjector = null;
-        webController = null;
-        appLoader = null;
+    public static void shutdownWebApplicaton() throws Exception {
+        // to allow other to call this shutdownWebApplicaton
+        if (webController != null){
+            webController.destroy();
+            appInjector = null;
+            webController = null;
+            appLoader = null;
+        }
     }
 
     

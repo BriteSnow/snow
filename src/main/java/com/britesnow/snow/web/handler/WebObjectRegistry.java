@@ -17,6 +17,9 @@ import com.britesnow.snow.web.handler.annotation.WebActionHandler;
 import com.britesnow.snow.web.handler.annotation.WebModelHandler;
 import com.britesnow.snow.web.handler.annotation.WebResourceHandler;
 import com.britesnow.snow.web.handler.annotation.FreemarkerDirectiveHandler;
+import com.britesnow.snow.web.hook.HookRegistry;
+import com.britesnow.snow.web.hook.annotation.WebApplicationHook;
+import com.britesnow.snow.web.hook.annotation.WebRequestHook;
 import com.britesnow.snow.web.param.resolver.WebParamResolverRef;
 import com.britesnow.snow.web.param.resolver.WebParamResolverRegistry;
 import com.britesnow.snow.web.renderer.freemarker.FreemarkerDirectiveProxy;
@@ -40,56 +43,55 @@ public class WebObjectRegistry {
     @Inject
     private WebParamResolverRegistry                                webParamResolverRegistry;
 
+    @Inject
+    private HookRegistry                                            hookRegistry;
+
     @Inject(optional = true)
     @Nullable
     @WebObjects
     private Object[]                                                webObjects;
 
-    
     /**
      * Must be called before calling registerWebHandlers.<br />
      * Must be called before at application init time (not thread safe). <br />
      */
     public void init() {
         webParamResolverRegistry.init();
-        
+
         WebObjectValidationExceptions exs = new WebObjectValidationExceptions();
-        
+
         if (webObjects != null) {
             for (Object webObject : webObjects) {
-                try{
+                try {
                     validateWebObject(webObject);
-                    registerWebObject(webObject);
-                }catch (WebObjectValidationException ex){
+                    registerWebObjectMethods(webObject);
+                } catch (WebObjectValidationException ex) {
                     exs.addWebException(ex);
                 }
             }
         }
-        if (exs.hasExceptions()){
+        if (exs.hasExceptions()) {
             throw exs;
         }
     }
 
     /**
-     * Validate that the 
+     * Validate that the
+     * 
      * @param webObject
      * @since 2.0.0
      */
     private void validateWebObject(Object webObject) throws WebObjectValidationException {
         Class cls = getNonGuiceEnhancedClass(webObject);
-        
+
         Object an = cls.getAnnotation(Singleton.class);
-        if (an == null){
+        if (an == null) {
             an = cls.getAnnotation(javax.inject.Singleton.class);
         }
-        if (an == null){
-            WebObjectValidationException ex = new WebObjectValidationException(cls,WebObjectValidationException.ERROR.NO_SINGLETON);
+        if (an == null) {
+            WebObjectValidationException ex = new WebObjectValidationException(cls, WebObjectValidationException.ERROR.NO_SINGLETON);
             throw ex;
         }
-    }
-    
-    private void registerWebObject(Object webHandler) {
-        registerWebHandlerMethods(webHandler);
     }
 
     /**
@@ -142,14 +144,14 @@ public class WebObjectRegistry {
     public List<FreemarkerDirectiveProxy> getFreemarkerDirectiveProxyList() {
         return freemarkerDirectiveProxyList;
     }
-    
+
     /**
-     * Do not call. Internal to Snow. 
+     * Do not call. Internal to Snow.
      * 
      * @param exceptionClass
      * @return
      */
-    public List<FreemarkerMethodProxy> getFreemarkerMethodProxyList(){
+    public List<FreemarkerMethodProxy> getFreemarkerMethodProxyList() {
         return freemarkerMethodProxyList;
     }
 
@@ -176,7 +178,7 @@ public class WebObjectRegistry {
     }
 
     // --------- Private Registration Methods (call at init() time) --------- //
-    private final void registerWebHandlerMethods(Object targetObject) {
+    private final void registerWebObjectMethods(Object targetObject) {
 
         Class c = getNonGuiceEnhancedClass(targetObject);
 
@@ -222,15 +224,29 @@ public class WebObjectRegistry {
                 registerWebResourceHandler(targetObject, m, webResourceHandlerAnnotation);
             }
             // --------- /Register WebResourceHandler --------- //
+            
+            // --------- Register WebRequestHook --------- //
+            WebRequestHook webRequestHook = m.getAnnotation(WebRequestHook.class);
+            if (webRequestHook != null){
+                hookRegistry.addReqHook(c,m,webRequestHook);
+            }
+            // --------- Register WebRequestHook --------- //
 
+            // --------- Register WebRequestHook --------- //
+            WebApplicationHook webApplicationHook = m.getAnnotation(WebApplicationHook.class);
+            if (webApplicationHook != null){
+                hookRegistry.addAppHook(c,m,webApplicationHook);
+            }
+            // --------- Register WebRequestHook --------- //
+            
             // --------- Freemarker handlers --------- //
             FreemarkerDirectiveHandler webTemplateDirective = m.getAnnotation(FreemarkerDirectiveHandler.class);
             if (webTemplateDirective != null) {
                 registerFreemarkerDirective(targetObject, m, webTemplateDirective);
             }
-            
+
             FreemarkerMethodHandler freemarkerMethodHandler = m.getAnnotation(FreemarkerMethodHandler.class);
-            if (freemarkerMethodHandler != null){
+            if (freemarkerMethodHandler != null) {
                 registerFreemarkerMethod(targetObject, m, freemarkerMethodHandler);
             }
             // --------- /Freemarker handlers --------- //
@@ -308,17 +324,18 @@ public class WebObjectRegistry {
         FreemarkerDirectiveProxy directiveProxy = new FreemarkerDirectiveProxy(templateMethodName, directiveRef);
         freemarkerDirectiveProxyList.add(directiveProxy);
     }
-    
-    private final void registerFreemarkerMethod(Object webHandler, Method m, FreemarkerMethodHandler freemarkerMethodHandler){
+
+    private final void registerFreemarkerMethod(Object webHandler, Method m,
+                            FreemarkerMethodHandler freemarkerMethodHandler) {
         String name = freemarkerMethodHandler.name();
-        if (name.length() == 0){
+        if (name.length() == 0) {
             name = m.getName();
         }
         WebParamResolverRef webParamResolverRefs[] = buildWebParamResolverRefs(m);
-        FreemarkerMethodHandlerRef ref = new FreemarkerMethodHandlerRef(webHandler,m, webParamResolverRefs,freemarkerMethodHandler);
-        FreemarkerMethodProxy proxy = new FreemarkerMethodProxy(name,ref);
+        FreemarkerMethodHandlerRef ref = new FreemarkerMethodHandlerRef(webHandler, m, webParamResolverRefs, freemarkerMethodHandler);
+        FreemarkerMethodProxy proxy = new FreemarkerMethodProxy(name, ref);
         freemarkerMethodProxyList.add(proxy);
-        
+
     }
 
     private final void registerWebExceptionCatcher(Object webHandler, Method m, WebExceptionCatcher webExceptionHandler) {

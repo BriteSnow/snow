@@ -18,6 +18,8 @@ import com.britesnow.snow.web.handler.WebHandlerContext;
 import com.britesnow.snow.web.handler.WebObjectRegistry;
 import com.britesnow.snow.web.handler.WebResourceHandlerRef;
 import com.britesnow.snow.web.handler.WebModelHandlerRef;
+import com.britesnow.snow.web.hook.AppStep;
+import com.britesnow.snow.web.hook.HookInvoker;
 import com.britesnow.snow.web.renderer.JsonRenderer;
 import com.britesnow.snow.web.renderer.freemarker.FreemarkerTemplateRenderer;
 import com.google.common.base.Throwables;
@@ -34,7 +36,7 @@ public class Application {
     private static final String            MODEL_KEY_REQUEST       = "_r";
 
     // just to make sure we initialize only once
-    private volatile boolean                        initialized             = false;
+    private volatile boolean               initialized             = false;
 
     @Inject(optional = true)
     private WebApplicationLifecycle        webApplicationLifeCycle = null;
@@ -53,8 +55,11 @@ public class Application {
     @Inject
     private WebObjectRegistry              webObjectRegistry;
 
+    @Inject
+    private HookInvoker                    hookInvoker;
+
     // --------- LifeCycle --------- //
-    public synchronized void  init() {
+    public synchronized void init() {
         if (!initialized) {
             try {
                 // initialize the hibernateSessionFactoryBuilder
@@ -67,6 +72,8 @@ public class Application {
                 // initialize freemarker
                 freemarkerRenderer.init();
 
+                hookInvoker.invokeAppHooks(AppStep.INIT);
+                
                 // initialize the webApplicationLifeCycle if present
                 if (webApplicationLifeCycle != null) {
                     webApplicationLifeCycle.init();
@@ -84,6 +91,9 @@ public class Application {
     }
 
     public void shutdown() {
+        
+        hookInvoker.invokeAppHooks(AppStep.SHUTDOWN);
+        
         if (webApplicationLifeCycle != null) {
             webApplicationLifeCycle.shutdown();
         }
@@ -122,10 +132,10 @@ public class Application {
         WebActionResponse actionResponse = rc.getWebActionResponse();
         if (actionResponse != null && actionResponse.getError() == null) {
             data = actionResponse.getResult();
-        } else if (actionResponse != null){
+        } else if (actionResponse != null) {
             data = actionResponse;
         }
-        if (data != null){
+        if (data != null) {
             jsonRenderer.render(data, rc.getWriter());
         }
     }

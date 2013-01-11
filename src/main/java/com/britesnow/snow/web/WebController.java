@@ -2,10 +2,8 @@ package com.britesnow.snow.web;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
@@ -30,6 +28,8 @@ import com.britesnow.snow.web.auth.AuthRequest;
 import com.britesnow.snow.web.db.hibernate.HibernateSessionInViewHandler;
 import com.britesnow.snow.web.handler.WebHandlerContext;
 import com.britesnow.snow.web.handler.WebHandlerException;
+import com.britesnow.snow.web.hook.HookInvoker;
+import com.britesnow.snow.web.hook.ReqStep;
 import com.britesnow.snow.web.less.LessProcessor;
 import com.britesnow.snow.web.path.FramePathsResolver;
 import com.britesnow.snow.web.path.ResourceFileResolver;
@@ -45,7 +45,7 @@ public class WebController {
     static private Logger                   logger                        = LoggerFactory.getLogger(WebController.class);
 
     private static final String             CHAR_ENCODING                 = "UTF-8";
-    
+
     public static int                       BUFFER_SIZE                   = 2048 * 2;
 
     private ServletFileUpload               fileUploader;
@@ -79,7 +79,7 @@ public class WebController {
     private ResourcePathResolver            resourcePathResolver;
 
     @Inject
-    private ResourceFileResolver                pathFileResolver;
+    private ResourceFileResolver            pathFileResolver;
 
     private ThreadLocal<RequestContext>     requestContextTl              = new ThreadLocal<RequestContext>();
 
@@ -94,8 +94,11 @@ public class WebController {
     @Inject
     private LessProcessor                   lessProcessor;
 
+    @Inject
+    private HookInvoker                     hookInvoker;
+
     // will be injected from .properties file
-    // FIXME: need to implement this.
+    // TODO: need to implement this.
     // private boolean ignoreTemplateNotFound = false;
 
     public CurrentRequestContextHolder getCurrentRequestContextHolder() {
@@ -103,6 +106,7 @@ public class WebController {
     }
 
     // --------- Injects --------- //
+    // TODO: need to implement this. 
     @Inject(optional = true)
     public void injectIgnoreTemplateNotFound(@Named("snow.ignoreTemplateNotFound") String ignore) {
         if ("true".equalsIgnoreCase(ignore)) {
@@ -140,11 +144,11 @@ public class WebController {
         ResponseType responseType = null;
         try {
             requestContextTl.set(rc);
-
+            
             HttpServletRequest request = rc.getReq();
 
             // get the request resourcePath
-            String resourcePath = resourcePathResolver.resolve(rc.getPathInfo(),rc);
+            String resourcePath = resourcePathResolver.resolve(rc.getPathInfo(), rc);
 
             // --------- Resolve the ResponseType --------- //
             // determine the requestType
@@ -152,7 +156,7 @@ public class WebController {
                 responseType = ResponseType.webResource;
             } else if (isTemplatePath(resourcePath)) {
                 responseType = ResponseType.template;
-            } else if (isWebActionResponseJson(resourcePath,rc)) {
+            } else if (isWebActionResponseJson(resourcePath, rc)) {
                 responseType = ResponseType.webActionResponseJson;
             } else if (isJsonPath(resourcePath)) {
                 responseType = ResponseType.json;
@@ -181,6 +185,8 @@ public class WebController {
                 String[] framePaths = framePathsResolver.resolve(rc);
                 rc.setFramePaths(framePaths);
             }
+            
+            hookInvoker.invokeReqHooks(ReqStep.START, rc);            
 
             // --------- Open HibernateSession --------- //
             if (hibernateSessionInViewHandler != null) {
@@ -190,8 +196,10 @@ public class WebController {
 
             // --------- Auth --------- //
             if (authService != null) {
+                hookInvoker.invokeReqHooks(ReqStep.BEFORE_AUTH, rc);
                 AuthToken<?> auth = authService.authRequest(rc);
                 rc.setAuthToken(auth);
+                hookInvoker.invokeReqHooks(ReqStep.AFTER_AUTH, rc);
             }
             // --------- /Auth --------- //
 
@@ -205,9 +213,11 @@ public class WebController {
             if ("POST".equals(request.getMethod())) {
                 String actionName = resolveWebActionName(rc);
                 if (actionName != null) {
-                    WebActionResponse webActionResponse = null;                    
+                    WebActionResponse webActionResponse = null;
+                    hookInvoker.invokeReqHooks(ReqStep.BEFORE_WEB_ACTION, rc);
                     webActionResponse = application.processWebAction(actionName, rc);
                     rc.setWebActionResponse(webActionResponse);
+                    hookInvoker.invokeReqHooks(ReqStep.AFTER_WEB_ACTION, rc);
                 }
 
                 // --------- afterActionProcessing --------- //
@@ -244,12 +254,19 @@ public class WebController {
             } catch (AbortWithHttpRedirectException e) {
                 sendHttpRedirect(rc, e);
             } catch (Throwable e) {
-                    // and this is the normal case...
-                    sendHttpError(rc, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
-                    logger.error("Error while processing request : " + rc.getPathInfo() + " because: " + t.getMessage(),t);
+                // and this is the normal case...
+                sendHttpError(rc, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
+                logger.error("Error while processing request : " + rc.getPathInfo() + " because: " + t.getMessage(), t);
             }
 
         } finally {
+            
+            try{
+                hookInvoker.invokeReqHooks(ReqStep.END, rc);
+            }catch (Throwable t){
+                logger.error("WebRequestHook exception: " + t.getMessage(),t);
+            }
+            
             // --------- RequestLifeCycle End --------- //
             if (requestLifeCycle != null) {
                 requestLifeCycle.end(rc);
@@ -302,10 +319,9 @@ public class WebController {
         HttpServletResponse res = rc.getRes();
 
         try {
-            
+
             // TODO: probably need to remove this, not sure it does anything here (or it even should be here.
             req.setCharacterEncoding(CHAR_ENCODING);
-            
 
             // TODO: needs to implement this
             /*
@@ -389,7 +405,7 @@ public class WebController {
         // --------- Process the .less file --------- //
         String lessFilePath = resourcePath.substring(0, resourcePath.length() - 4);
 
-        File lessFile = pathFileResolver.resolve(lessFilePath,rc);
+        File lessFile = pathFileResolver.resolve(lessFilePath, rc);
         if (!lessFile.exists()) {
             throw new AbortWithHttpStatusException(HttpStatus.NOT_FOUND, "File " + lessFilePath + " not found");
         }
@@ -426,7 +442,7 @@ public class WebController {
 
     private void serviceFile(RequestContext rc) {
         String resourcePath = rc.getResourcePath();
-        File resourceFile = pathFileResolver.resolve(resourcePath,rc);
+        File resourceFile = pathFileResolver.resolve(resourcePath, rc);
         if (resourceFile.exists()) {
             boolean isCachable = isCachable(resourcePath);
             httpWriter.writeFile(rc, resourceFile, isCachable, null);
@@ -452,7 +468,7 @@ public class WebController {
         }
     }
 
-    private void sendHttpRedirect(RequestContext rc, AbortWithHttpRedirectException e){
+    private void sendHttpRedirect(RequestContext rc, AbortWithHttpRedirectException e) {
 
         // like above, there's not much we can do if the response has already been committed. in that case,
         // we'll just silently ignore the exception.
@@ -514,40 +530,30 @@ public class WebController {
             return false;
         }
     }
-    
-    static private final boolean isWebActionResponseJson(String resourcePath, RequestContext rc){
-        if (rc.getReq().getMethod().equals("POST")){
-            if (resourcePath.endsWith(".do") || "/_actionResponse.json".equals(resourcePath)){
+
+    static private final boolean isWebActionResponseJson(String resourcePath, RequestContext rc) {
+        if (rc.getReq().getMethod().equals("POST")) {
+            if (resourcePath.endsWith(".do") || "/_actionResponse.json".equals(resourcePath)) {
                 return true;
             }
         }
         return false;
     }
-    
-    static private final String resolveWebActionName(RequestContext rc){
+
+    static private final String resolveWebActionName(RequestContext rc) {
         String resourcePath = rc.getResourcePath();
-        
+
         // if it is a .do request
-        if (resourcePath.endsWith(".do")){
-            return resourcePath.substring(1,resourcePath.length() - 3);
+        if (resourcePath.endsWith(".do")) {
+            return resourcePath.substring(1, resourcePath.length() - 3);
         }
-        
+
         return rc.getParam("action");
     }
 
     static final private boolean isCachable(String pathInfo) {
         String ext = FileUtil.getFileNameAndExtension(pathInfo)[1];
         return cachableExtension.contains(ext);
-    }
-
-    static final private String getLogErrorString(Throwable e) {
-        StringBuilder errorSB = new StringBuilder();
-        errorSB.append(e.getMessage());
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        e.printStackTrace(pw);
-        errorSB.append("\n-- StackTrace:\n").append(sw.toString()).append("\n-- /StackTrace");
-        return errorSB.toString();
     }
 
 }
