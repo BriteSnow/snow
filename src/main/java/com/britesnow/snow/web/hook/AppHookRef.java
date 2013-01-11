@@ -5,14 +5,14 @@ import java.lang.reflect.Method;
 import com.britesnow.snow.web.handler.ParamDef;
 
 public class AppHookRef extends HookRef {
-    private AppStep step;
+    private AppPhase step;
     
-    public AppHookRef(Class cls, Method method, ParamDef[] paramDefs, AppStep step){
-        super(cls,method,paramDefs);
+    public AppHookRef(Class cls, Method method, ParamDef[] paramDefs, AppPhase step, On on){
+        super(cls,method,paramDefs,on);
         this.step = step;
     }
   
-    public AppStep getStep() {
+    public AppPhase getStep() {
         return step;
     }
 }

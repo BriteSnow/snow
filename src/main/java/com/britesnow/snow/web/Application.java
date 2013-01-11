@@ -19,8 +19,9 @@ import com.britesnow.snow.web.handler.WebHandlerContext;
 import com.britesnow.snow.web.handler.WebObjectRegistry;
 import com.britesnow.snow.web.handler.WebResourceHandlerRef;
 import com.britesnow.snow.web.handler.WebModelHandlerRef;
-import com.britesnow.snow.web.hook.AppStep;
+import com.britesnow.snow.web.hook.AppPhase;
 import com.britesnow.snow.web.hook.HookInvoker;
+import com.britesnow.snow.web.hook.On;
 import com.britesnow.snow.web.renderer.JsonRenderer;
 import com.britesnow.snow.web.renderer.freemarker.FreemarkerTemplateRenderer;
 import com.google.common.base.Throwables;
@@ -66,6 +67,8 @@ public class Application {
     public synchronized void init() {
         if (!initialized) {
             try {
+                hookInvoker.invokeAppHooks(AppPhase.INIT,On.BEFORE);
+                
                 // initialize the hibernateSessionFactoryBuilder
                 if (hibernateSessionFactoryBuilder != null && hibernateSessionFactoryBuilder instanceof Initializable) {
                     ((Initializable) hibernateSessionFactoryBuilder).init();
@@ -76,12 +79,13 @@ public class Application {
                 // initialize freemarker
                 freemarkerRenderer.init();
 
-                hookInvoker.invokeAppHooks(AppStep.INIT);
+                
 
                 // initialize the webApplicationLifeCycle if present
                 if (webApplicationLifeCycle != null) {
                     webApplicationLifeCycle.init();
                 }
+                hookInvoker.invokeAppHooks(AppPhase.INIT,On.AFTER);
             } catch (Throwable e) {
                 logger.error("Snow - Application init failed: " + e.getMessage());
                 e.printStackTrace();
@@ -96,11 +100,13 @@ public class Application {
 
     public void shutdown() {
 
-        hookInvoker.invokeAppHooks(AppStep.SHUTDOWN);
+        hookInvoker.invokeAppHooks(AppPhase.SHUTDOWN,On.BEFORE);
 
         if (webApplicationLifeCycle != null) {
             webApplicationLifeCycle.shutdown();
         }
+        
+        hookInvoker.invokeAppHooks(AppPhase.SHUTDOWN,On.AFTER);
     }
 
     // --------- LifeCycle --------- //

@@ -1,5 +1,5 @@
 package com.britesnow.snow.web.hook;
 
-public enum AppStep {
+public enum AppPhase {
     NONE,INIT,SHUTDOWN;
 }

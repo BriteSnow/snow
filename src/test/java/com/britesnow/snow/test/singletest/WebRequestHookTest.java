@@ -31,12 +31,15 @@ public class WebRequestHookTest extends SnowTestSupport {
         Map result;
         
         rc = requestContextFactory.createRequestContext(RequestMethod.GET, "/info.json");
-        rc.setParamMap(MapUtil.mapIt("id", "1"));
+        rc.setParamMap(MapUtil.mapIt("id", "123"));
         webController.service(rc);
         result = rc.getResponseAsJson();
         
+        Assert.assertEquals((Integer)123,(Integer)result.get("id"));
+        Assert.assertEquals("hello",(String)result.get("sampleStringValue"));
+        Assert.assertEquals("testValue1",(String)result.get("testVal"));
         Assert.assertTrue((Boolean) result.get("webModelHandler-info"));
-        Assert.assertTrue((Boolean) result.get("webRequestHook-start"));
+        Assert.assertEquals("aaabbb", result.get("webRequestHook-start"));
     }
     
     

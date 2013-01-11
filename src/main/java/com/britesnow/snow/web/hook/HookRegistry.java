@@ -26,14 +26,14 @@ public class HookRegistry {
     @Inject
     private ParamDefBuilder paramDefBuilder;
 
-    private Map<AppStep, List<AppHookRef>> appHooksDic = new HashMap<AppStep, List<AppHookRef>>();
-    private Map<ReqStep, List<ReqHookRef>> reqHooksDic = new HashMap<ReqStep, List<ReqHookRef>>();
+    private Map<AppPhase, List<AppHookRef>> appHooksDic = new HashMap<AppPhase, List<AppHookRef>>();
+    private Map<ReqPhase, List<ReqHookRef>> reqHooksDic = new HashMap<ReqPhase, List<ReqHookRef>>();
 
-    public List<AppHookRef> getAppHooks(AppStep step){
+    public List<AppHookRef> getAppHooks(AppPhase step){
         return appHooksDic.get(step);
     }
     
-    public List<ReqHookRef> getRequestHooks(ReqStep step){
+    public List<ReqHookRef> getRequestHooks(ReqPhase step){
         return reqHooksDic.get(step);
     }
     
@@ -42,7 +42,7 @@ public class HookRegistry {
     
     // --------- Initialization Methods --------- //
     public void addAppHook(Class cls,Method m,WebApplicationHook webApplicationHook){
-        AppHookRef appHookRef = new AppHookRef(cls, m, paramDefBuilder.buildParamDefs(m,false), webApplicationHook.step());
+        AppHookRef appHookRef = new AppHookRef(cls, m, paramDefBuilder.buildParamDefs(m,false), webApplicationHook.phase(),webApplicationHook.on());
         addAppHookRef(appHookRef);
     }  
     
@@ -57,7 +57,7 @@ public class HookRegistry {
 
     
     public void addReqHook(Class cls,Method m,WebRequestHook webRequestHook){
-        ReqHookRef reqHookRef = new ReqHookRef(cls, m, paramDefBuilder.buildParamDefs(m,true), webRequestHook.step());
+        ReqHookRef reqHookRef = new ReqHookRef(cls, m, paramDefBuilder.buildParamDefs(m,true), webRequestHook.phase(),webRequestHook.on());
         addReqHookRef(reqHookRef);
     }
     

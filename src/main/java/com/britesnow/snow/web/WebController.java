@@ -29,7 +29,8 @@ import com.britesnow.snow.web.db.hibernate.HibernateSessionInViewHandler;
 import com.britesnow.snow.web.handler.WebHandlerContext;
 import com.britesnow.snow.web.handler.WebHandlerException;
 import com.britesnow.snow.web.hook.HookInvoker;
-import com.britesnow.snow.web.hook.ReqStep;
+import com.britesnow.snow.web.hook.On;
+import com.britesnow.snow.web.hook.ReqPhase;
 import com.britesnow.snow.web.less.LessProcessor;
 import com.britesnow.snow.web.path.FramePathsResolver;
 import com.britesnow.snow.web.path.ResourceFileResolver;
@@ -145,6 +146,8 @@ public class WebController {
         try {
             requestContextTl.set(rc);
             
+            hookInvoker.invokeReqHooks(ReqPhase.START,On.BEFORE, rc);
+            
             HttpServletRequest request = rc.getReq();
 
             // get the request resourcePath
@@ -186,7 +189,7 @@ public class WebController {
                 rc.setFramePaths(framePaths);
             }
             
-            hookInvoker.invokeReqHooks(ReqStep.START, rc);            
+            hookInvoker.invokeReqHooks(ReqPhase.START,On.AFTER, rc);            
 
             // --------- Open HibernateSession --------- //
             if (hibernateSessionInViewHandler != null) {
@@ -196,10 +199,10 @@ public class WebController {
 
             // --------- Auth --------- //
             if (authService != null) {
-                hookInvoker.invokeReqHooks(ReqStep.BEFORE_AUTH, rc);
+                hookInvoker.invokeReqHooks(ReqPhase.AUTH,On.BEFORE, rc);
                 AuthToken<?> auth = authService.authRequest(rc);
                 rc.setAuthToken(auth);
-                hookInvoker.invokeReqHooks(ReqStep.AFTER_AUTH, rc);
+                hookInvoker.invokeReqHooks(ReqPhase.AUTH,On.AFTER, rc);
             }
             // --------- /Auth --------- //
 
@@ -214,10 +217,10 @@ public class WebController {
                 String actionName = resolveWebActionName(rc);
                 if (actionName != null) {
                     WebActionResponse webActionResponse = null;
-                    hookInvoker.invokeReqHooks(ReqStep.BEFORE_WEB_ACTION, rc);
+                    hookInvoker.invokeReqHooks(ReqPhase.WEB_ACTION,On.BEFORE, rc);
                     webActionResponse = application.processWebAction(actionName, rc);
                     rc.setWebActionResponse(webActionResponse);
-                    hookInvoker.invokeReqHooks(ReqStep.AFTER_WEB_ACTION, rc);
+                    hookInvoker.invokeReqHooks(ReqPhase.WEB_ACTION,On.AFTER, rc);
                 }
 
                 // --------- afterActionProcessing --------- //
@@ -262,7 +265,7 @@ public class WebController {
         } finally {
             
             try{
-                hookInvoker.invokeReqHooks(ReqStep.END, rc);
+                hookInvoker.invokeReqHooks(ReqPhase.END,On.BEFORE, rc);
             }catch (Throwable t){
                 logger.error("WebRequestHook exception: " + t.getMessage(),t);
             }
@@ -283,6 +286,12 @@ public class WebController {
             }
             // --------- /Close HibernateSession --------- //
 
+            try{
+                hookInvoker.invokeReqHooks(ReqPhase.END,On.AFTER, rc);
+            }catch (Throwable t){
+                logger.error("WebRequestHook exception: " + t.getMessage(),t);
+            }
+            
         }
 
     }
