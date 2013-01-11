@@ -21,39 +21,45 @@ public class ParamDefBuilder {
     private WebParamResolverRegistry paramResolverRegistry; 
     
     
-    public ParamDef[] buildParamDefs(Method m){
+    public ParamDef[] buildParamDefs(Method m, boolean withParamResolver){
         int paramCount = m.getParameterTypes().length;
         ParamDef[] paramDefs = new ParamDef[paramCount];
         for (int i = 0; i < paramCount; i++){
-            ParamDef paramDef = buildParamDef(m, i);
+            ParamDef paramDef = buildParamDef(m, i,withParamResolver);
             paramDefs[i] = paramDef;
         }
         return paramDefs;
     }
     
-    private ParamDef buildParamDef(Method m,int idx){
+    private ParamDef buildParamDef(Method m,int idx,boolean withParamResolver){
         
         Class paramType = m.getParameterTypes()[idx];
         Annotation[] paramAnnotations = m.getParameterAnnotations()[idx];
         
         Key key = null;
         
-        WebParamResolverRef paramResolverRef = paramResolverRegistry.getWebParamResolverRef(m, idx);
+        WebParamResolverRef paramResolverRef = null;
+        
+        if (withParamResolver){
+            paramResolverRef = paramResolverRegistry.getWebParamResolverRef(m, idx);
+        }
         
         // if it is a Google Guice, check if there are provider for the annotations
-        System.out.println("buildParamDef: " + paramType + " " + paramResolverRef);
         if (paramResolverRef == null){
             if (paramAnnotations.length > 0){
                 for (Annotation an : paramAnnotations){
                     key = Key.get(paramType,an);
-                    System.out.println("binding: " + paramType + " " + key);
+                    break; // for now, just take the first.
+                    // TODO: Has to check if the key is bound, if not, go to the next annotation
                     //Binding b = injector.getBinding(key);
+                    //Provider b = injector.getProvider(key);
+                    //System.out.println("binding: " + paramType + " " + key + " " + b);
                     
                 }
             }
         }
         
-        ParamDef paramDef = new ParamDef(paramType,paramAnnotations,paramResolverRef);
+        ParamDef paramDef = new ParamDef(paramType,paramAnnotations,paramResolverRef,key);
         
         return paramDef; 
         

@@ -6,15 +6,14 @@ package com.britesnow.snow.web.handler;
 import java.lang.reflect.Method;
 
 import com.britesnow.snow.web.handler.annotation.FreemarkerDirectiveHandler;
-import com.britesnow.snow.web.param.resolver.WebParamResolverRef;
 
 
 public class FreemakerDirectiveHandlerRef extends WebHandlerRef {
 
     FreemarkerDirectiveHandler webTemplateDirective;
     
-    public FreemakerDirectiveHandlerRef(Object object, Method method,WebParamResolverRef[] webParamResolverRefs, FreemarkerDirectiveHandler webTemplateDirective) {
-        super(object, method, webParamResolverRefs);
+    public FreemakerDirectiveHandlerRef(Class webClass, Method method,ParamDef[] paramDefs, FreemarkerDirectiveHandler webTemplateDirective) {
+        super(webClass, method, paramDefs);
         this.webTemplateDirective = webTemplateDirective;
     }    
     

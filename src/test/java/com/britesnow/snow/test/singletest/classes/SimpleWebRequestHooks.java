@@ -16,7 +16,8 @@ public class SimpleWebRequestHooks{
     
     
     @WebModelHandler(startsWith="/info")
-    public void info(@WebModel Map m,@WebParam("id")Long id,@Named("testVal")String testVal){
+    public void info(@WebModel Map m,@WebParam("id")Long id,@SampleStringValue String sampleVal, @Named("testVal")String testVal){
+        System.out.println("sampleVal: -" + sampleVal + "-");
         System.out.println("testVal: -" + testVal + "-");
         System.out.println("id: -" + id + "-");
         m.put("webModelHandler-info", true);

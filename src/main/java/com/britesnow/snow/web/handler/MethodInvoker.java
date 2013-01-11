@@ -5,9 +5,11 @@ import java.lang.reflect.Method;
 import javax.inject.Inject;
 
 import com.britesnow.snow.web.RequestContext;
+import com.britesnow.snow.web.hook.HookRef;
 import com.britesnow.snow.web.param.resolver.WebParamResolverRef;
 import com.google.common.base.Throwables;
 import com.google.inject.Injector;
+import com.google.inject.Key;
 import com.google.inject.Singleton;
 
 
@@ -17,11 +19,16 @@ public class MethodInvoker {
     @Inject
     private Injector injector;
     
-    public Object invokeMethod(Class c, Method m, ParamDef[] paramDefs){
-        return invokeMethod(c,m,paramDefs,null);
+    public Object invokeWebHandler(WebHandlerRef webHandlerRef,RequestContext rc){
+        return invokeMethod(webHandlerRef.getWebClass(),webHandlerRef.getHandlerMethod(),webHandlerRef.getParamDefs(),rc);
     }
     
-    public Object invokeMethod(Class c, Method m, ParamDef[] paramDefs, RequestContext rc){
+    public Object invokeHook(HookRef hookRef, RequestContext rc){
+        return invokeMethod(hookRef.getCls(), hookRef.getMethod(), hookRef.getParamDefs(),rc);
+    }
+    
+    
+    private Object invokeMethod(Class c, Method m, ParamDef[] paramDefs, RequestContext rc){
         Object result = null;
         
         Object o = injector.getInstance(c);
@@ -60,6 +67,11 @@ public class MethodInvoker {
     }
     
     private Object resolveParamDef(ParamDef paramDef){
-        return injector.getInstance(paramDef.getParamType());
+        Key key = paramDef.getKey();
+        if (key != null){
+            return injector.getInstance(key);
+        }else{
+            return injector.getInstance(paramDef.getParamType());
+        }
     }
 }

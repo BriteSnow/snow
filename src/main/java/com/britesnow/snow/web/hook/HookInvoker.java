@@ -23,7 +23,7 @@ public class HookInvoker {
         
         if (appHookRefs != null){
             for (AppHookRef appHookRef : appHookRefs){
-                methodInvoker.invokeMethod(appHookRef.getCls(), appHookRef.getMethod(), appHookRef.getParamDefs());
+                methodInvoker.invokeHook(appHookRef,null);
             }
         }
     }
@@ -32,7 +32,7 @@ public class HookInvoker {
         List<ReqHookRef> reqHookRefs = hookRegistry.getRequestHooks(step);
         if (reqHookRefs != null){
             for (ReqHookRef reqHookRef : reqHookRefs){
-                methodInvoker.invokeMethod(reqHookRef.getCls(), reqHookRef.getMethod(), reqHookRef.getParamDefs(), rc);
+                methodInvoker.invokeHook(reqHookRef, rc);
             }
         }
     }

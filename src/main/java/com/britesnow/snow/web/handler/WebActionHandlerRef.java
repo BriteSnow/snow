@@ -3,12 +3,9 @@
  */
 package com.britesnow.snow.web.handler;
 
-
 import java.lang.reflect.Method;
 
 import com.britesnow.snow.web.handler.annotation.WebActionHandler;
-import com.britesnow.snow.web.param.resolver.WebParamResolverRef;
-
 
 public class WebActionHandlerRef extends WebHandlerRef{
 
@@ -19,9 +16,9 @@ public class WebActionHandlerRef extends WebHandlerRef{
 
 
     /*--------- Initialization ---------*/
-    public WebActionHandlerRef(Object object, Method method,WebParamResolverRef[] webParamResolverRefs, 
+    public WebActionHandlerRef(Class webClass, Method method,ParamDef[] paramDefs, 
                                WebActionHandler webAction) {
-        super(object,method,webParamResolverRefs);
+        super(webClass,method,paramDefs);
         this.webAction = webAction;
         
     }

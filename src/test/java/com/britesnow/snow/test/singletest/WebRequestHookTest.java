@@ -7,6 +7,7 @@ import junit.framework.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.britesnow.snow.test.singletest.classes.SampleStringValue;
 import com.britesnow.snow.test.singletest.classes.SimpleWebRequestHooks;
 import com.britesnow.snow.testsupport.SnowTestSupport;
 import com.britesnow.snow.testsupport.mock.RequestContextMock;
@@ -20,7 +21,8 @@ public class WebRequestHookTest extends SnowTestSupport {
 
     @BeforeClass
     public static void initTestClass() throws Exception {
-        SnowTestSupport.initWebApplication("src/test/resources/simpleApp",new CustomModule());
+        Map map = MapUtil.mapIt("testVal","testValue1");
+        SnowTestSupport.initWebApplication("src/test/resources/simpleApp", map, new CustomModule());
     }
     
     @Test
@@ -53,5 +55,10 @@ class CustomModule extends AbstractModule{
         return new Class[] {SimpleWebRequestHooks.class};
     }
     
+    @Provides
+    @SampleStringValue
+    public String getSampleStringValue(){
+        return "hello";
+    }
 }
 

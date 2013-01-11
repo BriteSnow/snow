@@ -1,35 +1,33 @@
 package com.britesnow.snow.web.handler;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-
-
-import com.britesnow.snow.util.AnnotationMap;
-import com.britesnow.snow.web.RequestContext;
-import com.britesnow.snow.web.param.resolver.WebParamResolverRef;
-import com.google.common.base.Throwables;
 
 public class WebHandlerRef {
     
-    protected Object webHandler;
+    protected Class webClass;
     protected Method method;
-    private WebParamResolverRef[] paramResolverRefs;
+    private ParamDef[] paramDefs;
     
-    WebHandlerRef(Object webHandlerObject, Method method, WebParamResolverRef[] paramResolverRefs) {
-        this.webHandler = webHandlerObject;
+    WebHandlerRef(Class webClass, Method method, ParamDef[] paramDefs) {
+        this.webClass = webClass;
         this.method = method;
-        this.paramResolverRefs = paramResolverRefs;
+        this.paramDefs = paramDefs;
     }
     
-    
-    public Object getHandlerObject(){
-        return webHandler;
-    }
     
     public Method getHandlerMethod(){
         return method;
     }    
     
+    public ParamDef[] getParamDefs(){
+        return paramDefs;
+    }
+    
+    public Class getWebClass(){
+        return webClass;
+    }
+    
+    /*
     public Object invoke(RequestContext rc){
         Object result = null;
         
@@ -57,5 +55,6 @@ public class WebHandlerRef {
         return result;
         
     }
+    */
 
 }

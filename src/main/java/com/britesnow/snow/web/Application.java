@@ -13,6 +13,7 @@ import com.britesnow.snow.SnowException;
 import com.britesnow.snow.web.db.hibernate.HibernateSessionFactoryBuilder;
 import com.britesnow.snow.web.exception.WebExceptionCatcherRef;
 import com.britesnow.snow.web.exception.WebExceptionContext;
+import com.britesnow.snow.web.handler.MethodInvoker;
 import com.britesnow.snow.web.handler.WebActionHandlerRef;
 import com.britesnow.snow.web.handler.WebHandlerContext;
 import com.britesnow.snow.web.handler.WebObjectRegistry;
@@ -58,6 +59,9 @@ public class Application {
     @Inject
     private HookInvoker                    hookInvoker;
 
+    @Inject
+    private MethodInvoker                  methodInvoker;
+
     // --------- LifeCycle --------- //
     public synchronized void init() {
         if (!initialized) {
@@ -73,7 +77,7 @@ public class Application {
                 freemarkerRenderer.init();
 
                 hookInvoker.invokeAppHooks(AppStep.INIT);
-                
+
                 // initialize the webApplicationLifeCycle if present
                 if (webApplicationLifeCycle != null) {
                     webApplicationLifeCycle.init();
@@ -91,9 +95,9 @@ public class Application {
     }
 
     public void shutdown() {
-        
+
         hookInvoker.invokeAppHooks(AppStep.SHUTDOWN);
-        
+
         if (webApplicationLifeCycle != null) {
             webApplicationLifeCycle.shutdown();
         }
@@ -168,13 +172,10 @@ public class Application {
         }
 
         // --------- Invoke Method --------- //
-
         Object result = null;
-
         try {
-            result = webActionRef.invoke(rc);
+            result = methodInvoker.invokeWebHandler(webActionRef, rc);
         } catch (Throwable t) {
-            // TODO: add support for WebExceptionCatcher
             throw Throwables.propagate(t);
         }
         // --------- /Invoke Method --------- //
@@ -208,16 +209,11 @@ public class Application {
     private void invokeWebModelRef(WebModelHandlerRef webModelRef, RequestContext rc) {
 
         if (webModelRef != null) {
-
             try {
-
-                webModelRef.invoke(rc);
-
+                methodInvoker.invokeWebHandler(webModelRef,rc);
             } catch (Exception e) {
-                // TODO: needs to add the support for WebExceptionCatcher
                 throw Throwables.propagate(e);
             }
-
         }
     }
 
@@ -228,7 +224,7 @@ public class Application {
     void processWebResourceHandler(RequestContext rc) {
         WebResourceHandlerRef webResourceHandlerRef = webObjectRegistry.getWebResourceHandlerRef(rc.getResourcePath());
         if (webResourceHandlerRef != null) {
-            webResourceHandlerRef.invoke(rc);
+            methodInvoker.invokeWebHandler(webResourceHandlerRef,rc);
         } else {
             throw new RuntimeException("No WebResourceHandler for " + rc.getResourcePath());
         }

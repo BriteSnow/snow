@@ -4,11 +4,14 @@ import static com.britesnow.snow.web.renderer.freemarker.FreemarkerUtil.getDataM
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.britesnow.snow.web.RequestContext;
 import com.britesnow.snow.web.handler.FreemarkerMethodHandlerRef;
+import com.britesnow.snow.web.handler.MethodInvoker;
 
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModelException;
@@ -20,6 +23,9 @@ public class FreemarkerMethodProxy  implements TemplateMethodModelEx{
     
     private String name;
     private FreemarkerMethodHandlerRef ref;
+    
+    @Inject
+    private MethodInvoker methodInvoker;
     
     public FreemarkerMethodProxy(String name, FreemarkerMethodHandlerRef ref){
         this.name = name;
@@ -39,7 +45,7 @@ public class FreemarkerMethodProxy  implements TemplateMethodModelEx{
         rc.setAttribute(FREEMARKER_METHOD_ARGUMENTS,args);
         Object result = null;
         try{
-            result = ref.invoke(rc);
+            methodInvoker.invokeWebHandler(ref, rc);
         }catch(Exception e){
             logger.error(e.getMessage());
         }finally{

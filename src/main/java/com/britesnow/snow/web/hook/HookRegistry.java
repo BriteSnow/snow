@@ -42,7 +42,7 @@ public class HookRegistry {
     
     // --------- Initialization Methods --------- //
     public void addAppHook(Class cls,Method m,WebApplicationHook webApplicationHook){
-        AppHookRef appHookRef = new AppHookRef(cls, m, paramDefBuilder.buildParamDefs(m), webApplicationHook.step());
+        AppHookRef appHookRef = new AppHookRef(cls, m, paramDefBuilder.buildParamDefs(m,false), webApplicationHook.step());
         addAppHookRef(appHookRef);
     }  
     
@@ -57,7 +57,7 @@ public class HookRegistry {
 
     
     public void addReqHook(Class cls,Method m,WebRequestHook webRequestHook){
-        ReqHookRef reqHookRef = new ReqHookRef(cls, m, paramDefBuilder.buildParamDefs(m), webRequestHook.step());
+        ReqHookRef reqHookRef = new ReqHookRef(cls, m, paramDefBuilder.buildParamDefs(m,true), webRequestHook.step());
         addReqHookRef(reqHookRef);
     }
     

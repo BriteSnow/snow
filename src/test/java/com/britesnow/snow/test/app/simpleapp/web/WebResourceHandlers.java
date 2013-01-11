@@ -32,5 +32,5 @@ public class WebResourceHandlers {
     @WebResourceHandler(matches="/echo2/.*",ext={".txt",".text"})
     public void handleEcho2Files(@WebPath(1)String fileName, RequestContext rc){
         httpWriter.writeStringContent(rc, fileName, new StringReader(fileName), true, null);
-    }    
+    } 
 }

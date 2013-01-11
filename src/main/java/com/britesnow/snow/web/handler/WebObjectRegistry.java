@@ -20,11 +20,11 @@ import com.britesnow.snow.web.handler.annotation.FreemarkerDirectiveHandler;
 import com.britesnow.snow.web.hook.HookRegistry;
 import com.britesnow.snow.web.hook.annotation.WebApplicationHook;
 import com.britesnow.snow.web.hook.annotation.WebRequestHook;
-import com.britesnow.snow.web.param.resolver.WebParamResolverRef;
 import com.britesnow.snow.web.param.resolver.WebParamResolverRegistry;
 import com.britesnow.snow.web.renderer.freemarker.FreemarkerDirectiveProxy;
 import com.britesnow.snow.web.renderer.freemarker.FreemarkerMethodProxy;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 @Singleton
@@ -46,10 +46,16 @@ public class WebObjectRegistry {
     @Inject
     private HookRegistry                                            hookRegistry;
 
+    @Inject
+    private ParamDefBuilder                                         paramDefBuilder;
+
     @Inject(optional = true)
     @Nullable
     @WebObjects
     private Object[]                                                webObjects;
+    
+    @Inject
+    private Injector injector;
 
     /**
      * Must be called before calling registerWebHandlers.<br />
@@ -191,7 +197,7 @@ public class WebObjectRegistry {
             // if it is an action method, then, add the WebAction Object and
             // Method to the action Dic
             if (webActionHandlerAnnotation != null) {
-                registerWebAction(targetObject, m, webActionHandlerAnnotation);
+                registerWebAction(c, m, webActionHandlerAnnotation);
             }
             // --------- /Register WebActionHandler --------- //
 
@@ -199,7 +205,7 @@ public class WebObjectRegistry {
             WebModelHandler webModelHandlerAnnotation = m.getAnnotation(WebModelHandler.class);
             if (webModelHandlerAnnotation != null) {
 
-                registerWebModel(targetObject, m, webModelHandlerAnnotation);
+                registerWebModel(c, m, webModelHandlerAnnotation);
 
                 // if this is for a leaf path, grab the startWith values from the
                 // the web model handler annotation.
@@ -221,33 +227,33 @@ public class WebObjectRegistry {
             // --------- Register WebResourceHandler --------- //
             WebResourceHandler webResourceHandlerAnnotation = m.getAnnotation(WebResourceHandler.class);
             if (webResourceHandlerAnnotation != null) {
-                registerWebResourceHandler(targetObject, m, webResourceHandlerAnnotation);
+                registerWebResourceHandler(c, m, webResourceHandlerAnnotation);
             }
             // --------- /Register WebResourceHandler --------- //
-            
+
             // --------- Register WebRequestHook --------- //
             WebRequestHook webRequestHook = m.getAnnotation(WebRequestHook.class);
-            if (webRequestHook != null){
-                hookRegistry.addReqHook(c,m,webRequestHook);
+            if (webRequestHook != null) {
+                hookRegistry.addReqHook(c, m, webRequestHook);
             }
             // --------- Register WebRequestHook --------- //
 
             // --------- Register WebRequestHook --------- //
             WebApplicationHook webApplicationHook = m.getAnnotation(WebApplicationHook.class);
-            if (webApplicationHook != null){
-                hookRegistry.addAppHook(c,m,webApplicationHook);
+            if (webApplicationHook != null) {
+                hookRegistry.addAppHook(c, m, webApplicationHook);
             }
             // --------- Register WebRequestHook --------- //
-            
+
             // --------- Freemarker handlers --------- //
             FreemarkerDirectiveHandler webTemplateDirective = m.getAnnotation(FreemarkerDirectiveHandler.class);
             if (webTemplateDirective != null) {
-                registerFreemarkerDirective(targetObject, m, webTemplateDirective);
+                registerFreemarkerDirective(c, m, webTemplateDirective);
             }
 
             FreemarkerMethodHandler freemarkerMethodHandler = m.getAnnotation(FreemarkerMethodHandler.class);
             if (freemarkerMethodHandler != null) {
-                registerFreemarkerMethod(targetObject, m, freemarkerMethodHandler);
+                registerFreemarkerMethod(c, m, freemarkerMethodHandler);
             }
             // --------- /Freemarker handlers --------- //
 
@@ -271,9 +277,9 @@ public class WebObjectRegistry {
         }
     }
 
-    private final void registerWebModel(Object webHandler, Method m, WebModelHandler webModel) {
-        WebParamResolverRef webParamResolverRefs[] = buildWebParamResolverRefs(m);
-        WebModelHandlerRef webModelRef = new WebModelHandlerRef(webHandler, m, webParamResolverRefs, webModel);
+    private final void registerWebModel(Class webClass, Method m, WebModelHandler webModel) {
+        //WebParamResolverRef webParamResolverRefs[] = buildWebParamResolverRefs(m);
+        WebModelHandlerRef webModelRef = new WebModelHandlerRef(webClass, m, paramDefBuilder.buildParamDefs(m,true), webModel);
         webModelHandlerRefList.add(webModelRef);
 
         String startWithArray[] = webModel.startsWith();
@@ -282,7 +288,7 @@ public class WebObjectRegistry {
         }
     }
 
-    private final void registerWebAction(Object webHandler, Method m, WebActionHandler webAction) {
+    private final void registerWebAction(Class webClass, Method m, WebActionHandler webAction) {
 
         String actionName = webAction.name();
         // if the action does have an empty name, then, take the name of the
@@ -300,51 +306,49 @@ public class WebObjectRegistry {
         }
         // if not found, create an empty list
         // add this object and method to the list
-        WebParamResolverRef webParamResolverRefs[] = buildWebParamResolverRefs(m);
-        webActionHandlerDic.put(actionName, new WebActionHandlerRef(webHandler, m, webParamResolverRefs, webAction));
+        webActionHandlerDic.put(actionName, new WebActionHandlerRef(webClass, m, paramDefBuilder.buildParamDefs(m,true), webAction));
     }
 
-    private final void registerWebResourceHandler(Object webHandler, Method m, WebResourceHandler webResourceHandler) {
-        WebParamResolverRef webParamResolverRefs[] = buildWebParamResolverRefs(m);
-        WebResourceHandlerRef webFileRef = new WebResourceHandlerRef(webHandler, m, webParamResolverRefs, webResourceHandler);
+    private final void registerWebResourceHandler(Class webClass, Method m, WebResourceHandler webResourceHandler) {
+        WebResourceHandlerRef webFileRef = new WebResourceHandlerRef(webClass, m, paramDefBuilder.buildParamDefs(m,true), webResourceHandler);
         webResourceHandlerList.add(webFileRef);
     }
 
-    private final void registerFreemarkerDirective(Object webHandler, Method m,
+    private final void registerFreemarkerDirective(Class webClass, Method m,
                             FreemarkerDirectiveHandler freemarkerDirectiveHandler) {
         String templateMethodName = freemarkerDirectiveHandler.name();
-        // if the action does have an empty name, then, take the name of the
-        // method
+        // if the action does have an empty name, then, take the name of the method
         if (templateMethodName.length() == 0) {
             templateMethodName = m.getName();
         }
 
-        WebParamResolverRef webParamResolverRefs[] = buildWebParamResolverRefs(m);
-        FreemakerDirectiveHandlerRef directiveRef = new FreemakerDirectiveHandlerRef(webHandler, m, webParamResolverRefs, freemarkerDirectiveHandler);
+        FreemakerDirectiveHandlerRef directiveRef = new FreemakerDirectiveHandlerRef(webClass, m, paramDefBuilder.buildParamDefs(m,true), freemarkerDirectiveHandler);
         FreemarkerDirectiveProxy directiveProxy = new FreemarkerDirectiveProxy(templateMethodName, directiveRef);
+        injector.injectMembers(directiveProxy);
         freemarkerDirectiveProxyList.add(directiveProxy);
     }
 
-    private final void registerFreemarkerMethod(Object webHandler, Method m,
+    private final void registerFreemarkerMethod(Class webClass, Method m,
                             FreemarkerMethodHandler freemarkerMethodHandler) {
         String name = freemarkerMethodHandler.name();
         if (name.length() == 0) {
             name = m.getName();
         }
-        WebParamResolverRef webParamResolverRefs[] = buildWebParamResolverRefs(m);
-        FreemarkerMethodHandlerRef ref = new FreemarkerMethodHandlerRef(webHandler, m, webParamResolverRefs, freemarkerMethodHandler);
+        FreemarkerMethodHandlerRef ref = new FreemarkerMethodHandlerRef(webClass, m, paramDefBuilder.buildParamDefs(m,true), freemarkerMethodHandler);
         FreemarkerMethodProxy proxy = new FreemarkerMethodProxy(name, ref);
+        injector.injectMembers(proxy);
         freemarkerMethodProxyList.add(proxy);
 
     }
 
-    private final void registerWebExceptionCatcher(Object webHandler, Method m, WebExceptionCatcher webExceptionHandler) {
-        WebExceptionCatcherRef webExcpetionCatcherRef = new WebExceptionCatcherRef(webHandler, m, webExceptionHandler);
+    private final void registerWebExceptionCatcher(Object object, Method m, WebExceptionCatcher webExceptionHandler) {
+        WebExceptionCatcherRef webExcpetionCatcherRef = new WebExceptionCatcherRef(object, m, webExceptionHandler);
         webExceptionCatcherMap.put(webExcpetionCatcherRef.getThrowableClass(), webExcpetionCatcherRef);
     }
 
     // --------- /Private Registration Methods (call at init() time) --------- //
 
+    /*
     private WebParamResolverRef[] buildWebParamResolverRefs(Method webHandlerMethod) {
         Class[] paramTypes = webHandlerMethod.getParameterTypes();
         WebParamResolverRef[] webParamResolverRefs = new WebParamResolverRef[paramTypes.length];
@@ -355,6 +359,7 @@ public class WebObjectRegistry {
 
         return webParamResolverRefs;
     }
+    */
 
     public static Class getNonGuiceEnhancedClass(Object obj) {
         String className = obj.getClass().getName();

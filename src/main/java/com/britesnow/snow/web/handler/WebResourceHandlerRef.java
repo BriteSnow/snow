@@ -6,15 +6,14 @@ import java.util.regex.Pattern;
 
 import com.britesnow.snow.util.FileUtil;
 import com.britesnow.snow.web.handler.annotation.WebResourceHandler;
-import com.britesnow.snow.web.param.resolver.WebParamResolverRef;
 
 public class WebResourceHandlerRef extends WebHandlerRef implements PathMatcher {
 
     private WebResourceHandler webResourceHandler;
 
-    public WebResourceHandlerRef(Object object, Method method, WebParamResolverRef[] webParamResolverRefs,
+    public WebResourceHandlerRef(Class webClass, Method method, ParamDef[] paramDefs,
                             WebResourceHandler webResourceHandler) {
-        super(object, method, webParamResolverRefs);
+        super(webClass, method, paramDefs);
         this.webResourceHandler = webResourceHandler;
     }
 

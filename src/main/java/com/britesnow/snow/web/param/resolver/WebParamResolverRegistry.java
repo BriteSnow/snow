@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import com.britesnow.snow.web.binding.WebObjects;
 import com.britesnow.snow.web.handler.WebObjectRegistry;
-import com.britesnow.snow.web.param.annotation.WebParam;
 import com.britesnow.snow.web.param.resolver.annotation.WebParamResolver;
 import com.britesnow.snow.web.renderer.freemarker.FreemarkerParamResolvers;
 import com.google.inject.Inject;
@@ -137,7 +136,7 @@ public class WebParamResolverRegistry {
         // if still null, then, check the parent classes
         if (ref == null) {
             Class parentClass = paramType.getSuperclass();
-            while (parentClass != null && ref == null && parentClass != Object.class) {
+            while (parentClass != null && ref == null) {
                 ref = refByType.get(parentClass);
                 parentClass = parentClass.getSuperclass();
             }
@@ -157,12 +156,11 @@ public class WebParamResolverRegistry {
     }
 
     private static Annotation getFirstAnnotationButWebParam(Annotation[] paramAnnotations) {
-        for (Annotation a : paramAnnotations) {
-            if (a.annotationType() != WebParam.class) {
-                return a;
-            }
+        if (paramAnnotations.length > 0){
+            return paramAnnotations[0];
+        }else{
+            return null;
         }
-        return null;
     }
 
 }

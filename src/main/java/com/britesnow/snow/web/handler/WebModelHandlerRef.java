@@ -8,16 +8,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.britesnow.snow.web.handler.annotation.WebModelHandler;
-import com.britesnow.snow.web.param.resolver.WebParamResolverRef;
 
 
 public class WebModelHandlerRef extends WebHandlerRef implements PathMatcher {
 
     WebModelHandler webModel;
 
-    public WebModelHandlerRef(Object object, Method method,WebParamResolverRef[] webParamResolverRefs,
+    public WebModelHandlerRef(Class webClass, Method method,ParamDef[] paramDefs,
                               WebModelHandler webModel) {
-        super(object, method,webParamResolverRefs);
+        super(webClass, method,paramDefs);
         this.webModel = webModel;
     }
     

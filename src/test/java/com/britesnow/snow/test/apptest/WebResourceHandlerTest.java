@@ -5,15 +5,19 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import com.britesnow.snow.test.app.simpleapp.web.WebResourceHandlers;
 import com.britesnow.snow.testsupport.SnowTestSupport;
 import com.britesnow.snow.testsupport.mock.RequestContextMock;
 import com.britesnow.snow.testsupport.mock.RequestContextMockFactory.RequestMethod;
+import com.britesnow.snow.web.binding.WebClasses;
+import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
 
 public class WebResourceHandlerTest extends SnowTestSupport {
     
     @BeforeClass
     public static void initTestClass() throws Exception {
-        SnowTestSupport.initWebApplication("src/test/resources/simpleApp");
+        SnowTestSupport.initWebApplication("src/test/resources/simpleApp", new CustomAppModule());
     }
     
     @Test
@@ -52,4 +56,19 @@ public class WebResourceHandlerTest extends SnowTestSupport {
         assertEquals(fileName,result);
     }    
 
+}
+
+class CustomAppModule extends AbstractModule{
+
+    @Override
+    protected void configure() {
+        
+    }
+    
+    @Provides
+    @WebClasses
+    public Class[] provideWebClasses(){
+        return new Class[] {WebResourceHandlers.class};
+    }
+    
 }

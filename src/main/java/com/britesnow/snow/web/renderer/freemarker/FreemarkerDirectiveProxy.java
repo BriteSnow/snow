@@ -8,11 +8,14 @@ import static com.britesnow.snow.web.renderer.freemarker.FreemarkerUtil.getDataM
 import java.io.IOException;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.britesnow.snow.web.RequestContext;
 import com.britesnow.snow.web.handler.FreemakerDirectiveHandlerRef;
+import com.britesnow.snow.web.handler.MethodInvoker;
 
 import freemarker.core.Environment;
 import freemarker.template.TemplateDirectiveBody;
@@ -27,6 +30,9 @@ public class FreemarkerDirectiveProxy implements TemplateDirectiveModel {
     
     private String name;
     private FreemakerDirectiveHandlerRef freemarkerDirectiveRef;
+    
+    @Inject
+    private MethodInvoker methodInvoker;
     
     public FreemarkerDirectiveProxy(String name,FreemakerDirectiveHandlerRef webTemplateDirectiveRef){
         this.name = name;
@@ -43,7 +49,7 @@ public class FreemarkerDirectiveProxy implements TemplateDirectiveModel {
         RequestContext rc = getDataModel("_r.rc", RequestContext.class);
         try {
             rc.setAttribute(FREEMARKER_DIRECTIVE_CONTEXT, new FreemarkerDirectiveContext(env, paramMap));
-            freemarkerDirectiveRef.invoke(rc);
+            methodInvoker.invokeWebHandler(freemarkerDirectiveRef, rc);
         } catch (Exception e) {
             logger.error(e.getMessage());
         }finally{

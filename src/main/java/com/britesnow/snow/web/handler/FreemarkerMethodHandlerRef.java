@@ -6,15 +6,14 @@ package com.britesnow.snow.web.handler;
 import java.lang.reflect.Method;
 
 import com.britesnow.snow.web.handler.annotation.FreemarkerMethodHandler;
-import com.britesnow.snow.web.param.resolver.WebParamResolverRef;
 
 
 public class FreemarkerMethodHandlerRef extends WebHandlerRef {
 
     FreemarkerMethodHandler freemarkerMethodHandler;
     
-    public FreemarkerMethodHandlerRef(Object object, Method method,WebParamResolverRef[] webParamResolverRefs, FreemarkerMethodHandler freemarkerMethodHandler) {
-        super(object, method, webParamResolverRefs);
+    public FreemarkerMethodHandlerRef(Class webClass, Method method,ParamDef[] paramDefs, FreemarkerMethodHandler freemarkerMethodHandler) {
+        super(webClass, method, paramDefs);
         this.freemarkerMethodHandler = freemarkerMethodHandler;
     }    
     
