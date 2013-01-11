@@ -25,4 +25,5 @@ public class FreemarkerHandlers {
         
         return arg0;
     }
+    
 }

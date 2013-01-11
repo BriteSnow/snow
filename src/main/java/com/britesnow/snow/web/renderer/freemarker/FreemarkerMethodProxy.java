@@ -45,7 +45,7 @@ public class FreemarkerMethodProxy  implements TemplateMethodModelEx{
         rc.setAttribute(FREEMARKER_METHOD_ARGUMENTS,args);
         Object result = null;
         try{
-            methodInvoker.invokeWebHandler(ref, rc);
+            result = methodInvoker.invokeWebHandler(ref, rc);
         }catch(Exception e){
             logger.error(e.getMessage());
         }finally{
