@@ -28,7 +28,7 @@ public class SimpleWebRequestHooks{
     public void reqHookStart(@WebModel Map m){
         m.put("webRequestHook-start", "aaa");
     }
-
+    
     @WebRequestHook(phase=ReqPhase.START)
     public void reqHookStartAfter(@WebModel Map m){
         String v = m.get("webRequestHook-start") + "bbb";

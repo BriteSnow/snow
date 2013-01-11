@@ -244,7 +244,7 @@ public class Application {
 
         WebExceptionCatcherRef webExceptionCatcherRef = webObjectRegistry.getWebExceptionCatcherRef(t.getClass());
         if (webExceptionCatcherRef != null) {
-            webExceptionCatcherRef.invoke(t, webExceptionContext, rc);
+            methodInvoker.invokeWebException(webExceptionCatcherRef,t,webExceptionContext,rc);
             return true;
         } else {
             return false;

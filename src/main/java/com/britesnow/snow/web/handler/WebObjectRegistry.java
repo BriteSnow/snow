@@ -9,7 +9,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import com.britesnow.snow.web.binding.WebObjects;
+import com.britesnow.snow.web.binding.WebClasses;
 import com.britesnow.snow.web.exception.WebExceptionCatcherRef;
 import com.britesnow.snow.web.exception.annotation.WebExceptionCatcher;
 import com.britesnow.snow.web.handler.annotation.FreemarkerMethodHandler;
@@ -51,8 +51,8 @@ public class WebObjectRegistry {
 
     @Inject(optional = true)
     @Nullable
-    @WebObjects
-    private Object[]                                                webObjects;
+    @WebClasses
+    private Class[]                                                webClasses;
     
     @Inject
     private Injector injector;
@@ -66,11 +66,11 @@ public class WebObjectRegistry {
 
         WebObjectValidationExceptions exs = new WebObjectValidationExceptions();
 
-        if (webObjects != null) {
-            for (Object webObject : webObjects) {
+        if (webClasses != null) {
+            for (Class webClass : webClasses) {
                 try {
-                    validateWebObject(webObject);
-                    registerWebObjectMethods(webObject);
+                    validateWebObject(webClass);
+                    registerWebObjectMethods(webClass);
                 } catch (WebObjectValidationException ex) {
                     exs.addWebException(ex);
                 }
@@ -87,8 +87,8 @@ public class WebObjectRegistry {
      * @param webObject
      * @since 2.0.0
      */
-    private void validateWebObject(Object webObject) throws WebObjectValidationException {
-        Class cls = getNonGuiceEnhancedClass(webObject);
+    private void validateWebObject(Class webClass) throws WebObjectValidationException {
+        Class cls = webClass;
 
         Object an = cls.getAnnotation(Singleton.class);
         if (an == null) {
@@ -184,10 +184,11 @@ public class WebObjectRegistry {
     }
 
     // --------- Private Registration Methods (call at init() time) --------- //
-    private final void registerWebObjectMethods(Object targetObject) {
+    private final void registerWebObjectMethods(Class webClass) {
 
-        Class c = getNonGuiceEnhancedClass(targetObject);
-
+        //Class c = getNonGuiceEnhancedClass(targetObject);
+        Class c = webClass;
+        
         Method methods[] = c.getMethods();
         List<String> additionalLeafPaths = new ArrayList<String>();
 
@@ -260,7 +261,7 @@ public class WebObjectRegistry {
             // --------- Register WebException --------- //
             WebExceptionCatcher webExceptionHandler = m.getAnnotation(WebExceptionCatcher.class);
             if (webExceptionHandler != null) {
-                registerWebExceptionCatcher(targetObject, m, webExceptionHandler);
+                registerWebExceptionCatcher(c, m, webExceptionHandler);
             }
             // --------- /Register WebException --------- //
 
@@ -341,8 +342,8 @@ public class WebObjectRegistry {
 
     }
 
-    private final void registerWebExceptionCatcher(Object object, Method m, WebExceptionCatcher webExceptionHandler) {
-        WebExceptionCatcherRef webExcpetionCatcherRef = new WebExceptionCatcherRef(object, m, webExceptionHandler);
+    private final void registerWebExceptionCatcher(Class cls, Method m, WebExceptionCatcher webExceptionHandler) {
+        WebExceptionCatcherRef webExcpetionCatcherRef = new WebExceptionCatcherRef(cls, m, webExceptionHandler);
         webExceptionCatcherMap.put(webExcpetionCatcherRef.getThrowableClass(), webExcpetionCatcherRef);
     }
 

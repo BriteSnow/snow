@@ -8,7 +8,6 @@ import javax.annotation.Nullable;
 
 import com.britesnow.snow.web.binding.ApplicationPackageBase;
 import com.britesnow.snow.web.binding.WebClasses;
-import com.britesnow.snow.web.binding.WebObjects;
 import com.britesnow.snow.web.exception.annotation.WebExceptionCatcher;
 import com.britesnow.snow.web.handler.annotation.FreemarkerMethodHandler;
 import com.britesnow.snow.web.handler.annotation.WebActionHandler;
@@ -56,26 +55,6 @@ public class DefaultApplicationModule extends AbstractModule {
         }
     }
 
-    @Provides
-    @WebObjects
-    @Inject
-    @Nullable
-    public Object[] providesWebObjects(Injector injector, @WebClasses Class[] webHandlerClasses) {
-
-        if (webHandlerClasses != null) {
-            Object[] webHandlers = new Object[webHandlerClasses.length];
-            int i = 0;
-            for (Class cls : webHandlerClasses) {
-
-                Object webHandler = injector.getInstance(cls);
-                webHandlers[i] = webHandler;
-                i++;
-            }
-            return webHandlers;
-        }
-
-        return null;
-    }
 
     @Provides
     @WebClasses

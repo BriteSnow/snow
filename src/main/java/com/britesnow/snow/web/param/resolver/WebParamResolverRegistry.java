@@ -11,8 +11,7 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.britesnow.snow.web.binding.WebObjects;
-import com.britesnow.snow.web.handler.WebObjectRegistry;
+import com.britesnow.snow.web.binding.WebClasses;
 import com.britesnow.snow.web.param.resolver.annotation.WebParamResolver;
 import com.britesnow.snow.web.renderer.freemarker.FreemarkerParamResolvers;
 import com.google.inject.Inject;
@@ -28,44 +27,38 @@ public class WebParamResolverRegistry {
     // for now, just support one annotation
     private Map<Class<? extends Annotation>, Map<Class, WebParamResolverRef>> refByAnnotation = new HashMap<Class<? extends Annotation>, Map<Class, WebParamResolverRef>>();
 
-    @Inject
-    private SystemWebParamResolvers                                           systemWebParamResolvers;
-
-    @Inject
-    private FreemarkerParamResolvers                                          freemarkerParamResolvers;
-
     @Inject(optional = true)
     @Nullable
-    @WebObjects
-    private Object[]                                                          webObjects;
+    @WebClasses
+    private Class[]                                                          webClasses;
 
     /**
      * Must be called before calling registerResolvers. Must be called at init time, no thread safe
      */
     public void init() {
         // first register the SystemWebParamResolvers
-        registerWebParamResolvers(systemWebParamResolvers);
-
-        registerWebParamResolvers(freemarkerParamResolvers);
+        registerWebParamResolvers(SystemWebParamResolvers.class);
+        registerWebParamResolvers(FreemarkerParamResolvers.class);
 
         // then, register the applicaiton WebParamResolvers
-        if (webObjects != null) {
-            for (Object webObject : webObjects) {
-                registerWebParamResolvers(webObject);
+        if (webClasses != null) {
+            for (Class webClass : webClasses) {
+                registerWebParamResolvers(webClass);
             }
         }
 
     }
 
-    final private void registerWebParamResolvers(Object resolversObject) {
+    final private void registerWebParamResolvers(Class webResolverClass) {
 
-        Class cls = WebObjectRegistry.getNonGuiceEnhancedClass(resolversObject);
+        //Class cls = WebObjectRegistry.getNonGuiceEnhancedClass(resolversObject);
+        Class cls = webResolverClass;
 
         for (Method method : cls.getMethods()) {
             WebParamResolver webParamResolver = method.getAnnotation(WebParamResolver.class);
 
             if (webParamResolver != null) {
-                WebParamResolverRef ref = new WebParamResolverRef(webParamResolver, resolversObject, method);
+                WebParamResolverRef ref = new WebParamResolverRef(webParamResolver, cls, method);
                 Class returnType = ref.getReturnType();
                 Class[] annotatedWith = ref.getAnnotatedWith();
 

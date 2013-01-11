@@ -2,9 +2,7 @@ package com.britesnow.snow.web.exception;
 
 import java.lang.reflect.Method;
 
-import com.britesnow.snow.web.RequestContext;
 import com.britesnow.snow.web.exception.annotation.WebExceptionCatcher;
-import com.google.common.base.Throwables;
 
 public class WebExceptionCatcherRef {
     @SuppressWarnings("unused")
@@ -12,14 +10,14 @@ public class WebExceptionCatcherRef {
 
     private Class<? extends Throwable> throwableClass;
 
-    private Object                     webObject;
+    private Class                      webClass;
     private Method                     method;
 
-    public WebExceptionCatcherRef(Object webObject, Method method, WebExceptionCatcher webExceptionHandler) {
+    public WebExceptionCatcherRef(Class webClass, Method method, WebExceptionCatcher webExceptionHandler) {
 
-        this.webObject = webObject;
+        this.webClass = webClass;
         this.method = method;
-
+        
         this.webExceptionHandler = webExceptionHandler;
 
         Class[] paramTypes = method.getParameterTypes();
@@ -34,13 +32,11 @@ public class WebExceptionCatcherRef {
         return throwableClass;
     }
 
+    public Class getWebClass(){
+        return webClass;
+    }
     
-    public void invoke(Throwable e, WebExceptionContext webExceptionException, RequestContext rc) {
-        Object[] values = new Object[] { e, webExceptionException, rc };
-        try {
-            method.invoke(webObject, values);
-        } catch (Throwable t) {
-            throw Throwables.propagate(t);
-        }
+    public Method getWebMethod(){
+        return method;
     }
 }

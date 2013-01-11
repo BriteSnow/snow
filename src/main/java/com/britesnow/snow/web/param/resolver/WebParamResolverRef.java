@@ -2,16 +2,13 @@ package com.britesnow.snow.web.param.resolver;
 
 import java.lang.reflect.Method;
 
-import com.britesnow.snow.util.AnnotationMap;
-import com.britesnow.snow.web.RequestContext;
 import com.britesnow.snow.web.param.resolver.annotation.WebParamResolver;
-import com.google.common.base.Throwables;
 
 public class WebParamResolverRef {
     
     // set a constructor
     private final WebParamResolver webParamResolverAnnotation;
-    private final Object resolverObject; 
+    private final Class resolverClass; 
 
     private final Method resolverMethod;
     
@@ -19,9 +16,9 @@ public class WebParamResolverRef {
     private final Class returnType;
     
     
-    public WebParamResolverRef(WebParamResolver webParamResolverAnnotation,Object resolverObject, Method resolverMethod){
+    public WebParamResolverRef(WebParamResolver webParamResolverAnnotation,Class resolverClass, Method resolverMethod){
         this.webParamResolverAnnotation = webParamResolverAnnotation;
-        this.resolverObject = resolverObject;
+        this.resolverClass = resolverClass;
         this.resolverMethod = resolverMethod;
         
         returnType = resolverMethod.getReturnType();
@@ -37,14 +34,13 @@ public class WebParamResolverRef {
         return webParamResolverAnnotation.annotatedWith();
     }
     
-    public Object invoke(AnnotationMap annotationMap, Class paramType, RequestContext rc){
-        Object[] args = new Object[]{annotationMap, paramType,rc};
-        try {
-            return resolverMethod.invoke(resolverObject, args);
-        } catch (Exception e) {
-            throw Throwables.propagate(e);
-        }
-        
+    
+    public Class getWebClass(){
+        return resolverClass;
+    }
+    
+    public Method getWebMethod(){
+        return resolverMethod;
     }
     // --------- /Public --------- //    
     

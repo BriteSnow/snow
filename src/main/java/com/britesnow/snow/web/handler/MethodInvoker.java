@@ -5,6 +5,8 @@ import java.lang.reflect.Method;
 import javax.inject.Inject;
 
 import com.britesnow.snow.web.RequestContext;
+import com.britesnow.snow.web.exception.WebExceptionCatcherRef;
+import com.britesnow.snow.web.exception.WebExceptionContext;
 import com.britesnow.snow.web.hook.HookRef;
 import com.britesnow.snow.web.param.resolver.WebParamResolverRef;
 import com.google.common.base.Throwables;
@@ -27,6 +29,16 @@ public class MethodInvoker {
         return invokeMethod(hookRef.getCls(), hookRef.getMethod(), hookRef.getParamDefs(),rc);
     }
     
+    public void invokeWebException(WebExceptionCatcherRef ecRef, Throwable ecT,  WebExceptionContext webExceptionContext,RequestContext rc){
+        Object[] values = new Object[] { ecT, webExceptionContext, rc };
+        try {
+            Object webObject = injector.getInstance(ecRef.getWebClass());
+            ecRef.getWebMethod().invoke(webObject, values);
+        } catch (Throwable t) {
+            throw Throwables.propagate(t);
+        }        
+    }
+    
     
     private Object invokeMethod(Class c, Method m, ParamDef[] paramDefs, RequestContext rc){
         Object result = null;
@@ -35,10 +47,11 @@ public class MethodInvoker {
         
         Object[] values = new Object[paramDefs.length];
         for (int i = 0; i < paramDefs.length; i++){
-            if (rc != null){
-                values[i] = resolveParamDef(paramDefs[i],rc);
+            ParamDef paramDef = paramDefs[i];
+            if (rc != null && paramDef.hasWebParamResolver()){
+                values[i] = webResolveParamDef(paramDef,rc);
             }else{
-                values[i] = resolveParamDef(paramDefs[i]);
+                values[i] = guiceResolveParamDef(paramDef);
             }
         }
         
@@ -51,22 +64,23 @@ public class MethodInvoker {
         return result;
     }
     
-    // will try the WebParamResolver first, and then, fall back on the guice one.
-    private Object resolveParamDef(ParamDef paramDef, RequestContext rc){
-        
+    private Object webResolveParamDef(ParamDef paramDef, RequestContext rc){
+        Object[] values = new Object[]{paramDef.getAnnotationMap(), paramDef.getParamType(),rc};
         Object result = null;
+        WebParamResolverRef ref = paramDef.getWebParamResolverRef();
         
-        WebParamResolverRef webParamResolverRef = paramDef.getWebParamResolverRef();
-        if (webParamResolverRef != null){
-            result = webParamResolverRef.invoke(paramDef.getAnnotationMap(), paramDef.getParamType(), rc);
-        }else{
-            result = resolveParamDef(paramDef);
-        }
+        Object o = injector.getInstance(ref.getWebClass());
+        try {
+            result = ref.getWebMethod().invoke(o, values);
+        } catch (Exception e) {
+            throw Throwables.propagate(e);
+        }        
         
         return result;
     }
     
-    private Object resolveParamDef(ParamDef paramDef){
+
+    private Object guiceResolveParamDef(ParamDef paramDef){
         Key key = paramDef.getKey();
         if (key != null){
             return injector.getInstance(key);
