@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Set;
 
-import javax.annotation.Nullable;
-
 import com.britesnow.snow.web.binding.ApplicationPackageBase;
 import com.britesnow.snow.web.binding.WebClasses;
 import com.britesnow.snow.web.exception.annotation.WebExceptionCatcher;
@@ -26,8 +24,6 @@ import com.britesnow.snow.web.path.ResourcePathResolver;
 import com.britesnow.snow.web.renderer.JsonLibJsonRenderer;
 import com.britesnow.snow.web.renderer.JsonRenderer;
 import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Provides;
 
 import com.metapossum.utils.scanner.reflect.ClassesInPackageScanner;
