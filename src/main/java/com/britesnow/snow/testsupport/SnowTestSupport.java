@@ -39,7 +39,7 @@ public class SnowTestSupport {
     }
 
     public static void initWebApplication(String webAppFolderStr, Map properties) throws Exception{
-        initWebApplication(webAppFolderStr,properties);
+        initWebApplication(webAppFolderStr,properties,(Module[])null);
     }
     
     /**
