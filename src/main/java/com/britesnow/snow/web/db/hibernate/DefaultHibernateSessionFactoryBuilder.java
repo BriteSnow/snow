@@ -4,10 +4,13 @@ import java.util.Map;
 
 import javax.inject.Singleton;
 
+import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.NamingStrategy;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.service.ServiceRegistryBuilder;
 
 import com.britesnow.snow.SnowException;
 import com.britesnow.snow.web.Initializable;
@@ -68,9 +71,17 @@ public class DefaultHibernateSessionFactoryBuilder implements HibernateSessionFa
         if (hibernateInterceptor != null) {
             cfg.setInterceptor(hibernateInterceptor);
         }
-
-        sessionFactory = cfg.buildSessionFactory();
         
+        sessionFactory = configureSessionFactory(cfg);
+        
+    }
+    
+    private static SessionFactory configureSessionFactory(Configuration configuration) throws HibernateException {
+        //Configuration configuration = new Configuration();
+        //configuration.configure();
+        ServiceRegistry serviceRegistry = new ServiceRegistryBuilder().applySettings(configuration.getProperties()).buildServiceRegistry();        
+        SessionFactory sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+        return sessionFactory;
     }
     
     @Override
