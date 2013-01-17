@@ -8,7 +8,7 @@ public class WebHandlerRef {
     protected Method method;
     private ParamDef[] paramDefs;
     
-    WebHandlerRef(Class webClass, Method method, ParamDef[] paramDefs) {
+    protected WebHandlerRef(Class webClass, Method method, ParamDef[] paramDefs) {
         this.webClass = webClass;
         this.method = method;
         this.paramDefs = paramDefs;

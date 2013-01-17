@@ -23,6 +23,8 @@ import com.britesnow.snow.web.path.ResourceFileResolver;
 import com.britesnow.snow.web.path.ResourcePathResolver;
 import com.britesnow.snow.web.renderer.JsonLibJsonRenderer;
 import com.britesnow.snow.web.renderer.JsonRenderer;
+import com.britesnow.snow.web.rest.ContentTypeResolver;
+import com.britesnow.snow.web.rest.DefaultContentTypeResolver;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 
@@ -43,6 +45,8 @@ public class DefaultApplicationModule extends AbstractModule {
         
         bind(ResourcePathResolver.class).to(DefaultResourcePathResolver.class);
         bind(ResourceFileResolver.class).to(DefaultResourceFileResolver.class);
+        
+        bind(ContentTypeResolver.class).to(DefaultContentTypeResolver.class);
         
         bind(JsonRenderer.class).to(JsonLibJsonRenderer.class);
 

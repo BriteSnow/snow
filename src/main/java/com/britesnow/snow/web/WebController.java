@@ -36,6 +36,9 @@ import com.britesnow.snow.web.path.FramePathsResolver;
 import com.britesnow.snow.web.path.ResourceFileResolver;
 import com.britesnow.snow.web.path.ResourcePathResolver;
 import com.britesnow.snow.web.renderer.WebBundleManager;
+import com.britesnow.snow.web.rest.ContentTypeResolver;
+import com.britesnow.snow.web.rest.RestRegistry;
+import com.britesnow.snow.web.rest.WebRestRef;
 import com.google.common.base.Throwables;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -97,7 +100,13 @@ public class WebController {
 
     @Inject
     private HookInvoker                     hookInvoker;
-
+    
+    @Inject
+    private RestRegistry                    restRegistry;
+    
+    @Inject
+    private ContentTypeResolver             contentTypeResolver;
+    
     // will be injected from .properties file
     // TODO: need to implement this.
     // private boolean ignoreTemplateNotFound = false;
@@ -150,12 +159,21 @@ public class WebController {
             
             HttpServletRequest request = rc.getReq();
 
+            String contentType = contentTypeResolver.resolveContentType(rc);
+            rc.setRestContentType(contentType);
+            
+            
             // get the request resourcePath
             String resourcePath = resourcePathResolver.resolve(rc.getPathInfo(), rc);
 
+            
+            WebRestRef webRestRef = restRegistry.getWebGetRef(rc,resourcePath);
+            
             // --------- Resolve the ResponseType --------- //
             // determine the requestType
-            if (application.hasWebResourceHandlerFor(resourcePath)) {
+            if (webRestRef != null){
+                responseType = ResponseType.rest;
+            } else if (application.hasWebResourceHandlerFor(resourcePath)) {
                 responseType = ResponseType.webResource;
             } else if (isTemplatePath(resourcePath)) {
                 responseType = ResponseType.template;
@@ -196,7 +214,9 @@ public class WebController {
                 hibernateSessionInViewHandler.openSessionInView();
             }
             // --------- /Open HibernateSession --------- //
-
+            
+            
+            
             // --------- Auth --------- //
             if (authService != null) {
                 hookInvoker.invokeReqHooks(ReqPhase.AUTH,On.BEFORE, rc);
@@ -211,28 +231,32 @@ public class WebController {
                 requestLifeCycle.start(rc);
             }
             // --------- /RequestLifeCycle Start --------- //
+            if (responseType == ResponseType.rest){
+                application.processRest(rc);
+            }else{
+                // --------- Processing the Post (if any) --------- //
+                if ("POST".equals(request.getMethod())) {
+                    String actionName = resolveWebActionName(rc);
+                    if (actionName != null) {
+                        WebActionResponse webActionResponse = null;
+                        hookInvoker.invokeReqHooks(ReqPhase.WEB_ACTION,On.BEFORE, rc);
+                        webActionResponse = application.processWebAction(actionName, rc);
+                        rc.setWebActionResponse(webActionResponse);
+                        hookInvoker.invokeReqHooks(ReqPhase.WEB_ACTION,On.AFTER, rc);
+                    }
 
-            // --------- Processing the Post (if any) --------- //
-            if ("POST".equals(request.getMethod())) {
-                String actionName = resolveWebActionName(rc);
-                if (actionName != null) {
-                    WebActionResponse webActionResponse = null;
-                    hookInvoker.invokeReqHooks(ReqPhase.WEB_ACTION,On.BEFORE, rc);
-                    webActionResponse = application.processWebAction(actionName, rc);
-                    rc.setWebActionResponse(webActionResponse);
-                    hookInvoker.invokeReqHooks(ReqPhase.WEB_ACTION,On.AFTER, rc);
+                    // --------- afterActionProcessing --------- //
+                    if (hibernateSessionInViewHandler != null) {
+                        hibernateSessionInViewHandler.afterActionProcessing();
+                    }
+                    // --------- /afterActionProcessing --------- //
                 }
+                // --------- /Processing the Post (if any) --------- //
 
-                // --------- afterActionProcessing --------- //
-                if (hibernateSessionInViewHandler != null) {
-                    hibernateSessionInViewHandler.afterActionProcessing();
-                }
-                // --------- /afterActionProcessing --------- //
+                serviceRequestContext(responseType, rc);                
             }
-            // --------- /Processing the Post (if any) --------- //
 
-            serviceRequestContext(responseType, rc);
-
+            rc.getRes().flushBuffer();
             // this catch is for when this exception is thrown prior to entering the web handler method.
             // (e.g. a WebHandlerMethodInterceptor).
         } catch (Throwable t) {
@@ -323,6 +347,7 @@ public class WebController {
     }
 
     // --------- Service Request --------- //
+    
     private void serviceTemplate(RequestContext rc) {
         HttpServletRequest req = rc.getReq();
         HttpServletResponse res = rc.getRes();

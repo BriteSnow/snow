@@ -23,6 +23,9 @@ import com.britesnow.snow.web.hook.annotation.WebRequestHook;
 import com.britesnow.snow.web.param.resolver.WebParamResolverRegistry;
 import com.britesnow.snow.web.renderer.freemarker.FreemarkerDirectiveProxy;
 import com.britesnow.snow.web.renderer.freemarker.FreemarkerMethodProxy;
+import com.britesnow.snow.web.rest.RestRegistry;
+import com.britesnow.snow.web.rest.annotation.WebGet;
+import com.britesnow.snow.web.rest.annotation.WebPost;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -45,6 +48,9 @@ public class WebObjectRegistry {
 
     @Inject
     private HookRegistry                                            hookRegistry;
+    
+    @Inject
+    private RestRegistry                                            restRegistry;
 
     @Inject
     private ParamDefBuilder                                         paramDefBuilder;
@@ -193,6 +199,19 @@ public class WebObjectRegistry {
         List<String> additionalLeafPaths = new ArrayList<String>();
 
         for (Method m : methods) {
+            
+            // --------- Register Rest Methods --------- //
+            WebGet webGet = m.getAnnotation(WebGet.class);
+            if (webGet != null){
+                restRegistry.registerWebGet(c, m, paramDefBuilder.buildParamDefs(m, true), webGet);
+            }
+            
+            WebPost webPost = m.getAnnotation(WebPost.class);
+            if (webPost != null){
+                restRegistry.registerWebPost(c, m, paramDefBuilder.buildParamDefs(m, true), webPost);
+            }
+            // --------- /Register Rest Methods --------- //
+            
             // --------- Register WebActionHandler --------- //
             WebActionHandler webActionHandlerAnnotation = m.getAnnotation(WebActionHandler.class);
             // if it is an action method, then, add the WebAction Object and
@@ -348,19 +367,6 @@ public class WebObjectRegistry {
     }
 
     // --------- /Private Registration Methods (call at init() time) --------- //
-
-    /*
-    private WebParamResolverRef[] buildWebParamResolverRefs(Method webHandlerMethod) {
-        Class[] paramTypes = webHandlerMethod.getParameterTypes();
-        WebParamResolverRef[] webParamResolverRefs = new WebParamResolverRef[paramTypes.length];
-
-        for (int i = 0; i < paramTypes.length; i++) {
-            webParamResolverRefs[i] = webParamResolverRegistry.getWebParamResolverRef(webHandlerMethod, i);
-        }
-
-        return webParamResolverRefs;
-    }
-    */
 
     public static Class getNonGuiceEnhancedClass(Object obj) {
         String className = obj.getClass().getName();

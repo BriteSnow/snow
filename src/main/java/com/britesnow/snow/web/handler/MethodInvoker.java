@@ -9,6 +9,7 @@ import com.britesnow.snow.web.exception.WebExceptionCatcherRef;
 import com.britesnow.snow.web.exception.WebExceptionContext;
 import com.britesnow.snow.web.hook.HookRef;
 import com.britesnow.snow.web.param.resolver.WebParamResolverRef;
+import com.britesnow.snow.web.rest.WebRestRef;
 import com.google.common.base.Throwables;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -20,6 +21,11 @@ public class MethodInvoker {
 
     @Inject
     private Injector injector;
+    
+    
+    public Object invokeWebRest(WebRestRef webRestRef, RequestContext rc){
+        return invokeMethod(webRestRef.getWebClass(),webRestRef.getHandlerMethod(),webRestRef.getParamDefs(),rc);
+    }
     
     public Object invokeWebHandler(WebHandlerRef webHandlerRef,RequestContext rc){
         return invokeMethod(webHandlerRef.getWebClass(),webHandlerRef.getHandlerMethod(),webHandlerRef.getParamDefs(),rc);

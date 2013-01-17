@@ -36,8 +36,7 @@ public class HttpServletResponseMock implements HttpServletResponse {
     
     @Override
     public void flushBuffer() throws IOException {
-        // TODO Auto-generated method stub
-
+        writer.flush();
     }
 
     @Override

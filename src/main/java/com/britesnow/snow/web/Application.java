@@ -24,6 +24,8 @@ import com.britesnow.snow.web.hook.HookInvoker;
 import com.britesnow.snow.web.hook.On;
 import com.britesnow.snow.web.renderer.JsonRenderer;
 import com.britesnow.snow.web.renderer.freemarker.FreemarkerTemplateRenderer;
+import com.britesnow.snow.web.rest.RestRegistry;
+import com.britesnow.snow.web.rest.WebRestRef;
 import com.google.common.base.Throwables;
 import com.google.inject.Inject;
 
@@ -56,6 +58,9 @@ public class Application {
 
     @Inject
     private WebObjectRegistry              webObjectRegistry;
+    
+    @Inject
+    private RestRegistry                   restRegistry;
 
     @Inject
     private HookInvoker                    hookInvoker;
@@ -165,6 +170,18 @@ public class Application {
         }
 
         jsonRenderer.render(data, rc.getWriter());
+    }
+    
+    
+    public void processRest(RequestContext rc){
+        WebRestRef webRestRef = restRegistry.getWebRestRef(rc);
+        
+        try{
+            Object result = methodInvoker.invokeWebRest(webRestRef,rc);
+            jsonRenderer.render(result, rc.getWriter());
+        }catch (Throwable t) {
+            throw Throwables.propagate(t);
+        }
     }
 
     // --------- /Content Processing --------- //

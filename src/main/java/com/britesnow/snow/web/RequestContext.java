@@ -65,6 +65,9 @@ public class RequestContext {
 
     // set by AuthService.authRequest
     private AuthToken<?>             authToken;
+    
+    // rest response contentType (for now used by the Rest api, and defined by ContentTypeResolver)
+    private String restContentType;
 
     public RequestContext(HttpServletRequest req, HttpServletResponse res, ServletContext servletContext,
                             ServletFileUpload fileUploader) {
@@ -132,14 +135,31 @@ public class RequestContext {
     }
 
     // --------- /Attribute Access --------- //
+    
+    
+    // --------- restContentType --------- //
+    public String getRestContentType() {
+        return restContentType;
+    }
 
-    /*--------- Param Methods ---------*/
+    public void setRestContentType(String restContentType) {
+        this.restContentType = restContentType;
+    }
+    // --------- restContentType --------- //
+    
+    public HttpMethod getMethod(){
+        return ObjectUtil.getValue(req.getMethod(), HttpMethod.class, null);
+    }
+
+    // --------- Param Methods --------- //
 
     // mostly for Mock objects
     protected void setParamMap(Map<String, Object> paramMap) {
         this.paramMap = paramMap;
         isParamInitialized = true;
     }
+
+
 
     public Map<String, Object> getParamMap() {
         initParamsIfNeeded();
@@ -384,7 +404,7 @@ public class RequestContext {
         }
     }
 
-    /*--------- /Param Methods ---------*/
+    // --------- /Param Methods --------- //
 
     /*--------- Cookie Methods ---------*/
     public Map<String, String> getCookieMap() {
