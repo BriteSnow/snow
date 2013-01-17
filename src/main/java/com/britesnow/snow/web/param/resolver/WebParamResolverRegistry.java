@@ -94,7 +94,7 @@ public class WebParamResolverRegistry {
         Class paramType = webHandlerMethod.getParameterTypes()[paramIdx];
 
         Annotation[] paramAnnotations = webHandlerMethod.getParameterAnnotations()[paramIdx];
-        Annotation paramAnnotation = getFirstAnnotationButWebParam(paramAnnotations);
+        Annotation paramAnnotation = getFirstAnnotation(paramAnnotations);
 
         // if we have an annotation, it takes precedence
 
@@ -148,7 +148,7 @@ public class WebParamResolverRegistry {
         return ref;
     }
 
-    private static Annotation getFirstAnnotationButWebParam(Annotation[] paramAnnotations) {
+    private static Annotation getFirstAnnotation(Annotation[] paramAnnotations) {
         if (paramAnnotations.length > 0){
             return paramAnnotations[0];
         }else{
