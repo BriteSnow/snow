@@ -1,10 +1,9 @@
 package com.britesnow.snow.test.app.simpleapp.entity;
 
-public class Employee {
+public class Employee extends BaseEntity{
 
     private String firstName;
     private String lastName;
-    private Long id;
     
     
     
@@ -21,14 +20,7 @@ public class Employee {
         this.lastName = lastName;
     }
     
-    public Long getId(){
-        return id;
-    }
-    
-    public void setId(Long id) {
-        this.id = id;
-        
-    }
+
     
     
 }

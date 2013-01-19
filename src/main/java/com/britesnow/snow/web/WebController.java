@@ -343,6 +343,8 @@ public class WebController {
             case file:
                 serviceFile(rc);
                 break;
+            default:
+                break;
         }
     }
 

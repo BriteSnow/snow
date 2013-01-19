@@ -8,7 +8,7 @@ import javax.inject.Singleton;
 import com.britesnow.snow.test.app.simpleapp.entity.Employee;
 
 @Singleton
-public class EmployeeDao {
+public class EmployeeDao implements IDao<Employee> {
 
     private Map<Long,Employee> employeStore = new HashMap<Long, Employee>();
     
