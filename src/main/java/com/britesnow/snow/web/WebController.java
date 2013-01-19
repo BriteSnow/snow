@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import com.britesnow.snow.util.FileUtil;
 import com.britesnow.snow.util.MapUtil;
 import com.britesnow.snow.util.Pair;
-import com.britesnow.snow.web.AbortWithHttpStatusException.HttpStatus;
 import com.britesnow.snow.web.auth.AuthToken;
 import com.britesnow.snow.web.auth.AuthRequest;
 import com.britesnow.snow.web.db.hibernate.HibernateSessionInViewHandler;
@@ -157,8 +156,6 @@ public class WebController {
             
             hookInvoker.invokeReqHooks(ReqPhase.START,On.BEFORE, rc);
             
-            HttpServletRequest request = rc.getReq();
-
             String contentType = contentTypeResolver.resolveContentType(rc);
             rc.setRestContentType(contentType);
             
@@ -167,7 +164,7 @@ public class WebController {
             String resourcePath = resourcePathResolver.resolve(rc.getPathInfo(), rc);
 
             
-            WebRestRef webRestRef = restRegistry.getWebGetRef(rc,resourcePath);
+            WebRestRef webRestRef = restRegistry.getWebRestRef(rc,resourcePath);
             
             // --------- Resolve the ResponseType --------- //
             // determine the requestType
@@ -235,7 +232,7 @@ public class WebController {
                 application.processRest(rc);
             }else{
                 // --------- Processing the Post (if any) --------- //
-                if ("POST".equals(request.getMethod())) {
+                if (HttpMethod.POST == rc.getMethod()) {
                     String actionName = resolveWebActionName(rc);
                     if (actionName != null) {
                         WebActionResponse webActionResponse = null;
@@ -252,11 +249,17 @@ public class WebController {
                     // --------- /afterActionProcessing --------- //
                 }
                 // --------- /Processing the Post (if any) --------- //
-
-                serviceRequestContext(responseType, rc);                
+                
+                // for now, when get or post we always run (need to be more restrictive)
+                HttpMethod method = rc.getMethod();
+                if (method == HttpMethod.GET || method == HttpMethod.POST){
+                    serviceRequestContext(responseType, rc);
+                }else{
+                    throw new AbortWithHttpStatusException(HttpStatus.NOT_FOUND);
+                }
+                                
             }
 
-            rc.getRes().flushBuffer();
             // this catch is for when this exception is thrown prior to entering the web handler method.
             // (e.g. a WebHandlerMethodInterceptor).
         } catch (Throwable t) {
@@ -315,7 +318,11 @@ public class WebController {
             }catch (Throwable t){
                 logger.error("WebRequestHook exception: " + t.getMessage(),t);
             }
-            
+            try {
+                rc.getRes().flushBuffer();
+            } catch (IOException e) {
+                logger.error("Error while doing rc.getRes().flushBuffer(): " + e.getMessage(),e);
+            }
         }
 
     }

@@ -24,8 +24,10 @@ import com.britesnow.snow.web.param.resolver.WebParamResolverRegistry;
 import com.britesnow.snow.web.renderer.freemarker.FreemarkerDirectiveProxy;
 import com.britesnow.snow.web.renderer.freemarker.FreemarkerMethodProxy;
 import com.britesnow.snow.web.rest.RestRegistry;
+import com.britesnow.snow.web.rest.annotation.WebDelete;
 import com.britesnow.snow.web.rest.annotation.WebGet;
 import com.britesnow.snow.web.rest.annotation.WebPost;
+import com.britesnow.snow.web.rest.annotation.WebPut;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -210,6 +212,16 @@ public class WebObjectRegistry {
             if (webPost != null){
                 restRegistry.registerWebPost(c, m, paramDefBuilder.buildParamDefs(m, true), webPost);
             }
+            
+            WebPut webPut = m.getAnnotation(WebPut.class);
+            if (webPut != null){
+                restRegistry.registerWebPut(c, m, paramDefBuilder.buildParamDefs(m, true), webPut);
+            }
+            
+            WebDelete webDelete = m.getAnnotation(WebDelete.class);
+            if (webDelete != null){
+                restRegistry.registerWebDelete(c, m, paramDefBuilder.buildParamDefs(m, true), webDelete);
+            }            
             // --------- /Register Rest Methods --------- //
             
             // --------- Register WebActionHandler --------- //

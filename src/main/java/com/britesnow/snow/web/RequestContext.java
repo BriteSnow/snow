@@ -36,8 +36,8 @@ import com.google.common.base.Throwables;
 public class RequestContext {
     static private Logger       logger             = LoggerFactory.getLogger(RequestContext.class);
 
-    HttpServletRequest          req;
-    HttpServletResponse         res;
+    private HttpServletRequest          req;
+    private HttpServletResponse         res;
     ServletContext              servletContext;
 
     private ServletFileUpload   fileUploader;
@@ -68,6 +68,9 @@ public class RequestContext {
     
     // rest response contentType (for now used by the Rest api, and defined by ContentTypeResolver)
     private String restContentType;
+    
+    // protected to allow mock override
+    protected HttpMethod httpMethod;
 
     public RequestContext(HttpServletRequest req, HttpServletResponse res, ServletContext servletContext,
                             ServletFileUpload fileUploader) {
@@ -75,6 +78,8 @@ public class RequestContext {
         this.res = res;
         this.servletContext = servletContext;
         this.fileUploader = fileUploader;
+        httpMethod = ObjectUtil.getValue(req.getMethod(), HttpMethod.class, null);
+        
         init();
     }
 
@@ -148,7 +153,7 @@ public class RequestContext {
     // --------- restContentType --------- //
     
     public HttpMethod getMethod(){
-        return ObjectUtil.getValue(req.getMethod(), HttpMethod.class, null);
+        return httpMethod;
     }
 
     // --------- Param Methods --------- //

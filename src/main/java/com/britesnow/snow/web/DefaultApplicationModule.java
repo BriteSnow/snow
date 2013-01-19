@@ -25,8 +25,10 @@ import com.britesnow.snow.web.renderer.JsonLibJsonRenderer;
 import com.britesnow.snow.web.renderer.JsonRenderer;
 import com.britesnow.snow.web.rest.ContentTypeResolver;
 import com.britesnow.snow.web.rest.DefaultContentTypeResolver;
+import com.britesnow.snow.web.rest.annotation.WebDelete;
 import com.britesnow.snow.web.rest.annotation.WebGet;
 import com.britesnow.snow.web.rest.annotation.WebPost;
+import com.britesnow.snow.web.rest.annotation.WebPut;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 
@@ -78,7 +80,9 @@ public class DefaultApplicationModule extends AbstractModule {
                                                 || method.getAnnotation(FreemarkerDirectiveHandler.class) != null                                                
                                                 || method.getAnnotation(FreemarkerMethodHandler.class) != null
                                                 || method.getAnnotation(WebGet.class) != null
-                                                || method.getAnnotation(WebPost.class) != null){
+                                                || method.getAnnotation(WebPost.class) != null
+                                                || method.getAnnotation(WebPut.class) != null
+                                                || method.getAnnotation(WebDelete.class) != null){
                             return true;
                         }
                     }

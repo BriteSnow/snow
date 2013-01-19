@@ -4,13 +4,19 @@ import java.lang.reflect.Method;
 
 import com.britesnow.snow.web.handler.ParamDef;
 import com.britesnow.snow.web.handler.WebHandlerRef;
+import com.britesnow.snow.web.rest.annotation.WebDelete;
 import com.britesnow.snow.web.rest.annotation.WebGet;
 import com.britesnow.snow.web.rest.annotation.WebPost;
+import com.britesnow.snow.web.rest.annotation.WebPut;
 
+@SuppressWarnings("unused")
 public class WebRestRef extends WebHandlerRef {
 
+    // for now, we do not uses this properties
     private WebGet webGet;
     private WebPost webPost;
+    private WebDelete webDelete;
+    private WebPut webPut;
 
     
     WebRestRef(Class webClass, Method method, ParamDef[] paramDefs, WebPost webPost) {
@@ -22,13 +28,15 @@ public class WebRestRef extends WebHandlerRef {
         super(webClass, method, paramDefs);
         this.webGet = webGet;
     }
-
-    public WebGet getWebGet() {
-        return webGet;
+    
+    WebRestRef(Class webClass, Method method, ParamDef[] paramDefs, WebDelete webDelete) {
+        super(webClass, method, paramDefs);
+        this.webDelete = webDelete;
     }
 
-    public WebPost getWebPost() {
-        return webPost;
+    WebRestRef(Class webClass, Method method, ParamDef[] paramDefs, WebPut webPut) {
+        super(webClass, method, paramDefs);
+        this.webPut = webPut;
     }
     
     

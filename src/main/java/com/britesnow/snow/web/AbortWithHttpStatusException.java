@@ -3,19 +3,6 @@ package com.britesnow.snow.web;
 @SuppressWarnings("serial")
 public class AbortWithHttpStatusException extends RuntimeException {
 
-    public enum HttpStatus{
-        NOT_FOUND(404);
-        
-        private HttpStatus(int code){
-            this.code = code;
-        }
-        
-        public int code(){
-            return code;
-        }
-        
-        private int code;
-    }
     private int status;
 
     public AbortWithHttpStatusException(HttpStatus status) {

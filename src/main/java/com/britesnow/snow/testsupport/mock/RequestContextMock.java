@@ -6,6 +6,8 @@ import javax.inject.Inject;
 import javax.servlet.ServletContext;
 
 import com.britesnow.snow.util.JsonUtil;
+import com.britesnow.snow.util.ObjectUtil;
+import com.britesnow.snow.web.HttpMethod;
 import com.britesnow.snow.web.RequestContext;
 
 public class RequestContextMock extends RequestContext {
@@ -30,6 +32,7 @@ public class RequestContextMock extends RequestContext {
     
     public void setRequestMethod(String method){
         req.setMethod(method);
+        httpMethod = ObjectUtil.getValue(req.getMethod(), HttpMethod.class, null);
     }
     
     

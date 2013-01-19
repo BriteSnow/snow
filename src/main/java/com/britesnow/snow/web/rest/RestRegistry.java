@@ -9,8 +9,10 @@ import javax.inject.Singleton;
 import com.britesnow.snow.web.RequestContext;
 import com.britesnow.snow.web.HttpMethod;
 import com.britesnow.snow.web.handler.ParamDef;
+import com.britesnow.snow.web.rest.annotation.WebDelete;
 import com.britesnow.snow.web.rest.annotation.WebGet;
 import com.britesnow.snow.web.rest.annotation.WebPost;
+import com.britesnow.snow.web.rest.annotation.WebPut;
 
 /**
  * Note: the registerWeb*** must be called only in init time, as the Map are not concurrent 
@@ -27,13 +29,15 @@ public class RestRegistry {
     
     private Map<String,WebRestRef> webGetRefByPath = new HashMap<String, WebRestRef>();
     private Map<String,WebRestRef> webPostRefByPath = new HashMap<String, WebRestRef>();
+    private Map<String,WebRestRef> webPutRefByPath = new HashMap<String, WebRestRef>();
+    private Map<String,WebRestRef> webDeleteRefByPath = new HashMap<String, WebRestRef>();
     
     // --------- WebRef Getters --------- //
     public WebRestRef getWebRestRef(RequestContext rc){
-        return getWebGetRef(rc,null);
+        return getWebRestRef(rc,null);
     }
     
-    public WebRestRef getWebGetRef(RequestContext rc,String resourcePath){
+    public WebRestRef getWebRestRef(RequestContext rc,String resourcePath){
         if (resourcePath == null){
             resourcePath = rc.getResourcePath();
         }
@@ -41,21 +45,16 @@ public class RestRegistry {
         
         switch (method){
             case GET: 
-                return getWebGetRef(resourcePath);
+                return webGetRefByPath.get(resourcePath);
             case POST: 
-                return getWebPostRef(resourcePath);
+                return webPostRefByPath.get(resourcePath);
+            case PUT:
+                return webPutRefByPath.get(resourcePath);
+            case DELETE:
+                return webDeleteRefByPath.get(resourcePath);
             default: 
                 return null;
         }
-    }
-
-    
-    public WebRestRef getWebGetRef(String path){
-        return webGetRefByPath.get(path);
-    }
-    
-    public WebRestRef getWebPostRef(String path){
-        return webPostRefByPath.get(path);
     }
     // --------- /WebRef Getters --------- //
     
@@ -68,6 +67,14 @@ public class RestRegistry {
     public void registerWebPost(Class webClass, Method m, ParamDef[] paramDefs, WebPost webPost ){
         registerWebRest(webPostRefByPath,webPost.value(),new WebRestRef(webClass,m, paramDefs,webPost));
     }
+    
+    public void registerWebPut(Class webClass, Method m, ParamDef[] paramDefs, WebPut webPut ){
+        registerWebRest(webPutRefByPath,webPut.value(),new WebRestRef(webClass,m, paramDefs,webPut));
+    }
+    
+    public void registerWebDelete(Class webClass, Method m, ParamDef[] paramDefs, WebDelete webDelete ){
+        registerWebRest(webDeleteRefByPath,webDelete.value(),new WebRestRef(webClass,m, paramDefs,webDelete));
+    }    
     // --------- /Register Methods (called in init only) --------- //
     
     

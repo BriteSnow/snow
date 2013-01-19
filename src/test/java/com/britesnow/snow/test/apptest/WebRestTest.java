@@ -47,5 +47,33 @@ public class WebRestTest extends SnowTestSupport {
         Assert.assertEquals("123Hello",result.get("val1"));        
     }
     
+    @Test
+    public void testWebPut(){
+        RequestContextMock rc;
+        Map result;
+        
+        rc = requestContextFactory.createRequestContext(RequestMethod.PUT, "/api/put-key-value");
+        rc.setParamMap(MapUtil.mapIt("key", "cat-01","value", "123"));
+        webController.service(rc);
+        result = rc.getResponseAsJson();
+        
+        Assert.assertEquals("123",result.get("cat-01"));        
+    }  
+    
+    
+    @Test
+    public void testWebDelete(){
+        RequestContextMock rc;
+        Map result;
+        
+        rc = requestContextFactory.createRequestContext(RequestMethod.DELETE, "/api/delete-entity");
+        rc.setParamMap(MapUtil.mapIt("entity_id","123"));
+        webController.service(rc);
+        result = rc.getResponseAsJson();
+        
+        Assert.assertEquals(123,result.get("deleted_entity_id"));        
+    }     
+    
+    
     
 }
