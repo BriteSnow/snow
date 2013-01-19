@@ -25,6 +25,8 @@ import com.britesnow.snow.web.renderer.JsonLibJsonRenderer;
 import com.britesnow.snow.web.renderer.JsonRenderer;
 import com.britesnow.snow.web.rest.ContentTypeResolver;
 import com.britesnow.snow.web.rest.DefaultContentTypeResolver;
+import com.britesnow.snow.web.rest.annotation.WebGet;
+import com.britesnow.snow.web.rest.annotation.WebPost;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 
@@ -66,7 +68,7 @@ public class DefaultApplicationModule extends AbstractModule {
                 @Override
                 public boolean acceptScannedResource(Class cls) {
                     for (Method method : cls.getDeclaredMethods()) {
-
+                            
                         if (method.getAnnotation(WebActionHandler.class) != null || method.getAnnotation(WebResourceHandler.class) != null
                                                 || method.getAnnotation(WebModelHandler.class) != null
                                                 || method.getAnnotation(WebParamResolver.class) != null
@@ -74,7 +76,9 @@ public class DefaultApplicationModule extends AbstractModule {
                                                 || method.getAnnotation(WebApplicationHook.class) != null
                                                 || method.getAnnotation(WebRequestHook.class) != null
                                                 || method.getAnnotation(FreemarkerDirectiveHandler.class) != null                                                
-                                                || method.getAnnotation(FreemarkerMethodHandler.class) != null) {
+                                                || method.getAnnotation(FreemarkerMethodHandler.class) != null
+                                                || method.getAnnotation(WebGet.class) != null
+                                                || method.getAnnotation(WebPost.class) != null){
                             return true;
                         }
                     }
