@@ -8,7 +8,7 @@ import net.sf.json.JsonConfig;
 import net.sf.json.util.CycleDetectionStrategy;
 
 public class JsonLibJsonRenderer implements JsonRenderer{
-    static private final String[] excludes = {"stackTrace"};
+    static private final String[] excludes = {"stackTrace","password"};
 
     public void render(Object data, Writer out) {
         String jsonString;

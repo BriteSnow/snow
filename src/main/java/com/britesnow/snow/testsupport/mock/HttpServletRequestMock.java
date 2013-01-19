@@ -24,6 +24,8 @@ public class HttpServletRequestMock implements HttpServletRequest {
     private Map    headers      = new HashMap();
     private Map    parameterMap = new HashMap();
     private Map    attributeMap = new HashMap();
+    
+    private HttpSession httpSession = new HttpSessionMock();
 
     // --------- Additional Mock Methods --------- //
     public void setMethod(String method) {
@@ -310,7 +312,7 @@ public class HttpServletRequestMock implements HttpServletRequest {
     @Override
     public HttpSession getSession() {
         // TODO Auto-generated method stub
-        return null;
+        return httpSession;
     }
 
     @Override
