@@ -81,12 +81,14 @@ public class RestRegistry {
     
 
     private void registerWebRest(Map<String,WebRestRef> refByPath,String[] paths, WebRestRef webRestRef){
-        for (String path : paths){
-            refByPath.put(path, webRestRef);
-        }        
+        // if now paths, in the .value() then take the methodName as the path
+        if (paths.length == 0){
+            refByPath.put("/" + webRestRef.getHandlerMethod().getName(), webRestRef);
+        }else{
+            for (String path : paths){
+                refByPath.put(path, webRestRef);
+            }     
+        }
     }
     
-    
-
-
 }

@@ -120,6 +120,11 @@ public class Application {
     // --------- LifeCycle --------- //
 
     // --------- Content Processing --------- //
+    
+    public boolean hasTemplate(RequestContext rc){
+        return freemarkerRenderer.hasTemplate(rc.getResourcePath(), rc);
+    }
+    
     public void processTemplate(RequestContext rc) throws Throwable {
 
         processWebModels(rc);

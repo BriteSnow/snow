@@ -39,4 +39,9 @@ public class WebRestHandlers {
         return result;
     }  
     
+    @WebGet()
+    public Map fromMethodName(@WebParam("info")String info){
+        return MapUtil.mapIt("info-echo",info);
+    }
+    
 }

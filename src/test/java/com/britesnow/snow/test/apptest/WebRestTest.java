@@ -33,7 +33,7 @@ public class WebRestTest extends SnowTestSupport {
     }
     
     
-    //@Test
+    @Test
     public void testWebPost(){
         RequestContextMock rc;
         Map result;
@@ -47,7 +47,7 @@ public class WebRestTest extends SnowTestSupport {
         Assert.assertEquals("123Hello",result.get("val1"));        
     }
     
-    //@Test
+    @Test
     public void testWebPut(){
         RequestContextMock rc;
         Map result;
@@ -61,7 +61,7 @@ public class WebRestTest extends SnowTestSupport {
     }  
     
     
-    //@Test
+    @Test
     public void testWebDelete(){
         RequestContextMock rc;
         Map result;
@@ -72,8 +72,18 @@ public class WebRestTest extends SnowTestSupport {
         result = rc.getResponseAsJson();
         
         Assert.assertEquals(123,result.get("deleted_entity_id"));        
-    }     
+    }
     
-    
+    @Test
+    public void testWebGetWithMethodName(){
+        RequestContextMock rc;
+        Map result;
+        
+        rc = requestContextFactory.createRequestContext(RequestMethod.GET, "/fromMethodName");
+        rc.setParamMap(MapUtil.mapIt("info", "123Hello"));
+        webController.service(rc);
+        result = rc.getResponseAsJson();
+        Assert.assertEquals("123Hello",result.get("info-echo"));
+    }    
     
 }

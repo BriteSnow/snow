@@ -134,6 +134,11 @@ public class FreemarkerTemplateRenderer implements TemplateRenderer {
             conf.setSharedVariable(methodProxy.getName(), methodProxy);
         }
     }
+    
+    public boolean hasTemplate(String resourcePath, RequestContext rc){
+        String templateName = templateNameResolver.resolve(resourcePath,rc);
+        return (templateName != null)?true:false;
+    }
 
     @Override
     public void render(String resourcePath, Object data, Writer out, RequestContext rc) {

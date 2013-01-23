@@ -280,8 +280,10 @@ public class WebController {
                 }
 
             } catch (AbortWithHttpStatusException e) {
-                sendHttpError(rc, e.getStatus(), e.getMessage());
+                rc.setAbortException(e);
+                sendHttpError(rc, e.getCode(), e.getMessage());
             } catch (AbortWithHttpRedirectException e) {
+                rc.setAbortException(e);
                 sendHttpRedirect(rc, e);
             } catch (Throwable e) {
                 // and this is the normal case...
@@ -360,9 +362,14 @@ public class WebController {
     private void serviceTemplate(RequestContext rc) {
         HttpServletRequest req = rc.getReq();
         HttpServletResponse res = rc.getRes();
-
+        
+        
         try {
-
+            
+            if (!application.hasTemplate(rc)){
+                throw new AbortWithHttpStatusException(HttpStatus.NOT_FOUND);
+            }
+            
             // TODO: probably need to remove this, not sure it does anything here (or it even should be here.
             req.setCharacterEncoding(CHAR_ENCODING);
 
@@ -517,7 +524,7 @@ public class WebController {
         // we'll just silently ignore the exception.
         HttpServletResponse response = rc.getRes();
         if (!response.isCommitted()) {
-            response.setStatus(e.getRedirectCode());
+            response.setStatus(e.getCode());
             response.addHeader("Location", e.getLocation());
         }
     }

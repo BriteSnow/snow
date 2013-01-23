@@ -73,6 +73,9 @@ public class RequestContext {
     protected HttpMethod        httpMethod;
 
     private Object              result;
+    
+    // mostly useful for unit testing
+    private AbortException      abortException;
 
     public RequestContext(HttpServletRequest req, HttpServletResponse res, ServletContext servletContext,
                             ServletFileUpload fileUploader) {
@@ -460,22 +463,7 @@ public class RequestContext {
 
     /*--------- /Cookie Methods ---------*/
 
-    // --------- WebState Methods --------- //
-    /**
-     * @param stateContext
-     * @return return a WebState for a given uiContext. Never return null.
-     */
-    /*
-     * TODO: needs to implement WebStateHandler public WebStateHandle getWebState(String stateContext){ if (webStateMap
-     * == null){ webStateMap = new HashMap<String, WebStateHandle>(); } WebStateHandle webState =
-     * webStateMap.get(stateContext); if (webState == null){ webState =
-     * getWebStateHandleFactory().constructWebStateHandle(stateContext, this); webStateMap.put(stateContext, webState);
-     * } return webState; }
-     */
-    // --------- /WebState Methods --------- //
-
     // --------- Paths --------- //
-
     public String[] getResourcePaths() {
         return splitPath(getResourcePath());
     }
@@ -550,6 +538,8 @@ public class RequestContext {
     }
 
     // --------- /Utilities for Paths --------- //
+    
+    
 
     /*--------- Writer ---------*/
     public Writer getWriter() {
@@ -661,4 +651,14 @@ public class RequestContext {
     }
 
     /*--------- /HttpServlet ---------*/
+    
+    // --------- Abort Exception --------- //
+    public AbortException getAbortException() {
+        return abortException;
+    }
+
+    public void setAbortException(AbortException abortException) {
+        this.abortException = abortException;
+    }    
+    // --------- /Abort Exception --------- //
 }

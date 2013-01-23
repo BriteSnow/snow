@@ -1,9 +1,8 @@
 package com.britesnow.snow.web;
 
 @SuppressWarnings("serial")
-public class AbortWithHttpStatusException extends RuntimeException {
+public class AbortWithHttpStatusException extends AbortException {
 
-    private int status;
 
     public AbortWithHttpStatusException(HttpStatus status) {
         this(status.code(), null);
@@ -19,15 +18,12 @@ public class AbortWithHttpStatusException extends RuntimeException {
 
     public AbortWithHttpStatusException(int status, String message) {
         super(message);
-        this.status = status;
+        this.setCode(status);
     }
 
-    public int getStatus() {
-        return status;
-    }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + " : " + status + (getMessage() != null ? " - " + getMessage() : "");
+        return getClass().getSimpleName() + " : " + getCode() + (getMessage() != null ? " - " + getMessage() : "");
     }
 }
