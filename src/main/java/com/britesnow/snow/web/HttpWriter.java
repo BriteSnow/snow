@@ -138,7 +138,7 @@ public class HttpWriter {
         }
     }
 
-    private void setHeaders(RequestContext rc, String fileName, Boolean cache, HttpWriterOptions options) throws Exception {
+    public void setHeaders(RequestContext rc, String fileName, Boolean cache, HttpWriterOptions options) throws Exception {
         options = (options != null)?options:defaultOptions;
         
         HttpServletResponse res = rc.getRes();

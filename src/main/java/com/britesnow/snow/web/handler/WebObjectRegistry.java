@@ -23,11 +23,14 @@ import com.britesnow.snow.web.hook.annotation.WebRequestHook;
 import com.britesnow.snow.web.param.resolver.WebParamResolverRegistry;
 import com.britesnow.snow.web.renderer.freemarker.FreemarkerDirectiveProxy;
 import com.britesnow.snow.web.renderer.freemarker.FreemarkerMethodProxy;
+import com.britesnow.snow.web.rest.DefaultWebSerializers;
 import com.britesnow.snow.web.rest.RestRegistry;
+import com.britesnow.snow.web.rest.SerializerRegistry;
 import com.britesnow.snow.web.rest.annotation.WebDelete;
 import com.britesnow.snow.web.rest.annotation.WebGet;
 import com.britesnow.snow.web.rest.annotation.WebPost;
 import com.britesnow.snow.web.rest.annotation.WebPut;
+import com.britesnow.snow.web.rest.annotation.WebSerializer;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -53,6 +56,9 @@ public class WebObjectRegistry {
     
     @Inject
     private RestRegistry                                            restRegistry;
+    
+    @Inject
+    private SerializerRegistry                                      serializerRegistry;
 
     @Inject
     private ParamDefBuilder                                         paramDefBuilder;
@@ -73,6 +79,9 @@ public class WebObjectRegistry {
         webParamResolverRegistry.init();
 
         WebObjectValidationExceptions exs = new WebObjectValidationExceptions();
+        
+        // register the default
+        registerWebObjectMethods(DefaultWebSerializers.class);
 
         if (webClasses != null) {
             for (Class webClass : webClasses) {
@@ -223,6 +232,13 @@ public class WebObjectRegistry {
                 restRegistry.registerWebDelete(c, m, paramDefBuilder.buildParamDefs(m, true), webDelete);
             }            
             // --------- /Register Rest Methods --------- //
+            
+            // --------- Register Web Serializer --------- //
+            WebSerializer webSerializer = m.getAnnotation(WebSerializer.class);
+            if (webSerializer != null){
+                serializerRegistry.registerWebSerializer(webClass, m, webSerializer);
+            }
+            // --------- /Register Web Serializer --------- //
             
             // --------- Register WebActionHandler --------- //
             WebActionHandler webActionHandlerAnnotation = m.getAnnotation(WebActionHandler.class);

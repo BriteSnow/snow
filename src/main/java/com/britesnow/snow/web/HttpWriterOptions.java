@@ -3,7 +3,7 @@ package com.britesnow.snow.web;
 public class HttpWriterOptions {
 
     private String contentType;
-    private String characterEncoding;
+    private String characterEncoding = "UTF-8";
     
     
     public String getContentType() {

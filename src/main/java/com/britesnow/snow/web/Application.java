@@ -25,7 +25,9 @@ import com.britesnow.snow.web.hook.On;
 import com.britesnow.snow.web.renderer.JsonRenderer;
 import com.britesnow.snow.web.renderer.freemarker.FreemarkerTemplateRenderer;
 import com.britesnow.snow.web.rest.RestRegistry;
+import com.britesnow.snow.web.rest.SerializerRegistry;
 import com.britesnow.snow.web.rest.WebRestRef;
+import com.britesnow.snow.web.rest.WebSerializerRef;
 import com.google.common.base.Throwables;
 import com.google.inject.Inject;
 
@@ -61,6 +63,9 @@ public class Application {
     
     @Inject
     private RestRegistry                   restRegistry;
+    
+    @Inject
+    private SerializerRegistry             serializerRegistry;
 
     @Inject
     private HookInvoker                    hookInvoker;
@@ -83,8 +88,6 @@ public class Application {
 
                 // initialize freemarker
                 freemarkerRenderer.init();
-
-                
 
                 // initialize the webApplicationLifeCycle if present
                 if (webApplicationLifeCycle != null) {
@@ -178,7 +181,11 @@ public class Application {
         
         try{
             Object result = methodInvoker.invokeWebRest(webRestRef,rc);
-            jsonRenderer.render(result, rc.getWriter());
+            rc.setResult(result);
+            String contentType = rc.getRestContentType();
+            WebSerializerRef ref = serializerRegistry.getWebSerializerRef(contentType);
+            methodInvoker.invokeWebSerializer(ref, rc);
+            //jsonRenderer.render(result, rc.getWriter());
         }catch (Throwable t) {
             throw Throwables.propagate(t);
         }

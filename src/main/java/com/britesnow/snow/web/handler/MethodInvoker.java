@@ -10,6 +10,7 @@ import com.britesnow.snow.web.exception.WebExceptionContext;
 import com.britesnow.snow.web.hook.HookRef;
 import com.britesnow.snow.web.param.resolver.WebParamResolverRef;
 import com.britesnow.snow.web.rest.WebRestRef;
+import com.britesnow.snow.web.rest.WebSerializerRef;
 import com.google.common.base.Throwables;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -43,6 +44,17 @@ public class MethodInvoker {
         } catch (Throwable t) {
             throw Throwables.propagate(t);
         }        
+    }
+    
+    public void invokeWebSerializer(WebSerializerRef ref, RequestContext rc){
+        Object result = rc.getResult();
+        Object[] values = new Object[]{result,rc};
+        try {
+            Object webObject = injector.getInstance(ref.getWebClass());
+            ref.getHandlerMethod().invoke(webObject, values);
+        } catch (Throwable t) {
+            throw Throwables.propagate(t);
+        }           
     }
     
     

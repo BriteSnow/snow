@@ -36,8 +36,8 @@ import com.google.common.base.Throwables;
 public class RequestContext {
     static private Logger       logger             = LoggerFactory.getLogger(RequestContext.class);
 
-    private HttpServletRequest          req;
-    private HttpServletResponse         res;
+    private HttpServletRequest  req;
+    private HttpServletResponse res;
     ServletContext              servletContext;
 
     private ServletFileUpload   fileUploader;
@@ -64,13 +64,15 @@ public class RequestContext {
     private String              pathInfo;
 
     // set by AuthService.authRequest
-    private AuthToken<?>             authToken;
-    
+    private AuthToken<?>        authToken;
+
     // rest response contentType (for now used by the Rest api, and defined by ContentTypeResolver)
-    private String restContentType;
-    
+    private String              restContentType;
+
     // protected to allow mock override
-    protected HttpMethod httpMethod;
+    protected HttpMethod        httpMethod;
+
+    private Object              result;
 
     public RequestContext(HttpServletRequest req, HttpServletResponse res, ServletContext servletContext,
                             ServletFileUpload fileUploader) {
@@ -79,7 +81,7 @@ public class RequestContext {
         this.servletContext = servletContext;
         this.fileUploader = fileUploader;
         httpMethod = ObjectUtil.getValue(req.getMethod(), HttpMethod.class, null);
-        
+
         init();
     }
 
@@ -140,8 +142,7 @@ public class RequestContext {
     }
 
     // --------- /Attribute Access --------- //
-    
-    
+
     // --------- restContentType --------- //
     public String getRestContentType() {
         return restContentType;
@@ -150,9 +151,10 @@ public class RequestContext {
     public void setRestContentType(String restContentType) {
         this.restContentType = restContentType;
     }
+
     // --------- restContentType --------- //
-    
-    public HttpMethod getMethod(){
+
+    public HttpMethod getMethod() {
         return httpMethod;
     }
 
@@ -163,8 +165,6 @@ public class RequestContext {
         this.paramMap = paramMap;
         isParamInitialized = true;
     }
-
-
 
     public Map<String, Object> getParamMap() {
         initParamsIfNeeded();
@@ -561,6 +561,17 @@ public class RequestContext {
     }
 
     /*--------- /Writer ---------*/
+
+    // --------- Result --------- //
+    public void setResult(Object result) {
+        this.result = result;
+    }
+
+    public Object getResult() {
+        return result;
+    }
+    // --------- /Result --------- //
+    
 
     /*--------- RootModel ---------*/
     /**
