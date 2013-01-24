@@ -508,7 +508,7 @@ public class RequestContext {
 
     // --------- Utilities for Paths --------- //
     // TODO: probably does not need to be that complicated. Might want to use Guava here.
-    static private String[] splitPath(String path) {
+    static public String[] splitPath(String path) {
         String[] paths = null;
         String[] tmpPaths = path.split("/");
         // remove the first element (always empty since the currentPri

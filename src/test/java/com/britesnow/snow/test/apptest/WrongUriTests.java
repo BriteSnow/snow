@@ -16,11 +16,19 @@ public class WrongUriTests extends SnowTestSupport {
         SnowTestSupport.initWebApplication("src/test/resources/simpleApp");
     }
     
-    @Test
+    //@Test
     public void getWrongTemplatePage(){
         RequestContextMock rc;
         rc = requestContextFactory.createRequestContext(RequestMethod.GET, "/wrongTemplatePage");
         webController.service(rc);
         Assert.assertEquals(404,rc.getAbortException().getCode());
     }  
+    
+    @Test
+    public void getWrongJsonPath(){
+        RequestContextMock rc;
+        rc = requestContextFactory.createRequestContext(RequestMethod.GET, "/wrongJusonPath.json");
+        webController.service(rc);
+        Assert.assertEquals(404,rc.getAbortException().getCode());
+    }     
 }

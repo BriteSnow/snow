@@ -130,6 +130,27 @@ public class WebObjectRegistry {
         return webActionHandlerDic.get(actionName);
     }
 
+    public List<WebModelHandlerRef> getWebModelHandlerRefList(String[] resourcePaths){
+        List<WebModelHandlerRef> refs = new ArrayList<WebModelHandlerRef>();
+        
+        // add the root
+        WebModelHandlerRef rootWmr = getWebModeHandlerlRef("/");
+        if (rootWmr != null) {
+            refs.add(rootWmr);
+        }
+        
+        StringBuilder pathBuilder = new StringBuilder();
+        for (int i = 0; i < resourcePaths.length; i++) {
+            String path = pathBuilder.append('/').append(resourcePaths[i]).toString();
+            WebModelHandlerRef webModelRef = getWebModeHandlerlRef(path);
+            if (webModelRef != null){
+                refs.add(webModelRef);
+            }
+        }        
+        
+        return refs;
+    }
+    
     public WebModelHandlerRef getWebModeHandlerlRef(String path) {
         return webModelHandlerByStartsWithMap.get(path);
     }
@@ -252,23 +273,7 @@ public class WebObjectRegistry {
             // --------- Register WebModelHandler --------- //
             WebModelHandler webModelHandlerAnnotation = m.getAnnotation(WebModelHandler.class);
             if (webModelHandlerAnnotation != null) {
-
                 registerWebModel(c, m, webModelHandlerAnnotation);
-
-                // if this is for a leaf path, grab the startWith values from the
-                // the web model handler annotation.
-                // todo - warn if startsWith has no entries which has no effect?
-                if (webModelHandlerAnnotation.leaf()) {
-                    String[] leafPaths = webModelHandlerAnnotation.startsWith();
-                    // make sure they all have trailing slashes...
-                    for (int i = 0; i < leafPaths.length; i++) {
-                        if (!leafPaths[i].endsWith("/")) {
-                            leafPaths[i] += "/";
-                        }
-                    }
-
-                    additionalLeafPaths.addAll(Arrays.asList(leafPaths));
-                }
             }
             // --------- Register WebModelHandler --------- //
 

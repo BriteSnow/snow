@@ -365,8 +365,7 @@ public class WebController {
         
         
         try {
-            
-            if (!application.hasTemplate(rc)){
+            if (!application.hasTemplate(rc) && !application.hasAllowSubPathsWebModel(rc)){
                 throw new AbortWithHttpStatusException(HttpStatus.NOT_FOUND);
             }
             
@@ -407,6 +406,10 @@ public class WebController {
     }
 
     private void serviceJson(RequestContext rc) {
+        if (!application.hasResourcePathWebModel(rc) && !application.hasAllowSubPathsWebModel(rc)){
+            throw new AbortWithHttpStatusException(HttpStatus.NOT_FOUND);
+        }
+        
         setJsonHeaders(rc);
         application.processJson(rc);
 

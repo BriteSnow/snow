@@ -12,12 +12,12 @@ import com.britesnow.snow.web.handler.annotation.WebModelHandler;
 
 public class WebModelHandlerRef extends WebHandlerRef implements PathMatcher {
 
-    WebModelHandler webModel;
+    WebModelHandler webModelHandler;
 
     public WebModelHandlerRef(Class webClass, Method method,ParamDef[] paramDefs,
                               WebModelHandler webModel) {
         super(webClass, method,paramDefs);
-        this.webModel = webModel;
+        this.webModelHandler = webModel;
     }
     
     /* (non-Javadoc)
@@ -25,9 +25,9 @@ public class WebModelHandlerRef extends WebHandlerRef implements PathMatcher {
      */
     @Override
     public boolean matchesPath(String path){
-        if (webModel != null && webModel.matches().length > 0){
+        if (webModelHandler != null && webModelHandler.matches().length > 0){
             /**/
-            for (String regex : webModel.matches()){
+            for (String regex : webModelHandler.matches()){
                 Pattern pat = Pattern.compile(regex);
                 Matcher mat = pat.matcher(path);
                 Boolean matches = mat.matches();
@@ -42,6 +42,9 @@ public class WebModelHandlerRef extends WebHandlerRef implements PathMatcher {
         }
     }
     
+    public WebModelHandler getWebModelHandler(){
+        return webModelHandler;
+    }
     
     public String toString(){
         return "WebModelRef: " + method.getName();

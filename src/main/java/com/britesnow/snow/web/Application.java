@@ -60,10 +60,10 @@ public class Application {
 
     @Inject
     private WebObjectRegistry              webObjectRegistry;
-    
+
     @Inject
     private RestRegistry                   restRegistry;
-    
+
     @Inject
     private SerializerRegistry             serializerRegistry;
 
@@ -77,8 +77,8 @@ public class Application {
     public synchronized void init() {
         if (!initialized) {
             try {
-                hookInvoker.invokeAppHooks(AppPhase.INIT,On.BEFORE);
-                
+                hookInvoker.invokeAppHooks(AppPhase.INIT, On.BEFORE);
+
                 // initialize the hibernateSessionFactoryBuilder
                 if (hibernateSessionFactoryBuilder != null && hibernateSessionFactoryBuilder instanceof Initializable) {
                     ((Initializable) hibernateSessionFactoryBuilder).init();
@@ -93,7 +93,7 @@ public class Application {
                 if (webApplicationLifeCycle != null) {
                     webApplicationLifeCycle.init();
                 }
-                hookInvoker.invokeAppHooks(AppPhase.INIT,On.AFTER);
+                hookInvoker.invokeAppHooks(AppPhase.INIT, On.AFTER);
             } catch (Throwable e) {
                 logger.error("Snow - Application init failed: " + e.getMessage());
                 e.printStackTrace();
@@ -108,23 +108,44 @@ public class Application {
 
     public void shutdown() {
 
-        hookInvoker.invokeAppHooks(AppPhase.SHUTDOWN,On.BEFORE);
+        hookInvoker.invokeAppHooks(AppPhase.SHUTDOWN, On.BEFORE);
 
         if (webApplicationLifeCycle != null) {
             webApplicationLifeCycle.shutdown();
         }
-        
-        hookInvoker.invokeAppHooks(AppPhase.SHUTDOWN,On.AFTER);
+
+        hookInvoker.invokeAppHooks(AppPhase.SHUTDOWN, On.AFTER);
     }
 
     // --------- LifeCycle --------- //
 
     // --------- Content Processing --------- //
-    
-    public boolean hasTemplate(RequestContext rc){
-        return freemarkerRenderer.hasTemplate(rc.getResourcePath(), rc);
+
+    public boolean hasAllowSubPathsWebModel(RequestContext rc){
+        List<WebModelHandlerRef> refs = webObjectRegistry.getWebModelHandlerRefList(rc.getResourcePaths());
+        boolean r = false;
+        for (WebModelHandlerRef ref : refs){
+            if (ref.getWebModelHandler().allowSubPaths()){
+                r = true;
+                break;
+            }
+        }
+        return r;
     }
     
+    public boolean hasResourcePathWebModel(RequestContext rc){
+        WebModelHandlerRef ref = webObjectRegistry.getWebModeHandlerlRef(rc.getResourcePath());
+        if (ref != null){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    
+    public boolean hasTemplate(RequestContext rc) {
+        return freemarkerRenderer.hasTemplate(rc.getResourcePath(), rc);
+    }
+
     public void processTemplate(RequestContext rc) throws Throwable {
 
         processWebModels(rc);
@@ -179,19 +200,18 @@ public class Application {
 
         jsonRenderer.render(data, rc.getWriter());
     }
-    
-    
-    public void processRest(RequestContext rc){
+
+    public void processRest(RequestContext rc) {
         WebRestRef webRestRef = restRegistry.getWebRestRef(rc);
-        
-        try{
-            Object result = methodInvoker.invokeWebRest(webRestRef,rc);
+
+        try {
+            Object result = methodInvoker.invokeWebRest(webRestRef, rc);
             rc.setResult(result);
             String contentType = rc.getRestContentType();
             WebSerializerRef ref = serializerRegistry.getWebSerializerRef(contentType);
             methodInvoker.invokeWebSerializer(ref, rc);
-            //jsonRenderer.render(result, rc.getWriter());
-        }catch (Throwable t) {
+            // jsonRenderer.render(result, rc.getWriter());
+        } catch (Throwable t) {
             throw Throwables.propagate(t);
         }
     }
@@ -220,22 +240,14 @@ public class Application {
     }
 
     void processWebModels(RequestContext rc) {
-        // get the rootModelBuilder
-        WebModelHandlerRef rootWmr = webObjectRegistry.getWebModeHandlerlRef("/");
-        if (rootWmr != null) {
-            invokeWebModelRef(rootWmr, rc);
-        }
+        List<WebModelHandlerRef> refs = webObjectRegistry.getWebModelHandlerRefList(rc.getResourcePaths());
 
-        StringBuilder pathBuilder = new StringBuilder();
-        String[] resourcePaths = rc.getResourcePaths();
-        for (int i = 0; i < resourcePaths.length; i++) {
-            String path = pathBuilder.append('/').append(resourcePaths[i]).toString();
-            WebModelHandlerRef webModelRef = webObjectRegistry.getWebModeHandlerlRef(path);
-            invokeWebModelRef(webModelRef, rc);
+        for (WebModelHandlerRef ref : refs) {
+            invokeWebModelRef(ref, rc);
         }
 
         // Match and process the "matches" webModels
-        List<WebModelHandlerRef> matchWebModelRefs = webObjectRegistry.getMatchWebModelHandlerRef(pathBuilder.toString());
+        List<WebModelHandlerRef> matchWebModelRefs = webObjectRegistry.getMatchWebModelHandlerRef(rc.getResourcePath());
         for (WebModelHandlerRef webModelRef : matchWebModelRefs) {
             invokeWebModelRef(webModelRef, rc);
         }
@@ -245,7 +257,7 @@ public class Application {
 
         if (webModelRef != null) {
             try {
-                methodInvoker.invokeWebHandler(webModelRef,rc);
+                methodInvoker.invokeWebHandler(webModelRef, rc);
             } catch (Exception e) {
                 throw Throwables.propagate(e);
             }
@@ -259,7 +271,7 @@ public class Application {
     void processWebResourceHandler(RequestContext rc) {
         WebResourceHandlerRef webResourceHandlerRef = webObjectRegistry.getWebResourceHandlerRef(rc.getResourcePath());
         if (webResourceHandlerRef != null) {
-            methodInvoker.invokeWebHandler(webResourceHandlerRef,rc);
+            methodInvoker.invokeWebHandler(webResourceHandlerRef, rc);
         } else {
             throw new RuntimeException("No WebResourceHandler for " + rc.getResourcePath());
         }
@@ -273,7 +285,7 @@ public class Application {
 
         WebExceptionCatcherRef webExceptionCatcherRef = webObjectRegistry.getWebExceptionCatcherRef(t.getClass());
         if (webExceptionCatcherRef != null) {
-            methodInvoker.invokeWebException(webExceptionCatcherRef,t,webExceptionContext,rc);
+            methodInvoker.invokeWebException(webExceptionCatcherRef, t, webExceptionContext, rc);
             return true;
         } else {
             return false;
