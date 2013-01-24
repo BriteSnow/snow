@@ -86,4 +86,24 @@ public class WebRestTest extends SnowTestSupport {
         Assert.assertEquals("123Hello",result.get("info-echo"));
     }    
     
+    @Test
+    public void getGetAndPost(){
+        RequestContextMock rc;
+        Map result;
+        
+        rc = requestContextFactory.createRequestContext(RequestMethod.GET, "/post-and-get");
+        rc.setParamMap(MapUtil.mapIt("info", "123Hello"));
+        webController.service(rc);
+        result = rc.getResponseAsJson();
+        Assert.assertEquals("123Hello",result.get("info-echo"));
+        Assert.assertEquals("GET", result.get("method-echo"));
+
+        rc = requestContextFactory.createRequestContext(RequestMethod.POST, "/post-and-get");
+        rc.setParamMap(MapUtil.mapIt("info", "123Hello"));
+        webController.service(rc);
+        result = rc.getResponseAsJson();
+        Assert.assertEquals("123Hello",result.get("info-echo"));
+        Assert.assertEquals("POST", result.get("method-echo"));        
+    }     
+    
 }

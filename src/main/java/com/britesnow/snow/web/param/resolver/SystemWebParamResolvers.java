@@ -11,6 +11,7 @@ import org.apache.commons.fileupload.FileItem;
 
 import com.britesnow.snow.util.AnnotationMap;
 import com.britesnow.snow.util.ObjectUtil;
+import com.britesnow.snow.web.HttpMethod;
 import com.britesnow.snow.web.RequestContext;
 import com.britesnow.snow.web.param.annotation.WebModel;
 import com.britesnow.snow.web.param.annotation.WebParam;
@@ -113,6 +114,11 @@ public class SystemWebParamResolvers {
         return rc;
     }
 
+    @WebParamResolver
+    public HttpMethod resolveHttpMethod(AnnotationMap annotationMap, Class paramType, RequestContext rc){
+        return rc.getMethod();
+    }
+    
     // --------- Servlet Resolvers --------- //
     @WebParamResolver
     public HttpServletRequest resolveHttpServletRequest(AnnotationMap annotationMap, Class paramType,
