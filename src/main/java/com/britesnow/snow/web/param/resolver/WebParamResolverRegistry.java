@@ -104,7 +104,9 @@ public class WebParamResolverRegistry {
             Map<Class, WebParamResolverRef> refByType = refByAnnotation.get(paramAnnotation.annotationType());
             if (refByType != null) {
                 for (Class type : refByType.keySet()) {
-                    if (paramType.isAssignableFrom(type)){
+                    //if (paramType.isAssignableFrom(type)){
+                    
+                    if (type.isAssignableFrom(paramType)){
                         ref = findRefForType(paramType,refByType);
                         if (ref != null) {
                             break;
@@ -125,7 +127,6 @@ public class WebParamResolverRegistry {
     private WebParamResolverRef findRefForType(Class paramType,Map<Class,WebParamResolverRef> refByType) {
         WebParamResolverRef ref = null;
         ref = refByType.get(paramType);
-
         // if still null, then, check the parent classes
         if (ref == null) {
             Class parentClass = paramType.getSuperclass();
@@ -134,17 +135,6 @@ public class WebParamResolverRegistry {
                 parentClass = parentClass.getSuperclass();
             }
         }
-
-        // if still null, then, check with the interfaces
-        if (ref == null) {
-            for (Class interfaceClass : paramType.getInterfaces()) {
-                ref = refByType.get(interfaceClass);
-                if (ref != null) {
-                    break;
-                }
-            }
-        }
-
         return ref;
     }
 

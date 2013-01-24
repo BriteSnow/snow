@@ -48,6 +48,7 @@ public class ParamDefBuilder {
         if (paramResolverRef == null){
             if (paramAnnotations.length > 0){
                 for (Annotation an : paramAnnotations){
+                    System.out.println("an: " + an + " paramType: " + paramType);
                     key = Key.get(paramType,an);
                     break; // for now, just take the first.
                     // TODO: Has to check if the key is bound, if not, go to the next annotation
