@@ -13,7 +13,7 @@ import com.britesnow.snow.web.param.resolver.annotation.WebParamResolver;
 @Singleton
 public class JSONObjectParamResolvers {
 
-    @WebParamResolver(annotatedWith=WebParam.class)
+    @WebParamResolver()
     public JSONObject resolveJsonObject(AnnotationMap annotationMap, Class paramType, RequestContext rc){
         try {
             return JSONObject.fromObject( rc.getParam( annotationMap.get(WebParam.class).value() ) );

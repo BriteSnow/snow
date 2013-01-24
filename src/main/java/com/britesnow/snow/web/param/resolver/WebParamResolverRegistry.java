@@ -104,7 +104,7 @@ public class WebParamResolverRegistry {
             Map<Class, WebParamResolverRef> refByType = refByAnnotation.get(paramAnnotation.annotationType());
             if (refByType != null) {
                 for (Class type : refByType.keySet()) {
-                    if (type.isAssignableFrom(paramType)) {
+                    if (paramType.isAssignableFrom(type)){
                         ref = findRefForType(paramType,refByType);
                         if (ref != null) {
                             break;
