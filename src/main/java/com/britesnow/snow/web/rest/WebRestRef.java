@@ -1,43 +1,33 @@
 package com.britesnow.snow.web.rest;
 
 import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 import com.britesnow.snow.web.handler.ParamDef;
 import com.britesnow.snow.web.handler.WebHandlerRef;
-import com.britesnow.snow.web.rest.annotation.WebDelete;
-import com.britesnow.snow.web.rest.annotation.WebGet;
-import com.britesnow.snow.web.rest.annotation.WebPost;
-import com.britesnow.snow.web.rest.annotation.WebPut;
 
-@SuppressWarnings("unused")
 public class WebRestRef extends WebHandlerRef {
 
-    // for now, we do not uses this properties
-    private WebGet webGet;
-    private WebPost webPost;
-    private WebDelete webDelete;
-    private WebPut webPut;
-
+    private Pattern pathPattern = null;
+    private Map<Integer,String> pathVarByIdx = null;
     
-    WebRestRef(Class webClass, Method method, ParamDef[] paramDefs, WebPost webPost) {
+    WebRestRef(Class webClass, Method method, ParamDef[] paramDefs) {
         super(webClass, method, paramDefs);
-        this.webPost = webPost;
     }
     
-    WebRestRef(Class webClass, Method method, ParamDef[] paramDefs, WebGet webGet) {
+    WebRestRef(Class webClass, Method method, ParamDef[] paramDefs, Pattern pathPattern, Map<Integer,String> pathVarByIdx) {
         super(webClass, method, paramDefs);
-        this.webGet = webGet;
-    }
-    
-    WebRestRef(Class webClass, Method method, ParamDef[] paramDefs, WebDelete webDelete) {
-        super(webClass, method, paramDefs);
-        this.webDelete = webDelete;
+        this.pathPattern = pathPattern;
+        this.pathVarByIdx = pathVarByIdx;
     }
 
-    WebRestRef(Class webClass, Method method, ParamDef[] paramDefs, WebPut webPut) {
-        super(webClass, method, paramDefs);
-        this.webPut = webPut;
+    public Pattern getPathPattern() {
+        return pathPattern;
     }
-    
-    
+
+    public Map<Integer, String> getPathVarByIdx() {
+        return pathVarByIdx;
+    }
+
 }

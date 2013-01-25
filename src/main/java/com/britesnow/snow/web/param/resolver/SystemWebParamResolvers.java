@@ -13,16 +13,19 @@ import com.britesnow.snow.util.AnnotationMap;
 import com.britesnow.snow.util.ObjectUtil;
 import com.britesnow.snow.web.HttpMethod;
 import com.britesnow.snow.web.RequestContext;
+import com.britesnow.snow.web.param.annotation.PathVar;
 import com.britesnow.snow.web.param.annotation.WebModel;
 import com.britesnow.snow.web.param.annotation.WebParam;
 import com.britesnow.snow.web.param.annotation.WebPath;
 import com.britesnow.snow.web.param.annotation.WebUser;
 import com.britesnow.snow.web.param.resolver.annotation.WebParamResolver;
+import com.google.common.base.Strings;
 
 @Singleton
 public class SystemWebParamResolvers {
 
-    // --------- Primary Type Resolvers --------- //
+    // --------- Primary Type @WebParam Resolvers --------- //
+    //TODO: probably can reduce all the primary type resolver to one generic (as the resolveWebPath)
     @WebParamResolver(annotatedWith=WebParam.class)
     public Long resolveLong(AnnotationMap annotationMap, Class paramType, RequestContext rc) {
         WebParam webParam = annotationMap.get(WebParam.class);
@@ -63,8 +66,7 @@ public class SystemWebParamResolvers {
         String val = rc.getParam(webParam.value());
         return (Enum)ObjectUtil.getValue(val, paramType, null);
     }
-    // --------- /Primary Type Resolvers --------- //
-
+    
     @WebParamResolver(annotatedWith=WebParam.class)
     public Map resolveMap(AnnotationMap annotationMap, Class paramType, RequestContext rc) {
         WebParam webParam = annotationMap.get(WebParam.class);
@@ -75,8 +77,10 @@ public class SystemWebParamResolvers {
     public FileItem resolveFileItem(AnnotationMap annotationMap, Class paramType, RequestContext rc) {
         WebParam webParam = annotationMap.get(WebParam.class);
         return rc.getParamAs(webParam.value(), FileItem.class);
-    }
+    }    
+    // --------- /@WebParam Resolvers --------- //
     
+
     @WebParamResolver(annotatedWith=WebUser.class)
     public Object resolveUser(AnnotationMap annotationMap, Class paramType, RequestContext rc){
         if (rc.getAuthToken() != null) {
@@ -92,7 +96,15 @@ public class SystemWebParamResolvers {
         return rc.getWebModel();
     }
     
-    
+    @WebParamResolver(annotatedWith=PathVar.class)
+    public Object resolvePathVar(AnnotationMap annotationMap, Class paramType, RequestContext rc){
+        PathVar pathVar = annotationMap.get(PathVar.class);
+        String  varName = pathVar.value();
+        if (!Strings.isNullOrEmpty(varName)){
+            return rc.getPathVarAs(varName,paramType,null);
+        }
+        return null;
+    }
     
     @WebParamResolver(annotatedWith=WebPath.class)
     public Object resolveWebpath(AnnotationMap annotationMap, Class paramType, RequestContext rc){

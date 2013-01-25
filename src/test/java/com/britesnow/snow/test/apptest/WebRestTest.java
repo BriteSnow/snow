@@ -87,7 +87,7 @@ public class WebRestTest extends SnowTestSupport {
     }    
     
     @Test
-    public void getGetAndPost(){
+    public void testGetAndPost(){
         RequestContextMock rc;
         Map result;
         
@@ -104,6 +104,18 @@ public class WebRestTest extends SnowTestSupport {
         result = rc.getResponseAsJson();
         Assert.assertEquals("123Hello",result.get("info-echo"));
         Assert.assertEquals("POST", result.get("method-echo"));        
-    }     
+    }
+    
+    
+    @Test
+    public void testDeleteWithPathVar(){
+        RequestContextMock rc;
+        Map result;
+        
+        rc = requestContextFactory.createRequestContext(RequestMethod.DELETE, "/delete-item-333-");
+        webController.service(rc);
+        result = rc.getResponseAsJson();
+        Assert.assertEquals(333,result.get("deletedItemId"));
+    }
     
 }

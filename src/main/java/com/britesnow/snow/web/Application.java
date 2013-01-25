@@ -3,6 +3,8 @@ package com.britesnow.snow.web;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.inject.Singleton;
 
@@ -205,6 +207,7 @@ public class Application {
         WebRestRef webRestRef = restRegistry.getWebRestRef(rc);
 
         try {
+            setEventualPathVarMap(webRestRef,rc);
             Object result = methodInvoker.invokeWebRest(webRestRef, rc);
             rc.setResult(result);
             String contentType = rc.getRestContentType();
@@ -213,6 +216,27 @@ public class Application {
             // jsonRenderer.render(result, rc.getWriter());
         } catch (Throwable t) {
             throw Throwables.propagate(t);
+        }
+    }
+    
+    private void setEventualPathVarMap(WebRestRef webRestRef, RequestContext rc){
+        Pattern pattern = webRestRef.getPathPattern();
+        
+        if (pattern != null){
+            Map<Integer,String> varNameById = webRestRef.getPathVarByIdx();
+            Matcher uriMatcher =  pattern.matcher(rc.getResourcePath());
+            
+            Map<String,String> valueByParamName = new HashMap<String, String>();
+            if (uriMatcher.matches()){
+                for (int gi = 0; gi <= uriMatcher.groupCount(); gi++){
+                    String value = uriMatcher.group(gi);
+                    String pathParam = varNameById.get(gi - 1);
+                    if (pathParam != null){
+                        valueByParamName.put(pathParam, value);
+                    }
+                }
+                rc.setPathVarMap(valueByParamName);
+            }            
         }
     }
 

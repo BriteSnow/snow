@@ -48,6 +48,8 @@ public class RequestContext {
     // built on demand
     private Map<String, Object> paramMap           = null;
 
+    private Map<String, String> pathVarMap         = null;
+
     // built on demand
     private Map<String, String> cookieMap;
 
@@ -73,7 +75,7 @@ public class RequestContext {
     protected HttpMethod        httpMethod;
 
     private Object              result;
-    
+
     // mostly useful for unit testing
     private AbortException      abortException;
 
@@ -161,9 +163,33 @@ public class RequestContext {
         return httpMethod;
     }
 
+    // --------- Path Var --------- //
+    public <T> T getPathVarAs(String name, Class<T> cls){
+        return ObjectUtil.getValue(getPathVar(name), cls, null);
+    }
+    
+    public <T> T getPathVarAs(String name, Class<T> cls, T defaultValue){
+        return ObjectUtil.getValue(getPathVar(name), cls, defaultValue);
+    }
+    
+    public String getPathVar(String var) {
+        if (pathVarMap != null) {
+            return pathVarMap.get(var);
+        } else {
+            return null;
+        }
+    }
+
+    // TODO: should not be public
+    void setPathVarMap(Map<String, String> map) {
+        pathVarMap = map;
+    }
+
+    // --------- /Path Var --------- //
+
     // --------- Param Methods --------- //
 
-    // mostly for Mock objects
+    // protected mostly for Mock objects
     protected void setParamMap(Map<String, Object> paramMap) {
         this.paramMap = paramMap;
         isParamInitialized = true;
@@ -267,7 +293,6 @@ public class RequestContext {
      *            Default value in case of an error or null/empty value
      * @return
      */
-    @SuppressWarnings("unchecked")
     public <T> T getParamAs(String name, Class<T> cls, T defaultValue) {
         Map<String, Object> paramMap = getParamMap();
         if (paramMap == null) {
@@ -538,8 +563,6 @@ public class RequestContext {
     }
 
     // --------- /Utilities for Paths --------- //
-    
-    
 
     /*--------- Writer ---------*/
     public Writer getWriter() {
@@ -560,8 +583,8 @@ public class RequestContext {
     public Object getResult() {
         return result;
     }
+
     // --------- /Result --------- //
-    
 
     /*--------- RootModel ---------*/
     /**
@@ -651,7 +674,7 @@ public class RequestContext {
     }
 
     /*--------- /HttpServlet ---------*/
-    
+
     // --------- Abort Exception --------- //
     public AbortException getAbortException() {
         return abortException;
@@ -659,6 +682,6 @@ public class RequestContext {
 
     public void setAbortException(AbortException abortException) {
         this.abortException = abortException;
-    }    
+    }
     // --------- /Abort Exception --------- //
 }

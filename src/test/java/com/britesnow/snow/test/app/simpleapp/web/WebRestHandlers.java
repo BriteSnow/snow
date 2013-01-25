@@ -6,6 +6,7 @@ import javax.inject.Singleton;
 
 import com.britesnow.snow.util.MapUtil;
 import com.britesnow.snow.web.HttpMethod;
+import com.britesnow.snow.web.param.annotation.PathVar;
 import com.britesnow.snow.web.param.annotation.WebParam;
 import com.britesnow.snow.web.rest.annotation.WebDelete;
 import com.britesnow.snow.web.rest.annotation.WebGet;
@@ -49,6 +50,11 @@ public class WebRestHandlers {
     @WebPost("/post-and-get")
     public Map postAndGet(HttpMethod method, @WebParam("info")String info ){
         return MapUtil.mapIt("method-echo",method,"info-echo",info);
+    }
+    
+    @WebDelete("/delete-item-{itemId}-")
+    public Map deleteItem(@PathVar("itemId") Long itemId){
+        return MapUtil.mapIt("deletedItemId",itemId);
     }
     
 }

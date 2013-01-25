@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import com.britesnow.snow.web.HttpMethod;
 import com.britesnow.snow.web.binding.WebClasses;
 import com.britesnow.snow.web.exception.WebExceptionCatcherRef;
 import com.britesnow.snow.web.exception.annotation.WebExceptionCatcher;
@@ -235,22 +236,22 @@ public class WebObjectRegistry {
             // --------- Register Rest Methods --------- //
             WebGet webGet = m.getAnnotation(WebGet.class);
             if (webGet != null){
-                restRegistry.registerWebGet(c, m, paramDefBuilder.buildParamDefs(m, true), webGet);
+                restRegistry.registerWebRest(c, m, paramDefBuilder.buildParamDefs(m, true), HttpMethod.GET, webGet.value());
             }
             
             WebPost webPost = m.getAnnotation(WebPost.class);
             if (webPost != null){
-                restRegistry.registerWebPost(c, m, paramDefBuilder.buildParamDefs(m, true), webPost);
+                restRegistry.registerWebRest(c, m, paramDefBuilder.buildParamDefs(m, true), HttpMethod.POST, webPost.value());
             }
             
             WebPut webPut = m.getAnnotation(WebPut.class);
             if (webPut != null){
-                restRegistry.registerWebPut(c, m, paramDefBuilder.buildParamDefs(m, true), webPut);
+                restRegistry.registerWebRest(c, m, paramDefBuilder.buildParamDefs(m, true), HttpMethod.PUT, webPut.value());
             }
             
             WebDelete webDelete = m.getAnnotation(WebDelete.class);
             if (webDelete != null){
-                restRegistry.registerWebDelete(c, m, paramDefBuilder.buildParamDefs(m, true), webDelete);
+                restRegistry.registerWebRest(c, m, paramDefBuilder.buildParamDefs(m, true), HttpMethod.DELETE, webDelete.value());
             }            
             // --------- /Register Rest Methods --------- //
             
