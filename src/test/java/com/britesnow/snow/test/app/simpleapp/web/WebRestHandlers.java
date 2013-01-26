@@ -53,8 +53,8 @@ public class WebRestHandlers {
     }
     
     @WebDelete("/delete-item-{itemId}-")
-    public Map deleteItem(@PathVar("itemId") Long itemId){
-        return MapUtil.mapIt("deletedItemId",itemId);
+    public String deleteItem(@PathVar("itemId") Long itemId){
+        return "{\"deletedItemId\":"  + itemId + "}";
     }
     
 }
