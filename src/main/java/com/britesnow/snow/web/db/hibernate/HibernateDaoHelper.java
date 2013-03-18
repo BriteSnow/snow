@@ -4,15 +4,9 @@
 package com.britesnow.snow.web.db.hibernate;
 
 import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.ResultSet;
-
 import java.util.List;
 
-
 import org.hibernate.Session;
-
-
 
 /**
  * 
@@ -34,7 +28,6 @@ public interface HibernateDaoHelper {
 
 
     public void saveEntities(List entities);
-
 
     public void saveEntities(Object... entities);
 
@@ -63,12 +56,6 @@ public interface HibernateDaoHelper {
      */
     public void flushAndClear();
 
-    /*--------- JDBC CALLS ---------*/
-    public ResultSet executeSql(String sql, Object... args);
-
     public Session getSession();
-
-    public Connection getConnection();
-
 
 }

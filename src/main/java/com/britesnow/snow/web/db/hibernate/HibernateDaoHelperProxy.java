@@ -4,8 +4,6 @@
 package com.britesnow.snow.web.db.hibernate;
 
 import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -48,10 +46,6 @@ public class HibernateDaoHelperProxy implements HibernateDaoHelper{
     }
 
 
-    @Override
-    public ResultSet executeSql(String sql,Object... args) {
-        return daoHelper.executeSql(sql,args);
-    }
 
     @Override
     public List<? extends Object> find(int pageIdx, int pageSize, String query, Object... values) {
@@ -80,16 +74,6 @@ public class HibernateDaoHelperProxy implements HibernateDaoHelper{
     }
 
     @Override
-    public Connection getConnection() {
-        return daoHelper.getConnection();
-    }
-
-    @Override
-    public Session getSession() {
-        return daoHelper.getSession();
-    }
-
-    @Override
     public <T> T reload(T obj, Serializable id) {
         return daoHelper.reload(obj, id);
     }
@@ -114,7 +98,10 @@ public class HibernateDaoHelperProxy implements HibernateDaoHelper{
     public <T> T update(T entity) {
         return daoHelper.update(entity);
     }
-
-
+    
+    @Override
+    public Session getSession() {
+        return daoHelper.getSession();
+    }    
     // --------- /Proxied Method --------- //
 }

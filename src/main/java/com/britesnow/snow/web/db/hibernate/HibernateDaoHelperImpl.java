@@ -4,16 +4,10 @@
 package com.britesnow.snow.web.db.hibernate;
 
 import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.engine.spi.SessionFactoryImplementor;
-import org.hibernate.service.jdbc.connections.spi.ConnectionProvider;
 
 import com.britesnow.snow.web.db.hibernate.annotation.Transactional;
 import com.google.inject.Singleton;
@@ -256,11 +250,23 @@ public class HibernateDaoHelperImpl implements HibernateDaoHelper {
     }
 
     /*--------- /Session Refresh ---------*/
+    
+    /* (non-Javadoc)
+     * @see org.snowfk.web.db.hibernate.HibernateDaoHelper#getSession()
+     */
+    public Session getSession() {
+        SessionHolder sessionHolder = SessionHolder.getThreadSessionHolder();
+        if (sessionHolder == null) {
+            throw new RuntimeException("Cannot get session. No SessionHolder bound to thread. "
+                                    + "Call OpenSessionInView() before getting a session");
+        }
+        return sessionHolder.getSession();
+    }    
 
     /*--------- JDBC CALLS ---------*/
-    /* (non-Javadoc)
-     * @see org.snowfk.web.db.hibernate.HibernateDaoHelper#executeSql(java.lang.String)
-     */
+    // for now, we turn this off as it seems to have memory leaks 
+    // with the new hibernate 4.x way of getting Hibernate Session.
+    /*
     public ResultSet executeSql(String sql, Object... args) {
         try {
             ResultSet rs = null;
@@ -286,34 +292,11 @@ public class HibernateDaoHelperImpl implements HibernateDaoHelper {
             throw new SnowHibernateException(e);
         }
     }
+    */
 
     /*--------- /JDBC CALLS ---------*/
 
-    /* (non-Javadoc)
-     * @see org.snowfk.web.db.hibernate.HibernateDaoHelper#getSession()
-     */
-    public Session getSession() {
-        SessionHolder sessionHolder = SessionHolder.getThreadSessionHolder();
-        if (sessionHolder == null) {
-            throw new RuntimeException("Cannot get session. No SessionHolder bound to thread. "
-                                    + "Call OpenSessionInView() before getting a session");
-        }
-        return sessionHolder.getSession();
-    }
 
-    /* (non-Javadoc)
-     * @see org.snowfk.web.db.hibernate.HibernateDaoHelper#getConnection()
-     */
-    @SuppressWarnings("deprecation")
-    public Connection getConnection() {
-        try {
-            ConnectionProvider cp =((SessionFactoryImplementor)getSession().getSessionFactory()).getConnectionProvider();  
-            return cp.getConnection();    
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-          return null;
-//        return getSession().connection();
-    }
+
 
 }
