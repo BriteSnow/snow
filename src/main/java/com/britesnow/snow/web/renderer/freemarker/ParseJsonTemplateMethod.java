@@ -11,7 +11,7 @@ import java.util.Map;
 import com.britesnow.snow.util.FileUtil;
 import com.britesnow.snow.util.JsonUtil;
 import com.britesnow.snow.web.RequestContext;
-import com.britesnow.snow.web.path.ResourceFileResolver;
+import com.britesnow.snow.web.path.ResourceFileLocator;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -22,7 +22,7 @@ import freemarker.template.TemplateModelException;
 public class ParseJsonTemplateMethod implements TemplateMethodModelEx {
 
     @Inject
-    private ResourceFileResolver pathFileResolver;
+    private ResourceFileLocator pathFileResolver;
     
     @Override
     public Object exec(List args) throws TemplateModelException {
@@ -32,7 +32,7 @@ public class ParseJsonTemplateMethod implements TemplateMethodModelEx {
         
         if (path != null) {
             
-            File jsonFile = pathFileResolver.resolve(path,rc);
+            File jsonFile = pathFileResolver.locate(path,rc);
             
             if (jsonFile.exists()){
                 String json = FileUtil.getFileContentAsString(jsonFile);

@@ -31,7 +31,7 @@ import com.britesnow.snow.web.hook.HookInvoker;
 import com.britesnow.snow.web.hook.On;
 import com.britesnow.snow.web.hook.ReqPhase;
 import com.britesnow.snow.web.path.FramePathsResolver;
-import com.britesnow.snow.web.path.ResourceFileResolver;
+import com.britesnow.snow.web.path.ResourceFileLocator;
 import com.britesnow.snow.web.path.ResourcePathResolver;
 import com.britesnow.snow.web.renderer.WebBundleManager;
 import com.britesnow.snow.web.renderer.less.LessProcessor;
@@ -82,7 +82,7 @@ public class WebController {
     private ResourcePathResolver            resourcePathResolver;
 
     @Inject
-    private ResourceFileResolver            pathFileResolver;
+    private ResourceFileLocator            pathFileResolver;
 
     private ThreadLocal<RequestContext>     requestContextTl              = new ThreadLocal<RequestContext>();
 
@@ -458,7 +458,7 @@ public class WebController {
         // --------- Process the .less file --------- //
         String lessFilePath = resourcePath.substring(0, resourcePath.length() - 4);
 
-        File lessFile = pathFileResolver.resolve(lessFilePath, rc);
+        File lessFile = pathFileResolver.locate(lessFilePath, rc);
         if (!lessFile.exists()) {
             throw new AbortWithHttpStatusException(HttpStatus.NOT_FOUND, "File " + lessFilePath + " not found");
         }
@@ -495,7 +495,7 @@ public class WebController {
 
     private void serviceFile(RequestContext rc) {
         String resourcePath = rc.getResourcePath();
-        File resourceFile = pathFileResolver.resolve(resourcePath, rc);
+        File resourceFile = pathFileResolver.locate(resourcePath, rc);
         if (resourceFile.exists()) {
             boolean isCachable = isCachable(resourcePath);
             httpWriter.writeFile(rc, resourceFile, isCachable, null);

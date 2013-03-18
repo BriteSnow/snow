@@ -7,7 +7,7 @@ import javax.inject.Singleton;
 
 import com.britesnow.snow.web.RequestContext;
 import com.britesnow.snow.web.binding.WebAppFolder;
-import com.britesnow.snow.web.path.ResourceFileResolver;
+import com.britesnow.snow.web.path.ResourceFileLocator;
 import com.google.inject.Inject;
 
 
@@ -19,7 +19,7 @@ public class FeemarkerTemplateNameResolver {
     private @WebAppFolder File webAppFolder;
     
     @Inject
-    private ResourceFileResolver resourceFileResolver;
+    private ResourceFileLocator resourceFileResolver;
     
     
     // resourcePath needs to be relative to WebAppFolder
@@ -31,7 +31,7 @@ public class FeemarkerTemplateNameResolver {
             resourcePath += ".ftl";
         }
         
-        File resourceFile = resourceFileResolver.resolve(resourcePath, rc); //new File(webAppFolder,resourcePath);
+        File resourceFile = resourceFileResolver.locate(resourcePath, rc); //new File(webAppFolder,resourcePath);
         
         return getTemplateName(resourceFile);
     }

@@ -9,17 +9,17 @@ import com.britesnow.snow.web.RequestContext;
 import com.britesnow.snow.web.binding.WebAppFolder;
 
 /**
- * Default ResourceFile resolver. Just assume that the resource path is relative to the webAppFolder. 
+ * Default ResourceFile locator. Just assume that the resource path is relative to the webAppFolder. 
  * 
  * @author jeremychone
  */
 @Singleton
-public class DefaultResourceFileResolver implements ResourceFileResolver {
+public class DefaultResourceFileLocator implements ResourceFileLocator {
 
     @Inject 
     private @WebAppFolder File  webAppFolder;
     
-    public File resolve(String resourcePath, RequestContext rc){
+    public File locate(String resourcePath, RequestContext rc){
         return new File(webAppFolder,resourcePath);
     }
 }

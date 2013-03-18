@@ -14,7 +14,7 @@ import com.britesnow.snow.testsupport.mock.RequestContextMock;
 import com.britesnow.snow.testsupport.mock.RequestContextMockFactory.RequestMethod;
 import com.britesnow.snow.web.RequestContext;
 import com.britesnow.snow.web.binding.WebAppFolder;
-import com.britesnow.snow.web.path.ResourceFileResolver;
+import com.britesnow.snow.web.path.ResourceFileLocator;
 import com.google.inject.AbstractModule;
 
 public class ResourceResolversTest extends SnowTestSupport {
@@ -27,7 +27,7 @@ public class ResourceResolversTest extends SnowTestSupport {
 
             @Override
             protected void configure() {
-                bind(ResourceFileResolver.class).to(CustomResourceFileResolver.class);
+                bind(ResourceFileLocator.class).to(CustomResourceFileResolver.class);
             }
         });
     }
@@ -58,13 +58,13 @@ public class ResourceResolversTest extends SnowTestSupport {
 
 }
 
-class CustomResourceFileResolver implements ResourceFileResolver {
+class CustomResourceFileResolver implements ResourceFileLocator {
 
     @Inject
     private @WebAppFolder
     File webAppFolder;
 
-    public File resolve(String resourcePath, RequestContext rc) {
+    public File locate(String resourcePath, RequestContext rc) {
         // incase there is teh ignore this prefix, remove it (note that sometime we will have // in the resourcePath,
         // but this works)
         resourcePath = resourcePath.replace(ResourceResolversTest.IGNORE_PREFIX, "");

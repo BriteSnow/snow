@@ -18,10 +18,10 @@ import com.britesnow.snow.web.hook.annotation.WebApplicationHook;
 import com.britesnow.snow.web.hook.annotation.WebRequestHook;
 import com.britesnow.snow.web.param.resolver.annotation.WebParamResolver;
 import com.britesnow.snow.web.path.DefaultFramePathsResolver;
-import com.britesnow.snow.web.path.DefaultResourceFileResolver;
+import com.britesnow.snow.web.path.DefaultResourceFileLocator;
 import com.britesnow.snow.web.path.DefaultResourcePathResolver;
 import com.britesnow.snow.web.path.FramePathsResolver;
-import com.britesnow.snow.web.path.ResourceFileResolver;
+import com.britesnow.snow.web.path.ResourceFileLocator;
 import com.britesnow.snow.web.path.ResourcePathResolver;
 import com.britesnow.snow.web.renderer.JsonLibJsonRenderer;
 import com.britesnow.snow.web.renderer.JsonRenderer;
@@ -52,7 +52,7 @@ public class DefaultApplicationModule extends AbstractModule {
         bind(FramePathsResolver.class).to(DefaultFramePathsResolver.class);
         
         bind(ResourcePathResolver.class).to(DefaultResourcePathResolver.class);
-        bind(ResourceFileResolver.class).to(DefaultResourceFileResolver.class);
+        bind(ResourceFileLocator.class).to(DefaultResourceFileLocator.class);
         
         bind(ContentTypeResolver.class).to(DefaultContentTypeResolver.class);
         

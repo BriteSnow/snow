@@ -8,7 +8,7 @@ import javax.inject.Inject;
 
 import com.britesnow.snow.util.FileUtil;
 import com.britesnow.snow.web.RequestContext;
-import com.britesnow.snow.web.path.ResourceFileResolver;
+import com.britesnow.snow.web.path.ResourceFileLocator;
 import com.google.inject.Singleton;
 
 @Singleton
@@ -18,7 +18,7 @@ public class WebBundleManager {
     public static final String DEBUG_LINK_STRING     = "_debug_links";
 
     @Inject
-    private ResourceFileResolver resourceFileResolver;
+    private ResourceFileLocator resourceFileResolver;
     
     public boolean isWebBundle(String resourcePath) {
         boolean r = false;
@@ -37,7 +37,7 @@ public class WebBundleManager {
 
         String ext = FileUtil.getFileNameAndExtension(resourcePath)[1];
         
-        File resourceFolder = resourceFileResolver.resolve(resourcePath,rc).getParentFile();
+        File resourceFolder = resourceFileResolver.locate(resourcePath,rc).getParentFile();
 
         List<File> files = getWebBundleFiles(resourceFolder, ext);
 

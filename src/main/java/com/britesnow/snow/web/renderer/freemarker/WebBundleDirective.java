@@ -18,7 +18,7 @@ import java.util.Map;
 import com.britesnow.snow.SnowException;
 import com.britesnow.snow.util.ObjectUtil;
 import com.britesnow.snow.web.RequestContext;
-import com.britesnow.snow.web.path.ResourceFileResolver;
+import com.britesnow.snow.web.path.ResourceFileLocator;
 import com.britesnow.snow.web.path.ResourcePathResolver;
 import com.britesnow.snow.web.renderer.WebBundleManager;
 import com.google.inject.Inject;
@@ -47,7 +47,7 @@ public class WebBundleDirective implements TemplateDirectiveModel {
     @Inject
     private WebBundleManager webBundleManager;
     @Inject
-    private ResourceFileResolver pathFileResolver;
+    private ResourceFileLocator pathFileResolver;
     @Inject
     private ResourcePathResolver resourcePathResolver;
     
@@ -94,7 +94,7 @@ public class WebBundleDirective implements TemplateDirectiveModel {
         //Part part = webApplication.getPart(path);
         //File folder = part.getResourceFile();
         String resourcePath = resourcePathResolver.resolve(path, rc);
-        File folder = pathFileResolver.resolve(resourcePath,rc);
+        File folder = pathFileResolver.locate(resourcePath,rc);
         
         if (!folder.exists()){
             throw new SnowException(Alert.NOT_VALID_WEBBUNDLE_PATH,"path",folder.getAbsolutePath());
