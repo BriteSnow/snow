@@ -57,7 +57,7 @@ public class LessProcessor {
             scope = cx.initStandardObjects(global);
             cx.evaluateReader(scope, new InputStreamReader(env.openConnection().getInputStream()), env.getFile(), 1, null);
             cx.evaluateString(scope, "lessenv.charset = '" + CHARSET + "';", "charset", 1, null);
-            cx.evaluateString(scope, "lessenv.css = " + "true" + ";", "css", 1, null);
+            cx.evaluateString(scope, "lessenv.css = " + "false" + ";", "css", 1, null);
             cx.evaluateReader(scope, new InputStreamReader(less.openConnection().getInputStream()), less.getFile(), 1, null);
             cx.evaluateReader(scope, new InputStreamReader(engine.openConnection().getInputStream()), engine.getFile(), 1, null);
             compileString = (Function) scope.get("compileString", scope);
