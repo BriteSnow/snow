@@ -1,4 +1,4 @@
-package com.britesnow.snow.web.less;
+package com.britesnow.snow.web.renderer.less;
 
 import java.net.URL;
 

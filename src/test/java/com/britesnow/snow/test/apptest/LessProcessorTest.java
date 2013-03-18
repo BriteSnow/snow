@@ -5,7 +5,7 @@ import java.io.File;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.britesnow.snow.web.less.LessProcessor;
+import com.britesnow.snow.web.renderer.less.LessProcessor;
 
 public class LessProcessorTest {
     
