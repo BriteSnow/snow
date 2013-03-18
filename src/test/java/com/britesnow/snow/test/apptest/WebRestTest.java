@@ -115,7 +115,6 @@ public class WebRestTest extends SnowTestSupport {
         rc = requestContextFactory.createRequestContext(RequestMethod.DELETE, "/delete-item-333-");
         webController.service(rc);
         result = rc.getResponseAsJson();
-        System.out.println(rc.getResponseAsString());
         Assert.assertEquals(333,result.get("deletedItemId"));
     }
     

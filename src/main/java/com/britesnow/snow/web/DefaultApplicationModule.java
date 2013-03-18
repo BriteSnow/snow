@@ -1,9 +1,11 @@
 package com.britesnow.snow.web;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.Set;
 
+import javax.annotation.Nullable;
+import javax.inject.Singleton;
+
+import com.britesnow.snow.util.PackageScanner;
 import com.britesnow.snow.web.binding.ApplicationPackageBase;
 import com.britesnow.snow.web.binding.WebClasses;
 import com.britesnow.snow.web.exception.annotation.WebExceptionCatcher;
@@ -33,8 +35,9 @@ import com.britesnow.snow.web.rest.annotation.WebSerializer;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 
-import com.metapossum.utils.scanner.reflect.ClassesInPackageScanner;
-import com.metapossum.utils.scanner.reflect.ExtendsClassResourceFilter;
+
+
+import com.google.common.base.Predicate;
 
 public class DefaultApplicationModule extends AbstractModule {
 
@@ -61,51 +64,50 @@ public class DefaultApplicationModule extends AbstractModule {
     }
 
 
+    @Singleton
     @Provides
     @WebClasses
     public Class[] providesWebClasses() {
         if (applicationPackageBase != null) {
-            ClassesInPackageScanner classScanner = new ClassesInPackageScanner();
-
-            classScanner.setResourceFilter(new ExtendsClassResourceFilter(Object.class, true) {
-                @Override
-                public boolean acceptScannedResource(Class cls) {
-                    for (Method method : cls.getDeclaredMethods()) {
-                            
-                        if (method.getAnnotation(WebActionHandler.class) != null || method.getAnnotation(WebResourceHandler.class) != null
-                                                || method.getAnnotation(WebModelHandler.class) != null
-                                                || method.getAnnotation(WebParamResolver.class) != null
-                                                || method.getAnnotation(WebExceptionCatcher.class) != null
-                                                || method.getAnnotation(WebApplicationHook.class) != null
-                                                || method.getAnnotation(WebRequestHook.class) != null
-                                                || method.getAnnotation(FreemarkerDirectiveHandler.class) != null                                                
-                                                || method.getAnnotation(FreemarkerMethodHandler.class) != null
-                                                || method.getAnnotation(WebGet.class) != null
-                                                || method.getAnnotation(WebPost.class) != null
-                                                || method.getAnnotation(WebPut.class) != null
-                                                || method.getAnnotation(WebDelete.class) != null
-                                                || method.getAnnotation(WebSerializer.class) != null){
-                            return true;
-                        }
-                    }
-                    return false;
-                }
-            });
-
             try {
-                Set classSet = classScanner.findSubclasses(applicationPackageBase, Object.class);
-                Class[] webHandlerClasses = new Class[classSet.size()];
-                classSet.toArray(webHandlerClasses);
-                return webHandlerClasses;
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-                throw new RuntimeException("Failed to scan packages: " + applicationPackageBase);
+                Class[] webClasses = new PackageScanner(applicationPackageBase).findClasses(webClassPredicate);
+                return webClasses;
+            } catch (Throwable e1) {
+                throw new RuntimeException("Cannot load automatically the @WebClasses in package " + applicationPackageBase, e1);
             }
         } else {
             return new Class[0];
         }
 
     }
+    
+
+    private static Predicate<Class> webClassPredicate = new Predicate<Class>() {
+        
+        @Override
+        public boolean apply(@Nullable Class cls) {
+            for (Method method : cls.getDeclaredMethods()) {
+                
+                if (method.getAnnotation(WebActionHandler.class) != null || method.getAnnotation(WebResourceHandler.class) != null
+                                        || method.getAnnotation(WebModelHandler.class) != null
+                                        || method.getAnnotation(WebParamResolver.class) != null
+                                        || method.getAnnotation(WebExceptionCatcher.class) != null
+                                        || method.getAnnotation(WebApplicationHook.class) != null
+                                        || method.getAnnotation(WebRequestHook.class) != null
+                                        || method.getAnnotation(FreemarkerDirectiveHandler.class) != null                                                
+                                        || method.getAnnotation(FreemarkerMethodHandler.class) != null
+                                        || method.getAnnotation(WebGet.class) != null
+                                        || method.getAnnotation(WebPost.class) != null
+                                        || method.getAnnotation(WebPut.class) != null
+                                        || method.getAnnotation(WebDelete.class) != null
+                                        || method.getAnnotation(WebSerializer.class) != null){
+                    return true;
+                }
+            }
+            return false; 
+        }
+    };
 
 }
+
+

@@ -126,11 +126,13 @@
       <classifier>jdk15</classifier>
     </dependency>
     
+    <!--
     <dependency>
 	  <groupId>com.metapossum</groupId>
 	  <artifactId>metapossum-scanner</artifactId>
 	  <version>1.0.1</version>
-	</dependency>    
+	</dependency>
+	-->    
 	
     <dependency>
       <groupId>org.hibernate</groupId>
@@ -154,7 +156,7 @@
     <dependency>
 	    <groupId>com.google.guava</groupId>
 	    <artifactId>guava</artifactId>
-	    <version>13.0</version>
+	    <version>14.0.1</version>
 	  </dependency>
     
     <dependency>
