@@ -320,10 +320,15 @@ public class WebController {
             }catch (Throwable t){
                 logger.error("WebRequestHook exception: " + t.getMessage(),t);
             }
+            
+            HttpServletResponse res = rc.getRes();
+            boolean isCommitted = res.isCommitted();
             try {
-                rc.getRes().flushBuffer();
+                if (!isCommitted){
+                    res.flushBuffer();
+                }
             } catch (IOException e) {
-                logger.error("Error while doing rc.getRes().flushBuffer(): " + e.getMessage(),e);
+                logger.error("Error while doing rc.getRes().flushBuffer() (isCommitted : " + isCommitted + ")" + e.getMessage(),e);
             }
         }
 
