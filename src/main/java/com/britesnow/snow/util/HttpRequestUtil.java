@@ -49,6 +49,7 @@ public class HttpRequestUtil {
     static public void removeCookie(HttpServletRequest req, HttpServletResponse res, String name) {
         Cookie cookie = getCookie(req, name);
         if (cookie != null) {
+            cookie.setPath("/");
             cookie.setMaxAge(0);
             res.addCookie(cookie);
         }
