@@ -54,15 +54,16 @@ public class RestRegistry {
             ref = refByPath.get(resourcePath);
         }
         
+        // if still null, check if there is a vared path matching
         if (ref == null){
-            // TODO: check if there is a vared path matching
             Map<Pattern,WebRestRef> refByPattern = getRefByPattern(method);
-            
-            for (Pattern pattern : refByPattern.keySet()){
-                Matcher matcher = pattern.matcher(resourcePath);
-                if (matcher.matches()){
-                    ref = refByPattern.get(pattern);
-                    break;
+            if(refByPattern != null){
+                for (Pattern pattern : refByPattern.keySet()){
+                    Matcher matcher = pattern.matcher(resourcePath);
+                    if (matcher.matches()){
+                        ref = refByPattern.get(pattern);
+                        break;
+                    }
                 }
             }
         }
