@@ -8,3 +8,4 @@ bin
 lib
 build.xml
 target
+mvninstall.sh
