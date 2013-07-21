@@ -74,6 +74,8 @@ public class RequestContext {
     // protected to allow mock override
     protected HttpMethod        httpMethod;
 
+    private WebRequestType      webRequestType;
+
     private Object              result;
 
     // mostly useful for unit testing
@@ -159,19 +161,28 @@ public class RequestContext {
 
     // --------- restContentType --------- //
 
+    // 
     public HttpMethod getMethod() {
         return httpMethod;
     }
+    
+    void setWebRequestType(WebRequestType webRequestType){
+        this.webRequestType = webRequestType;
+    }
+    
+    public WebRequestType getWebRequestType(){
+        return webRequestType;
+    }
 
     // --------- Path Var --------- //
-    public <T> T getPathVarAs(String name, Class<T> cls){
+    public <T> T getPathVarAs(String name, Class<T> cls) {
         return ObjectUtil.getValue(getPathVar(name), cls, null);
     }
-    
-    public <T> T getPathVarAs(String name, Class<T> cls, T defaultValue){
+
+    public <T> T getPathVarAs(String name, Class<T> cls, T defaultValue) {
         return ObjectUtil.getValue(getPathVar(name), cls, defaultValue);
     }
-    
+
     public String getPathVar(String var) {
         if (pathVarMap != null) {
             return pathVarMap.get(var);
@@ -468,22 +479,25 @@ public class RequestContext {
         return ObjectUtil.getValue(getCookie(name), cls, defaultValue);
     }
 
-
     /**
      * set a cookie for a session lifecycle (this is the same as calling setCookie(name,value, false)
      * 
      * @param name
-     * @param value if null, cookie for this name will be removed. 
+     * @param value
+     *            if null, cookie for this name will be removed.
      */
     public void setCookie(String name, Object value) {
-        setCookie(name,value,false);
+        setCookie(name, value, false);
     }
-    
+
     /**
-     * Set a cookie value. 
+     * Set a cookie value.
+     * 
      * @param name
-     * @param value if null, will remove the cookie. 
-     * @param persistent if persistent, the cookie is set to persist for a very long time (one year)
+     * @param value
+     *            if null, will remove the cookie.
+     * @param persistent
+     *            if persistent, the cookie is set to persist for a very long time (one year)
      */
     public void setCookie(String name, Object value, boolean persistent) {
         // update the response

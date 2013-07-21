@@ -170,20 +170,31 @@ public class WebController {
             // determine the requestType
             if (webRestRef != null){
                 responseType = ResponseType.rest;
+                rc.setWebRequestType(WebRequestType.WEB_REST);
             } else if (application.hasWebResourceHandlerFor(resourcePath)) {
                 responseType = ResponseType.webResource;
+                rc.setWebRequestType(WebRequestType.WEB_RESOURCE);
             } else if (isTemplatePath(resourcePath)) {
                 responseType = ResponseType.template;
+                rc.setWebRequestType(WebRequestType.WEB_TEMPLATE);
             } else if (isWebActionResponseJson(resourcePath, rc)) {
                 responseType = ResponseType.webActionResponseJson;
+                // TODO: Need to do warning, should be deprecated. 
+                //       So, do not set anything.
             } else if (isJsonPath(resourcePath)) {
                 responseType = ResponseType.json;
+                // TODO: Should map to file if file exist, but need to change serveJson to support that
+                //       (should also be deprecated)
+                rc.setWebRequestType(WebRequestType.WEB_TEMPLATE);
             } else if (webBundleManager.isWebBundle(resourcePath)) {
                 responseType = ResponseType.webBundle;
+                rc.setWebRequestType(WebRequestType.GENERATED_ASSET);
             } else if (resourcePath.endsWith(".less.css")) {
                 responseType = ResponseType.lessCss;
+                rc.setWebRequestType(WebRequestType.GENERATED_ASSET);
             } else {
                 responseType = ResponseType.file;
+                rc.setWebRequestType(WebRequestType.STATIC_FILE);
             }
             // --------- /Resolve the ResponseType --------- //
 
