@@ -468,9 +468,26 @@ public class RequestContext {
         return ObjectUtil.getValue(getCookie(name), cls, defaultValue);
     }
 
+
+    /**
+     * set a cookie for a session lifecycle (this is the same as calling setCookie(name,value, false)
+     * 
+     * @param name
+     * @param value if null, cookie for this name will be removed. 
+     */
     public void setCookie(String name, Object value) {
+        setCookie(name,value,false);
+    }
+    
+    /**
+     * Set a cookie value. 
+     * @param name
+     * @param value if null, will remove the cookie. 
+     * @param persistent if persistent, the cookie is set to persist for a very long time (one year)
+     */
+    public void setCookie(String name, Object value, boolean persistent) {
         // update the response
-        HttpRequestUtil.setCookieValue(getRes(), name, value, true);
+        HttpRequestUtil.setCookieValue(getRes(), name, value, persistent);
         // update the cookieMap (making sure that the template gets what we send to the browser)
         if (value != null) {
             getCookieMap().put(name, value.toString());

@@ -35,13 +35,16 @@ public class HttpRequestUtil {
      * @param res
      * @param name
      * @param value if null, does nothing
-     * @param persistent
+     * @param persistent if true, set the expiration to one year.
      */
     static public void setCookieValue(HttpServletResponse res, String name, Object value, boolean persistent) {
+        final int year = 3600 * 24 * 364;
         if (value != null) {
             Cookie cookie = new Cookie(name, value.toString());
             cookie.setPath("/");
-            cookie.setMaxAge(3600 * 24 * 364); // set expiration to one year.
+            if (persistent){
+                cookie.setMaxAge(year); // set expiration to one year.
+            }
             res.addCookie(cookie);
         }
     }
