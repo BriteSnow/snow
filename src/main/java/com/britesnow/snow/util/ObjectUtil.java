@@ -18,7 +18,6 @@ import org.apache.commons.beanutils.PropertyUtilsBean;
 
 @SuppressWarnings("unchecked")
 public class ObjectUtil {
-    static NumberFormat        numberFormat         = NumberFormat.getInstance(Locale.US);
 
     public static final String DEFAULT_DATE_PATTERN = "yyyy-MM-dd";
 
@@ -144,7 +143,7 @@ public class ObjectUtil {
                 if (cls == String.class) {
                     return (T) valueStr;
                 } else if (valueStr.length() > 0) {
-
+                    NumberFormat numberFormat = NumberFormat.getInstance(Locale.US);
                     if (cls.isArray()) {
                         return getValue(new String[] { valueStr }, cls, defaultValue);
                     } else if (cls == Integer.class) {
