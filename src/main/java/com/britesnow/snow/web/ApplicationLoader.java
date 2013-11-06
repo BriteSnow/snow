@@ -183,7 +183,7 @@ public class ApplicationLoader {
         if (servletContext != null) {
             String appFolderName = appFolder.getName();
 
-            File appDirPropertiesFile = new File(appFolder.getParentFile(), appFolderName + ".application.properties");
+            File appDirPropertiesFile = new File(appFolder.getParentFile(), appFolderName + ".properties");
             if (appDirPropertiesFile.exists()) {
                 Properties appDirProperties = new Properties();
                 try {
