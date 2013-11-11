@@ -7,15 +7,12 @@ import javax.inject.Inject;
 
 import com.britesnow.snow.web.param.resolver.WebParamResolverRef;
 import com.britesnow.snow.web.param.resolver.WebParamResolverRegistry;
-import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Singleton;
 
 @Singleton
 public class ParamDefBuilder {
     
-    @Inject
-    private Injector injector; 
     
     @Inject
     private WebParamResolverRegistry paramResolverRegistry; 
