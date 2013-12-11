@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.britesnow.snow.web.binding.WebClasses;
+import com.britesnow.snow.web.param.annotation.WebParam;
 import com.britesnow.snow.web.param.resolver.annotation.WebParamResolver;
 import com.britesnow.snow.web.renderer.freemarker.FreemarkerParamResolvers;
 import com.google.inject.Inject;
@@ -104,8 +105,6 @@ public class WebParamResolverRegistry {
             Map<Class, WebParamResolverRef> refByType = refByAnnotation.get(paramAnnotation.annotationType());
             if (refByType != null) {
                 for (Class type : refByType.keySet()) {
-                    //if (paramType.isAssignableFrom(type)){
-                    
                     if (type.isAssignableFrom(paramType)){
                         ref = findRefForType(paramType,refByType);
                         if (ref != null) {
@@ -116,6 +115,17 @@ public class WebParamResolverRegistry {
             }
         }
 
+        // if it is a @WebParam and the refType returnType was just an Object, try to see if we have a direct type resolver with the WebParam
+        // NOTE: This makes the @WebParam a default annotation in case it was not specified in the custom returnType binding,
+        //       and allows to have the generic System resolveWebParam with Object return type as a fall back.
+        // TODO: rather to test with Object.class, we should take the close returnType class to the paramType. It will make it more generic.
+        if (ref != null && ref.getReturnType() == Object.class &&  paramAnnotation.annotationType() == WebParam.class){
+            WebParamResolverRef tmpRef = findRefForType(paramType,refByReturnType);
+            if (tmpRef != null){
+                ref = tmpRef;
+            }
+        }
+        
         // if could not resolve it with the annotation, try with the type only.
         if (ref == null) {
             ref = findRefForType(paramType,refByReturnType);
@@ -130,6 +140,7 @@ public class WebParamResolverRegistry {
         // if still null, then, check the parent classes
         if (ref == null) {
             Class parentClass = paramType.getSuperclass();
+            
             while (parentClass != null && ref == null) {
                 ref = refByType.get(parentClass);
                 parentClass = parentClass.getSuperclass();

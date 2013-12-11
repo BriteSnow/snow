@@ -44,6 +44,14 @@ public class WebParamResolverRef {
     }
     // --------- /Public --------- //    
     
+    public String toString(){
+        StringBuilder sb = new StringBuilder("WebParamResolverRef{");
+        sb.append("returnType:").append(returnType.getName());
+        sb.append(",resolverMethod:").append(resolverMethod.getDeclaringClass().getSimpleName()).append('.').append(resolverMethod.getName());
+        sb.append('}');
+        return sb.toString();
+    }
+    
     
 
 }

@@ -7,10 +7,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.fileupload.FileItem;
 
 import com.britesnow.snow.util.AnnotationMap;
-import com.britesnow.snow.util.ObjectUtil;
 import com.britesnow.snow.web.HttpMethod;
 import com.britesnow.snow.web.RequestContext;
 import com.britesnow.snow.web.WebRequestType;
@@ -26,58 +24,10 @@ import com.google.common.base.Strings;
 public class SystemWebParamResolvers {
 
     // --------- Primary Type @WebParam Resolvers --------- //
-    //TODO: probably can reduce all the primary type resolver to one generic (as the resolveWebPath)
     @WebParamResolver(annotatedWith=WebParam.class)
-    public Long resolveLong(AnnotationMap annotationMap, Class paramType, RequestContext rc) {
+    public Object resolveWebParam(AnnotationMap annotationMap, Class paramType, RequestContext rc) {
         WebParam webParam = annotationMap.get(WebParam.class);
-        String id = rc.getParam(webParam.value());
-        return ObjectUtil.getValue(id, Long.class, null);
-    }
-
-    @WebParamResolver(annotatedWith=WebParam.class)
-    public Integer resolveInteger(AnnotationMap annotationMap, Class paramType, RequestContext rc) {
-        WebParam webParam = annotationMap.get(WebParam.class);
-        String id = rc.getParam(webParam.value());
-        return ObjectUtil.getValue(id, Integer.class, null);
-    }
-
-    @WebParamResolver(annotatedWith=WebParam.class)
-    public Double resolveDouble(AnnotationMap annotationMap, Class paramType, RequestContext rc) {
-        WebParam webParam = annotationMap.get(WebParam.class);
-        String id = rc.getParam(webParam.value());
-        return ObjectUtil.getValue(id, Double.class, null);
-    }
-
-    @WebParamResolver(annotatedWith=WebParam.class)
-    public String resolveString(AnnotationMap annotationMap, Class paramType, RequestContext rc) {
-        WebParam webParam = annotationMap.get(WebParam.class);
-        return rc.getParam(webParam.value());
-    }
-    
-    @WebParamResolver(annotatedWith=WebParam.class)
-    public Boolean resolveBoolean(AnnotationMap annotationMap, Class paramType, RequestContext rc) {
-        WebParam webParam = annotationMap.get(WebParam.class);
-        String val = rc.getParam(webParam.value());
-        return ObjectUtil.getValue(val,Boolean.class,null);
-    }
-    
-    @WebParamResolver(annotatedWith=WebParam.class)
-    public Enum resolveEnum(AnnotationMap annotationMap, Class paramType, RequestContext rc) {
-        WebParam webParam = annotationMap.get(WebParam.class);
-        String val = rc.getParam(webParam.value());
-        return (Enum)ObjectUtil.getValue(val, paramType, null);
-    }
-    
-    @WebParamResolver(annotatedWith=WebParam.class)
-    public Map resolveMap(AnnotationMap annotationMap, Class paramType, RequestContext rc) {
-        WebParam webParam = annotationMap.get(WebParam.class);
-        return rc.getParamMap(webParam.value());
-    }
-    
-    @WebParamResolver(annotatedWith=WebParam.class)
-    public FileItem resolveFileItem(AnnotationMap annotationMap, Class paramType, RequestContext rc) {
-        WebParam webParam = annotationMap.get(WebParam.class);
-        return rc.getParamAs(webParam.value(), FileItem.class);
+        return rc.getParamAs(webParam.value(),paramType,null);
     }    
     // --------- /@WebParam Resolvers --------- //
     
