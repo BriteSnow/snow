@@ -9,6 +9,7 @@ import com.britesnow.snow.web.param.annotation.WebModel;
 import com.britesnow.snow.web.param.annotation.WebParam;
 import com.britesnow.snow.web.rest.annotation.WebGet;
 import com.google.inject.Singleton;
+import org.apache.commons.fileupload.FileItem;
 
 @Singleton
 public class WebParamResolverTestWebHandlers {
@@ -26,5 +27,11 @@ public class WebParamResolverTestWebHandlers {
     @WebGet("/testLongArrayWebParam")
     public Map testLongArrayWebParam(@WebParam("stringArrayLongs")Long[] stringArrayLongs){
         return mapIt("stringArrayLongs",stringArrayLongs);
-    }    
+    }
+
+    @WebGet("/testFileItem")
+    public void testFileItem(@WebParam("file1")FileItem file1){
+        // NOTE: empty test right now, just to see if it get binded
+        // TODO: need to implement the mock for files.
+    }
 }

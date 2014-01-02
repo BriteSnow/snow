@@ -106,12 +106,13 @@ public class WebParamResolverRegistry {
             if (refByType != null) {
                 for (Class type : refByType.keySet()) {
                     if (type.isAssignableFrom(paramType)){
-                        ref = findRefForType(paramType,refByType);
+                        ref = findRefForType(paramType, refByType, true);
                         if (ref != null) {
                             break;
                         }
                     }
                 }
+
             }
         }
 
@@ -120,7 +121,7 @@ public class WebParamResolverRegistry {
         //       and allows to have the generic System resolveWebParam with Object return type as a fall back.
         // TODO: rather to test with Object.class, we should take the close returnType class to the paramType. It will make it more generic.
         if (ref != null && ref.getReturnType() == Object.class &&  paramAnnotation.annotationType() == WebParam.class){
-            WebParamResolverRef tmpRef = findRefForType(paramType,refByReturnType);
+            WebParamResolverRef tmpRef = findRefForType(paramType,refByReturnType, true);
             if (tmpRef != null){
                 ref = tmpRef;
             }
@@ -128,24 +129,37 @@ public class WebParamResolverRegistry {
         
         // if could not resolve it with the annotation, try with the type only.
         if (ref == null) {
-            ref = findRefForType(paramType,refByReturnType);
+            ref = findRefForType(paramType,refByReturnType, true);
         }
 
         return ref;
     }
 
-    private WebParamResolverRef findRefForType(Class paramType,Map<Class,WebParamResolverRef> refByType) {
+    private WebParamResolverRef findRefForType(Class paramType,Map<Class,WebParamResolverRef> refByType, boolean withAssignableFrom) {
         WebParamResolverRef ref = null;
         ref = refByType.get(paramType);
         // if still null, then, check the parent classes
         if (ref == null) {
             Class parentClass = paramType.getSuperclass();
-            
+
             while (parentClass != null && ref == null) {
                 ref = refByType.get(parentClass);
                 parentClass = parentClass.getSuperclass();
             }
         }
+
+        // if ref still null, then, try to match by isAssignableFrom
+        if (withAssignableFrom && ref == null){
+            for (Class type : refByType.keySet()) {
+                if (type.isAssignableFrom(paramType)){
+                    ref = refByType.get(type);
+                    if (ref != null) {
+                        break;
+                    }
+                }
+            }
+        }
+
         return ref;
     }
 
