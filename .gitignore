@@ -1,11 +1,27 @@
+# Mac stuff
 .DS_Store
+
+# Eclipse stuff
 .project
 .classpath
 .settings
-release.properties
-pom.xml.releaseBackup
-bin
-lib
-build.xml
+
+# Intellij stuff
+.idea/
+*.iml
+
+# maven stuff
 target
 mvninstall.sh
+
+# other stuff
+release.properties
+pom.xml.releaseBackup
+
+# legacy (might remove)
+bin
+lib
+
+# side script
+build.xml
+
