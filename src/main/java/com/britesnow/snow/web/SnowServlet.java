@@ -35,17 +35,17 @@ public class SnowServlet extends HttpServlet {
             ApplicationLoader appLoader = new ApplicationLoader(webAppFolder, servletContext);
             
             String appName = appLoader.getWebAppFolder().getName();
-            System.out.println("==== Snow Application : " + appName + " ===========");
+            logger.info("==== Snow Application : " + appName + " ===========");
             appLoader.load();
-            System.out.println("loading... done");
+            logger.info("loading... done");
             String appDir = servletContext.getInitParameter("appDir");
             if (appDir != null){
-                System.out.println("appDir: " + appDir);
+                logger.info("appDir: " + appDir);
             }
             webController = appLoader.getWebController();
             webController.init();
-            System.out.println("init... done");
-            System.out.println("==== /Snow Application : " + appName + " ===========");
+            logger.info("init... done");
+            logger.info("==== /Snow Application : " + appName + " ===========");
         } catch (Exception e) {
             logger.error(e.getMessage());
             throw new ServletException(e);

@@ -28,42 +28,29 @@ public class TransactionalInterceptor implements MethodInterceptor {
 
         Object ret = null;
         try {
-            
-            
             //// proceed to call
-            //System.out.println("..... before");
             ret = invoc.proceed();
-            //System.out.println("..... after");
             //// if this call had begun the transaction, then commit it
             if (sessionHolder != null && txOwner) {
                 sessionHolder.commitTransaction();
                 logger.debug(".......... Transaction Commit");
-                //System.out.println(".......... Transaction Commit");
             }
-
         } catch (Throwable t) {
-            
-            t.printStackTrace();
-            //SnowHibernateException she = new SnowHibernateException(t);
-            System.out.flush();
-            //System.out.println("SnowHibernateException message: " + she.getMessage());
-           
             //// if this call had begun the transaction, then 
             //   do a rollback on exception
             if (sessionHolder != null && txOwner) {
                 sessionHolder.rollbackTransaction();
                 if (t instanceof SnowHibernateException)
-                logger.error("SnowHibernateException message: " + t.getMessage());
+                logger.error("SnowHibernateException message: " + t.getMessage(), t);
             }
             
             //Since we do not require the @Transactional methods to throws exception, we must throw runtime exception.
             if (t instanceof RuntimeException){
-                throw ((RuntimeException)t);
+                throw t;
             }else{
                 throw new RuntimeException(t);
             }
         }
-        
         
         return ret;
     }

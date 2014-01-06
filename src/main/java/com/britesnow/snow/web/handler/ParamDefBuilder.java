@@ -56,8 +56,6 @@ public class ParamDefBuilder {
                     // TODO: Has to check if the key is bound, if not, go to the next annotation
                     // Binding b = injector.getBinding(key);
                     // Provider b = injector.getProvider(key);
-                    // System.out.println("binding: " + paramType + " " + key + " " + b);
-
                 }
             }
         }

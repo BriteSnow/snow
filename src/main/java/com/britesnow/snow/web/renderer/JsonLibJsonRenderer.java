@@ -41,7 +41,6 @@ public class JsonLibJsonRenderer implements JsonRenderer{
         try {
             out.write(jsonString);
         } catch (IOException e) {
-            e.printStackTrace();
             throw new RuntimeException(e);
         } 
     }
