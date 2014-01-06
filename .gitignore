@@ -1,3 +1,4 @@
+.gitignore
 .DS_Store
 .project
 .classpath
@@ -9,3 +10,5 @@ lib
 build.xml
 target
 mvninstall.sh
+.idea
+*.iml
