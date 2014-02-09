@@ -10,13 +10,16 @@
 .idea/
 *.iml
 
+# Ignore Sublime files
+*.sublime-project
+*.sublime-workspace
+
 # maven stuff
 target
 mvninstall.sh
 
 # other stuff
 release.properties
-pom.xml.releaseBackup
 
 # legacy (might remove)
 bin
