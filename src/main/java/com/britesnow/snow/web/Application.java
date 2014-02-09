@@ -97,8 +97,7 @@ public class Application {
                 }
                 hookInvoker.invokeAppHooks(AppPhase.INIT, On.AFTER);
             } catch (Throwable e) {
-                logger.error("Snow - Application init failed: " + e.getMessage());
-                e.printStackTrace();
+                logger.error("Snow - Application init failed: " + e.getMessage(),e);
             }
             initialized = false;
 

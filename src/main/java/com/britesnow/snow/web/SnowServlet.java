@@ -40,7 +40,7 @@ public class SnowServlet extends HttpServlet {
             logger.info("loading... done");
             String appDir = servletContext.getInitParameter("appDir");
             if (appDir != null){
-                System.out.println("appDir: " + appDir);
+                logger.info("appDir: " + appDir);
             }
             webController = appLoader.getWebController();
             webController.init();

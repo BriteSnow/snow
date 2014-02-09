@@ -157,8 +157,7 @@ public class FreemarkerTemplateRenderer implements TemplateRenderer {
                 Template template = conf.getTemplate(templateName);
                 template.process(model, out);
             }catch(Exception e){
-                logger.error("Error while rendering freemarker template " + resourcePath + " (" + templateName + ") because " + e.getMessage());
-                e.printStackTrace();
+                logger.error("Error while rendering freemarker template " + resourcePath + " (" + templateName + ") because " + e.getMessage(),e);
             }
         }else{
             // DO nothing, if we are here, the flag ignoreTemplateNotFound was set to true, so, it is expected to silently ignore.

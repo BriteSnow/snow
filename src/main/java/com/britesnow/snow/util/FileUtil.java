@@ -48,9 +48,7 @@ public class FileUtil {
 			props.load(is);
 			mimeTypeProperties = props;
 		} catch (Exception e) {
-			
-			logger.error("Could not load the property [" + mimeTypePath + "] because " + e.getMessage());
-			e.printStackTrace();
+			logger.error("Could not load the property [" + mimeTypePath + "] because " + e.getMessage(),e);
 		}
 	}
 
