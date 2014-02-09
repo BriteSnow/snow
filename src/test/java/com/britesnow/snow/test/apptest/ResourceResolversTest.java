@@ -6,6 +6,7 @@ import java.io.File;
 
 import javax.inject.Inject;
 
+import com.britesnow.snow.test.AssertUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -53,7 +54,7 @@ public class ResourceResolversTest extends SnowTestSupport {
         rc = requestContextFactory.createRequestContext(RequestMethod.GET, IGNORE_PREFIX + "/js/_web_bundle_all__anykey__.js");
         webController.service(rc);
         result = rc.getResponseAsString();
-        assertContains(new String[]{"var js1","var js2"},result);
+        AssertUtils.assertContains(new String[]{"var js1", "var js2"}, result);
     }    
 
 }

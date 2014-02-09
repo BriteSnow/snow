@@ -38,7 +38,7 @@ public class WebApplicationHookTest extends SnowTestSupport {
     @AfterClass
     public static void shutDownTestClass(){
         try {
-            SnowTestSupport.shutdownWebApplicaton();
+            SnowTestSupport.shutdownWebApplication();
             Assert.assertNotNull(SimpleWebAppHooks.appStates[1]);
             Assert.assertFalse(SimpleWebAppHooks.appStates[1].init);
             Assert.assertTrue(SimpleWebAppHooks.appStates[1].shutdown);

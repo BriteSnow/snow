@@ -451,6 +451,11 @@ public class RequestContext {
     // --------- /Param Methods --------- //
 
     /*--------- Cookie Methods ---------*/
+	// For the RequestContextMock (allow to easily set cookies for test APIs)
+	protected void setCookieMap(Map cookieMap){
+		this.cookieMap = cookieMap;
+	}
+
     public Map<String, String> getCookieMap() {
         if (cookieMap == null) {
             cookieMap = new HashMap<String, String>();

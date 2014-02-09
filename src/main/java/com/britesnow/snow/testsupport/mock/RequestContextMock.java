@@ -39,7 +39,11 @@ public class RequestContextMock extends RequestContext {
     public void setParamMap(Map params){
         super.setParamMap(params);
     }
-    
+
+	public void setCookieMap(Map cookieMap){
+		super.setCookieMap(cookieMap);
+	}
+
     public void setPathInfo(String pathInfo){
         req.setPathInfo(pathInfo);
     }

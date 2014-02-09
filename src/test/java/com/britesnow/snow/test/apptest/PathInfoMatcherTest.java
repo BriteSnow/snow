@@ -1,5 +1,6 @@
 package com.britesnow.snow.test.apptest;
 
+import com.britesnow.snow.test.AssertUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -20,7 +21,7 @@ public class PathInfoMatcherTest extends SnowTestSupport {
         webController.service(rc);
 
         String result = rc.getResponseAsString();
-        assertContains(new String[] { "isPathInfoMatcher:true", "isContactPage:false" }, result);
+        AssertUtils.assertContains(new String[]{"isPathInfoMatcher:true", "isContactPage:false"}, result);
     }
     
     @Test
@@ -28,12 +29,12 @@ public class PathInfoMatcherTest extends SnowTestSupport {
         RequestContextMock rc = requestContextFactory.createRequestContext(RequestMethod.GET, "/subfolder/");
         webController.service(rc);
         String result = rc.getResponseAsString();
-        assertContains(new String[] { "isSubfoler:true"}, result);
+        AssertUtils.assertContains(new String[]{"isSubfoler:true"}, result);
         
         rc = requestContextFactory.createRequestContext(RequestMethod.GET, "/subfolder/index");
         webController.service(rc);
         result = rc.getResponseAsString();
-        assertContains(new String[] { "isSubfolerIndex:true"}, result);
+        AssertUtils.assertContains(new String[]{"isSubfolerIndex:true"}, result);
     }    
 
     //@Test
@@ -42,6 +43,6 @@ public class PathInfoMatcherTest extends SnowTestSupport {
         webController.service(rc);
 
         String result = rc.getResponseAsString();
-        assertContains(new String[] { "startsSubfolder:true", "startsRoot:true", "startsContactPage:false" }, result);
+        AssertUtils.assertContains(new String[]{"startsSubfolder:true", "startsRoot:true", "startsContactPage:false"}, result);
     }
 }
