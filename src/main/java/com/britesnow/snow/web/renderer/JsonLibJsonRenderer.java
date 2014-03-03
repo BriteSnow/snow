@@ -9,7 +9,7 @@ import net.sf.json.util.CycleDetectionStrategy;
 import net.sf.json.util.PropertyFilter;
 
 public class JsonLibJsonRenderer implements JsonRenderer {
-	static private final String[] excludes = {"stackTrace", "password"};
+	static private final String[] excludes = {"stackTrace", "password", "pwd"};
 
 	static private final PropertyFilter ignoreNullFilter = new PropertyFilter() {
 
