@@ -6,88 +6,30 @@ package com.britesnow.snow.web.auth;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * <p>The authentication token returned by the AuthService. It provides basic role model with the Type, but typical use just use the User
+ * while role/privilege model is application specific.</p>
+ * @param <T>
+ */
 public class AuthToken<T> {
 
-    public enum Type {
-        root, admin, user, visitor;
-    }
-
-    private Type                type       = Type.visitor;
-    private T                   user;
-    private Map<String, String> groupNames = new HashMap<String, String>();
+	private T user = null;
 
     public AuthToken() {
-
     }
 
-    public AuthToken(Type type) {
-        setType(type);
-    }
-
-    public boolean belongTo(String groupName) {
-        return groupNames.containsKey(groupName);
-    }
-
-    /*--------- Getters ---------*/
-    public boolean getHasRootRights() {
-        return (type == Type.root) ? true : false;
-    }
-
-    public boolean getHasAdminRights() {
-        switch (type) {
-            case root:
-            case admin:
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    public boolean getHasUserRights() {
-        switch (type) {
-            case root:
-            case admin:
-            case user:
-                return true;
-            default:
-                return false;
-        }
-    }
-    public boolean getHasVisitorRights() {
-        return true; //for now, everybody is at least visitor right
-    }
-    /*--------- /Getters ---------*/
+	public AuthToken(T user) {
+		this.user = user;
+	}
 
     /* --------- Getters & Setters --------- */
-    public Type getType() {
-        return type;
-    }
-
-    public void setType(Type type) {
-        this.type = type;
-        if (type != null) {
-            groupNames.put(type.name(), type.name());
-
-            //add the "admin" group if it is a root Auth type
-            switch (type) {
-                case root:
-                case admin:
-                    groupNames.put("admin", "admin");
-                    break;
-                default:
-                    break;
-
-            }
-        }
-
-    }
-
     public T getUser() {
         return user;
     }
 
-    public void setUser(T user) {
+    public AuthToken<T> setUser(T user) {
         this.user = user;
+		return this;
     }
 
     /* --------- /Getters & Setters --------- */
