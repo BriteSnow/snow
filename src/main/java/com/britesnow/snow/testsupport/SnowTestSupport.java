@@ -125,8 +125,13 @@ public class SnowTestSupport {
 	 * @return
 	 */
 	public RequestContextMock doGet(String uri, Map params){
-		return doHttp(RequestContextMockFactory.RequestMethod.GET, uri, params);
+		return doHttp(RequestContextMockFactory.RequestMethod.GET, uri, params,null);
 	}
+
+	public RequestContextMock doGet(String uri, Map params, Map cookies){
+		return doHttp(RequestContextMockFactory.RequestMethod.GET, uri, params,cookies);
+	}
+
 
 	/**
 	 * Same as doGet for a HTTP POST.
@@ -135,7 +140,11 @@ public class SnowTestSupport {
 	 * @return
 	 */
 	public RequestContextMock doPost(String uri, Map params){
-		return doHttp(RequestContextMockFactory.RequestMethod.POST, uri, params);
+		return doHttp(RequestContextMockFactory.RequestMethod.POST, uri, params,null);
+	}
+
+	public RequestContextMock doPost(String uri, Map params, Map cookies){
+		return doHttp(RequestContextMockFactory.RequestMethod.POST, uri, params,cookies);
 	}
 
 	/**
@@ -145,7 +154,11 @@ public class SnowTestSupport {
 	 * @return
 	 */
 	public RequestContextMock doPut(String uri, Map params){
-		return doHttp(RequestContextMockFactory.RequestMethod.PUT, uri, params);
+		return doHttp(RequestContextMockFactory.RequestMethod.PUT, uri, params,null);
+	}
+
+	public RequestContextMock doPut(String uri, Map params, Map cookies){
+		return doHttp(RequestContextMockFactory.RequestMethod.PUT, uri, params, cookies);
 	}
 
 	/**
@@ -154,9 +167,8 @@ public class SnowTestSupport {
 	 * @return
 	 */
 	public RequestContextMock doDelete(String uri){
-		return doHttp(RequestContextMockFactory.RequestMethod.DELETE, uri, null);
+		return doHttp(RequestContextMockFactory.RequestMethod.DELETE, uri, null, null);
 	}
-
 
 	/**
 	 * The lower level method of doGet and doPost which take the requestMethod (POST or GET).
@@ -166,9 +178,10 @@ public class SnowTestSupport {
 	 * @param params
 	 * @return
 	 */
-	public RequestContextMock doHttp(RequestContextMockFactory.RequestMethod requestMethod, String uri, Map params){
+	public RequestContextMock doHttp(RequestContextMockFactory.RequestMethod requestMethod, String uri, Map params, Map cookies){
 		RequestContextMock rc = requestContextFactory.createRequestContext(requestMethod, uri);
 		rc.setParamMap(params);
+		rc.setCookieMap(cookies);
 		webController.service(rc);
 		return rc;
 	}

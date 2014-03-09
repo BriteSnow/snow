@@ -9,6 +9,7 @@ import com.britesnow.snow.util.JsonUtil;
 import com.britesnow.snow.util.ObjectUtil;
 import com.britesnow.snow.web.HttpMethod;
 import com.britesnow.snow.web.RequestContext;
+import com.britesnow.snow.web.auth.AuthToken;
 
 public class RequestContextMock extends RequestContext {
 
@@ -34,12 +35,28 @@ public class RequestContextMock extends RequestContext {
         req.setMethod(method);
         httpMethod = ObjectUtil.getValue(req.getMethod(), HttpMethod.class, null);
     }
-    
-    
+
+	/**
+	 * <p>Mock method to set the AuthToken to be this user.</p>
+	 * <p>Very usefull to test request flow without testing the authentication flow.</p>
+	 * @param user
+	 */
+	public void setUser(Object user){
+		super.setAuthToken(new AuthToken(user));
+	}
+
+	/**
+	 * Mock method to inject the HTTP param to this RequestContextMock
+	 * @param params
+	 */
     public void setParamMap(Map params){
         super.setParamMap(params);
     }
 
+	/**
+	 * Mock method to inject the cookies to this RequestContextMock
+	 * @param cookieMap
+	 */
 	public void setCookieMap(Map cookieMap){
 		super.setCookieMap(cookieMap);
 	}
@@ -47,7 +64,8 @@ public class RequestContextMock extends RequestContext {
     public void setPathInfo(String pathInfo){
         req.setPathInfo(pathInfo);
     }
-    
+
+
     public String getResponseAsString(){
         return res.getResponseAsString();
     }
