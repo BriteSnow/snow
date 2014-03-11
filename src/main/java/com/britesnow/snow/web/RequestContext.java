@@ -8,13 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.lang.reflect.Array;
 import java.net.URLDecoder;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
@@ -78,6 +72,10 @@ public class RequestContext {
 
     private Object              result;
 
+	private HashMap<Class,Object> singletonDataMap = new HashMap<Class,Object>();
+
+	private HashMap<String, Object> namedDataMap = new HashMap<String, Object>();
+
     // mostly useful for unit testing
     private AbortException      abortException;
 
@@ -94,6 +92,7 @@ public class RequestContext {
 
     protected void init() {
     }
+
 
     /*--------- Auth Methods ---------*/
 
@@ -449,6 +448,79 @@ public class RequestContext {
     }
 
     // --------- /Param Methods --------- //
+
+	// --------- Data Methods --------- //
+
+	/**
+	 * Get a singleton data by its object type
+	 * @param cls
+	 * @param <T>
+	 * @return
+	 */
+	public <T> T getData(Class<T> cls){
+		return (T) singletonDataMap.get(cls);
+	}
+
+	/**
+	 * Set a singleton data (i.e. single instance of this type)
+	 * @param obj
+	 * @return
+	 */
+	public RequestContext setData(Object obj){
+		if (obj != null){
+			singletonDataMap.put(obj.getClass(),obj);
+		}
+		return this;
+	}
+
+	/**
+	 * Remove a singleton data.
+	 * @param cls
+	 * @return
+	 */
+	public RequestContext removeData(Class cls){
+		singletonDataMap.remove(cls);
+		return this;
+	}
+
+	/**
+	 * Get a named data.
+	 * @param name
+	 * @return
+	 */
+	public Object getData(String name){
+		Object data = null;
+		if (name != null) {
+			data = namedDataMap.get(name);
+		}
+		return data;
+	}
+
+	/**
+	 * Set a named data.
+	 * @param name
+	 * @param data
+	 * @return
+	 */
+	public RequestContext setData(String name, Object data){
+		if (name != null){
+			namedDataMap.put(name,data);
+		}
+		return this;
+	}
+
+	/**
+	 * Remove a named data
+	 * @param name
+	 * @return
+	 */
+	public RequestContext removeData(String name){
+		if (name != null) {
+			namedDataMap.remove(name);
+		}
+		return this;
+	}
+	// --------- /Data Methods --------- //
 
     /*--------- Cookie Methods ---------*/
 	// For the RequestContextMock (allow to easily set cookies for test APIs)
