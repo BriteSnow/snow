@@ -10,15 +10,13 @@ import java.lang.annotation.Target;
 
 /**
  * 
- * Add this annotation to a @WebAction or @WebModel method inject. <br />
+ * Add this annotation to a @WebAction or @WebModel method inject. 
  * Usage: 
  * <pre>
  * \@WebAction
  * public void addUser(@WebMode; Map m){...}
  * </pre>
  * 
- * @author Jeremy Chone
- * @date Apr 12, 2010
  */
 @Retention(RetentionPolicy.RUNTIME) 
 @Target(ElementType.PARAMETER)

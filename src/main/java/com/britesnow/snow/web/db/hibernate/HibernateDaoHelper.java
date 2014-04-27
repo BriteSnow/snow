@@ -12,8 +12,6 @@ import org.hibernate.Session;
  * 
  * Helper Interface to access Hibernate Session functions. 
  * 
- * @author Jeremy Chone
- * @date Jul 30, 2009
  */
 public interface HibernateDaoHelper {
 

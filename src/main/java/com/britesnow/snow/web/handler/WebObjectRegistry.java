@@ -73,8 +73,8 @@ public class WebObjectRegistry {
     private Injector injector;
 
     /**
-     * Must be called before calling registerWebHandlers.<br />
-     * Must be called before at application init time (not thread safe). <br />
+     * Must be called before calling registerWebHandlers.
+     * Must be called before at application init time (not thread safe). 
      */
     public void init() {
         webParamResolverRegistry.init();
@@ -192,9 +192,6 @@ public class WebObjectRegistry {
 
     /**
      * Do not call. Internal to Snow.
-     * 
-     * @param exceptionClass
-     * @return
      */
     public List<FreemarkerMethodProxy> getFreemarkerMethodProxyList() {
         return freemarkerMethodProxyList;

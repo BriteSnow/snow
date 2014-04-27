@@ -54,12 +54,10 @@ public class FileUtil {
 
 	
 	/**
-	 * Return the list of Files (excluding folders) for this Folder for the given extensions. <br />
-	 * Note 1: The list will be ordered by name via Java to make it consistent across file systems. <br />
+	 * Return the list of Files (excluding folders) for this Folder for the given extensions. 
+	 * Note 1: The list will be ordered by name via Java to make it consistent across file systems. 
 	 * Note 2: The extensions are case-insensitive.
 	 *  
-	 * @param folder
-	 * @param extensions 
 	 */
 	public static File[] getFiles(File folder,String... extensions){
 	    final Set<String> exts = new HashSet<String>();
@@ -97,8 +95,6 @@ public class FileUtil {
 	/**
 	 * Write a full string to a file. Use PrintWriter and BufferedReader
 	 * 
-	 * @param content
-	 * @param dest
 	 * @throws IOException
 	 */
 	public static void saveStringToFile(String content, File dest) throws IOException {
@@ -135,7 +131,6 @@ public class FileUtil {
 	/**
 	 * Get the content of a file as a string. Return null if an exception occurs
 	 * 
-	 * @param f
 	 * @return The content of the file as string. Null if the file is null or
 	 *         does not exist. Null if exception occurs.
 	 */
@@ -185,9 +180,6 @@ public class FileUtil {
 	/**
 	 * Return the ZipContent of a ZipEntry as a string.
 	 * 
-	 * @param zipFile
-	 * @param entryName
-	 * @return
 	 * @throws Exception
 	 */
 	public static String getZipContentAsString(File zipFile, String entryName) throws Exception {
@@ -223,9 +215,6 @@ public class FileUtil {
 	 * line break issue (an line break will be added on the overwritted string
 	 * files)
 	 * 
-	 * @param orgZip
-	 * @param destZip
-	 * @param entryContentByEntryNameMap
 	 * @throws IOException
 	 */
 	public static void cloneZipAndOverwriteStringContent(File orgZip, File destZip,
@@ -358,8 +347,8 @@ public class FileUtil {
 
 	/**
 	 * Change the fileName with a optional fileNameSuffix (which will be added
-	 * before the extension) and a optional new Extension.<br />
-	 * <br />
+	 * before the extension) and a optional new Extension.
+	 * 
 	 * 
 	 * Note: The extension is found by using lastIndexOf('.')
 	 * 
@@ -370,7 +359,6 @@ public class FileUtil {
 	 * @param newExtension
 	 *            If not null, will replace the fileName extension. If null, the
 	 *            fileName extension will be kept.
-	 * @return
 	 */
 	public static String changeFileName(String fileName, String fileNameSuffix, String newExtension) {
 		String[] nameAndExt = getFileNameAndExtension(fileName);
@@ -389,13 +377,11 @@ public class FileUtil {
 	/**
 	 * Return a String[2] with the first element being the file path/name
 	 * (before the last '.'), and the second element as the extension (from the
-	 * last '.' on). If no extension, return an empty string. <br />
-	 * <br />
+	 * last '.' on). If no extension, return an empty string. 
+	 * 
 	 * 
 	 * Note: The extension is found by using lastIndexOf('.')
 	 * 
-	 * @param fullFileName
-	 * @return
 	 */
 	public static String[] getFileNameAndExtension(String fullFileName) {
 		String[] fileNameAndExtension = new String[2];
@@ -417,12 +403,10 @@ public class FileUtil {
 	 * Return a String[2] with the first element being the file path (up to and
 	 * including the last '/'), and the second element as the file name
 	 * (including extension). If the fullFileName has no path, then [0] is empty
-	 * string, and [1] if the file name <br />
+	 * string, and [1] if the file name 
 	 * 
 	 * Note: Supports only '/' file deliminator.
 	 * 
-	 * @param fullFileName
-	 * @return
 	 */
 	public static String[] getFilePathAndName(String fullFileName) {
 		String[] filePathAndName = new String[2];
@@ -458,14 +442,13 @@ public class FileUtil {
 	 * example.
 	 * 
 	 * NOTE: Limitation support only one [..] per fullPath (for now)
-	 * 
-	 * "/firms/[1]" > "/firms/01" "/firms/[10]" > "/firms/10"
-	 * "/firms/[101] > "/firms/01/10"
-	 * 
+	 * <pre>
+	 * "/firms/[1]" &gt; "/firms/01" "/firms/[10]" &gt; "/firms/10"
+	 * "/firms/[101] &gt; "/firms/01/10"
+	 * </pre>
 	 * @param fullPath
 	 *            a path, with and optional "[0-9]" id fagments, that will be
 	 *            split in sub-folders
-	 * @return
 	 */
 	public static String splitIdFolder2(String fullPath, char fileSeparatorChar) {
 		if (fullPath == null) {
@@ -526,8 +509,8 @@ public class FileUtil {
 	}
 
 	/**
-	 * Some extra mime type that might not be available in the servletContext. <br />
-	 * Note this is not all the mime type, and you should first try to get the mimeType from the servletContext. <br />
+	 * Some extra mime type that might not be available in the servletContext. 
+	 * Note this is not all the mime type, and you should first try to get the mimeType from the servletContext. 
 	 * This is just a fall back in the case the server does not have the latest mimeType such as office .docx, ...
 	 * 
 	 * @param fileName Full file name with the extension. If null, this methods return null.

@@ -16,11 +16,11 @@ import freemarker.template.TemplateModelException;
 /**
  * 
  * Set/Override some queryParam to an existing href. 
- * <br /> <br />
- * arg0: href query (i.e., "/product" or "/product?prodId=234")<br />
- * arg1: queryParams to override (i.e., "prodId=11" or "prodId=11&itemId=123")<br />
- *  <br />
- * Examples: <br />
+ * <pre>
+ * arg0 href query (i.e., "/product" or "/product?prodId=234")
+ * arg1 queryParams to override (i.e., "prodId=11" or "prodId=11&amp;itemId=123")
+ * </pre>
+ * Examples: 
  * <pre>
  * ..href='${setHrefParam(r.href,"showAllTasks=true")}'...
  * </pre>

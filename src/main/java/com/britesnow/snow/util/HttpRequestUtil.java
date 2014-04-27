@@ -93,9 +93,9 @@ public class HttpRequestUtil {
     
     /*--------- Query String ---------*/
     /**
-     * Simple methods that return a map name/value pair given a queryString like "name=toto&last=foo". <br />
+     * Simple methods that return a map name/value pair given a queryString like "name=toto&amp;last=foo". 
      * Note: today does not support multivalue
-     * @param queryString should not contain the leading '?'. Just name/value seperated by '&'.
+     * @param queryString should not contain the leading '?'. Just name/value seperated by '&amp;'.
      * @return Name/Value Map. Empty map if queryString is null or does not contain any name/value.
      */
     public static Map<String,Object> getMapFromQueryString(String queryString){

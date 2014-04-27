@@ -5,14 +5,12 @@ package com.britesnow.snow.web;
 
 /**
  * 
- * A requestLifeCycle gets called when a request start and end. Any WebModule may have a RequestLifeCycle.<br /><br />
+ * A requestLifeCycle gets called when a request start and end. Any WebModule may have a RequestLifeCycle.
  * 
  * To configure a RequestLifeCycle class for a WebModule, add the following in the <em>configure()</em>: 
  * <pre>bind(RequestLifeCycle.class).to(MyRequestLifeCycle.class)</pre>
  * Obviously, the  @Provides would also work.
  * 
- * @author Jeremy Chone
- * @date May 2, 2010
  */
 public interface RequestLifecycle {
 

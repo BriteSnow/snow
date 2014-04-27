@@ -41,7 +41,8 @@ public class FreemarkerUtil {
     }
 
     /**
-     * Convenient methods to return a Freemarker param wrapped object.<br /> NOTE: It assumes that the Class<C> c will
+     * Convenient methods to return a Freemarker param wrapped object. 
+     * NOTE: It assumes that the <code>Class&lt;C&gt; c</code> will
      * be the correct type.
      * 
      * @param <C>

@@ -61,15 +61,7 @@ public class HttpWriter {
     }
 
     /**
-     * Still experimental
-     * 
-     * @param rc
-     * @param fileName
-     * @param content
-     * @param cache
-     *            (for now, not supported, only no-cache)
-     * @param options
-     * @throws Exception
+     * Write a contentReader to the http response.
      */
     public void writeStringContent(RequestContext rc, String fileName, Reader contentReader, boolean cache, HttpWriterOptions options) {
         options = (options != null)?options:defaultOptions;

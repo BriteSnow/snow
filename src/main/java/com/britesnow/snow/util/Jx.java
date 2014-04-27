@@ -453,7 +453,7 @@ public class Jx {
 
     /**
      * Add a external Jx node to the first node (as a children). The current
-     * node of this Jx Object need to be a ELEMENT (otherwise, nothing happen)<br />
+     * node of this Jx Object need to be a ELEMENT (otherwise, nothing happen)
      * 
      * @param nodeToAdd
      * @return This Jx Object for chainability

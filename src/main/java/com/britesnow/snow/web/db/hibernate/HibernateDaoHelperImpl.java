@@ -18,8 +18,6 @@ import com.google.inject.Singleton;
  * SessionHolder and assumes that HibernateHandler.openSessionInView has been
  * called.
  * 
- * @author Jeremy Chone
- * @date Jul 30, 2009
  */
 @Singleton
 public class HibernateDaoHelperImpl implements HibernateDaoHelper {

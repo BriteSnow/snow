@@ -67,7 +67,7 @@ public class JAXBProcessor {
 
     /**
      * Serialize an Java object to XML Element. if the rootElement is null,
-     * then, an empty <result/> element will be create which will contain the
+     * then, an empty result element will be create which will contain the
      * result of the serialization.
      * 
      * @param obj

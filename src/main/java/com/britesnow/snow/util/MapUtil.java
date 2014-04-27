@@ -8,11 +8,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * @author Jeremy Chone
- * @date Jul 29, 2009
- * 
- */
 public class MapUtil {
 
 
@@ -29,7 +24,7 @@ public class MapUtil {
 	}
 	
 	/**
-	 * Convenient methods for the getNestedValue(Map m, String namePath, Class<T> cls, T defaultValue) with defaultValue == null
+	 * Convenient methods for the getNestedValue(Map m, String namePath, Class cls, T defaultValue) with defaultValue == null
 	 * @param <T>
 	 * @param m
 	 * @param namePath

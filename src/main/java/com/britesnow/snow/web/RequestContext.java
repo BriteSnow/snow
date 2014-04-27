@@ -285,7 +285,7 @@ public class RequestContext {
     /**
      * Return the param value as "cls" class object. If the value is null (or empty string) return the defaultValue.<br>
      * 
-     * Note: For the first call, this method will parse the request (in case of a multipart).<br />
+     * Note: For the first call, this method will parse the request (in case of a multipart).
      * 
      * <div class="issues"> <strong>Issues</strong>
      * <ul>
