@@ -3,16 +3,15 @@ package com.britesnow.snow.test.apptest;
 import org.junit.Assert;
 import org.junit.Test;
 
-import sun.org.mozilla.javascript.internal.Context;
-import sun.org.mozilla.javascript.internal.Scriptable;
-import sun.org.mozilla.javascript.internal.ScriptableObject;
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
 
 
 /**
- * Just for Development right now. 
+ *
  */
 public class JsTest {
-
 
     @Test
     public void simpeJsTest(){
