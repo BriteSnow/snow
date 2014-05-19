@@ -29,7 +29,7 @@ public class PackageScanner {
         this.basePackage = basePackage;
     }
 
-    public Class[] findClasses(Predicate p) {
+    public Class[] findClasses(Predicate<Class> p) {
         Set<ClassInfo> classInfoSet = getTopLevelClassesRecursive();
         List<Class> classList = new ArrayList<Class>();
 

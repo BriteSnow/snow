@@ -202,7 +202,7 @@ public class ApplicationLoader {
         PropertyPostProcessor propertyPostProcessor = getPropertyPostProcessor();
 
         // if we do not have it programmatically, then, look in the
-        // snow.snow.propertyPostProcessorClass properties
+        // snow.propertyPostProcessorClass properties
         if (propertyPostProcessor == null) {
             String propertyPostProcessorClassName = (String) appProperties.get("snow.propertyPostProcessorClass");
             if (propertyPostProcessorClassName != null) {
