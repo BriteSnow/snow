@@ -31,7 +31,8 @@ public class SnowServlet extends HttpServlet {
         ServletContext servletContext = config.getServletContext();
         
         try {
-            File webAppFolder = new File(servletContext.getRealPath("WEB-INF/")).getParentFile();
+			String realPath = servletContext.getRealPath(File.separator);
+			File webAppFolder = new File(realPath);
             ApplicationLoader appLoader = new ApplicationLoader(webAppFolder, servletContext);
             
             String appName = appLoader.getWebAppFolder().getName();
