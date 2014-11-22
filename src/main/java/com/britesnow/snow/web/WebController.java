@@ -493,14 +493,16 @@ public class WebController {
         }
 
         String lessResult = null;
-        Pair<Long, String> timeAndContent = lessCache.get(lessFilePath);
+		// we add the lessFile full path to make sure it is unique (in cause of custom FileLocator)
+		String lessCacheKey = lessFile.getAbsolutePath();
+        Pair<Long, String> timeAndContent = lessCache.get(lessCacheKey);
         if (timeAndContent != null && maxTime <= timeAndContent.getFirst()) {
             // if we have a match, and none of the maxTime of all the .less file still smaller or equal than the cache
             // item, then, still valid
             lessResult = timeAndContent.getSecond();
         } else {
             lessResult = lessProcessor.compile(lessFile);
-            lessCache.put(lessFilePath, new Pair<Long, String>(maxTime, lessResult));
+            lessCache.put(lessCacheKey, new Pair<Long, String>(maxTime, lessResult));
         }
         // --------- /Process the .less file --------- //
 
