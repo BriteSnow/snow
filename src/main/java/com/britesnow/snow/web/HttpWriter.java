@@ -35,7 +35,7 @@ public class HttpWriter {
     public String getContentType(String resourcePath) {
         String contentType = null;
         if (servletContext != null) {
-            servletContext.getMimeType(resourcePath);
+            contentType = servletContext.getMimeType(resourcePath);
         }
         // if the servletContext (server) could not fine the mimeType, then, give a little help
         if (contentType == null) {
