@@ -22,7 +22,7 @@ public class DefaultFramePathsResolver implements FramePathsResolver {
     @Override
     public String[] resolve(RequestContext rc) {
         String path = rc.getResourcePath();
-        return resolveResourcePath(path, rc);
+        return resolvePath(path, rc);
     }
 
     /**
@@ -32,7 +32,7 @@ public class DefaultFramePathsResolver implements FramePathsResolver {
      * @param path
      * @return
      */
-    public String[] resolveResourcePath(String path, RequestContext rc){
+    public String[] resolvePath(String path, RequestContext rc){
         String framePath;
 
         List<String> framePaths = new ArrayList<String>();
