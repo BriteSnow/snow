@@ -209,13 +209,13 @@ public class WebController {
                     break;
             }
 
+            hookInvoker.invokeReqHooks(ReqPhase.START,On.AFTER, rc);
+
             // if we have template request, then, resolve the framePaths
             if (responseType == ResponseType.template) {
                 String[] framePaths = framePathsResolver.resolve(rc);
                 rc.setFramePaths(framePaths);
             }
-            
-            hookInvoker.invokeReqHooks(ReqPhase.START,On.AFTER, rc);            
 
             // --------- Open HibernateSession --------- //
             if (hibernateSessionInViewHandler != null) {
@@ -239,6 +239,7 @@ public class WebController {
                 requestLifeCycle.start(rc);
             }
             // --------- /RequestLifeCycle Start --------- //
+
             if (responseType == ResponseType.rest){
                 application.processRest(rc);
             }else{
