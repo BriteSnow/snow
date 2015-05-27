@@ -168,7 +168,7 @@ public class FreemarkerTemplateRenderer implements TemplateRenderer {
 
     /**
      * Return a template from a content. Note that this method will always compile the content.
-     * 
+     *
      * @param name
      * @param content
      * @return
