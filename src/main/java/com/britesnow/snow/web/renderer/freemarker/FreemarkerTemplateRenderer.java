@@ -165,7 +165,17 @@ public class FreemarkerTemplateRenderer implements TemplateRenderer {
             // TODO: need to decide a strategy here. 
         }
     }
-    
+
+    /**
+     * Return a template from a content. Note that this method will always compile the content.
+     * 
+     * @param name
+     * @param content
+     * @return
+     */
+    public Template getPlainTextTemplate(String name, String content) {
+        return Template.getPlainTextTemplate(name, content, conf);
+    }
     
 
 }
