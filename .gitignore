@@ -18,6 +18,9 @@
 target
 mvninstall.sh
 
+# dev stuff
+dev/ 
+
 # other stuff
 release.properties
 

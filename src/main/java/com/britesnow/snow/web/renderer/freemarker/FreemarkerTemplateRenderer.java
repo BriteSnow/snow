@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.inject.Singleton;
 import javax.servlet.ServletContext;
 
+import com.google.common.base.Throwables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -166,16 +167,15 @@ public class FreemarkerTemplateRenderer implements TemplateRenderer {
         }
     }
 
-    /**
-     * Return a template from a content. Note that this method will always compile the content.
-     *
-     * @param name
-     * @param content
-     * @return
-     */
-    public Template getPlainTextTemplate(String name, String content) {
-        return Template.getPlainTextTemplate(name, content, conf);
-    }
-    
+
+
+	public Template buildNewTemplate(String name, String content) {
+		try {
+			Template template = new Template(name, content, conf);
+			return template;
+		} catch (IOException e) {
+			throw Throwables.propagate(e);
+		}
+	}
 
 }

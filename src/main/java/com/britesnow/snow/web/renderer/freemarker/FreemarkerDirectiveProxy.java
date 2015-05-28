@@ -48,10 +48,10 @@ public class FreemarkerDirectiveProxy implements TemplateDirectiveModel {
         
         RequestContext rc = getDataModel("_r.rc", RequestContext.class);
         try {
-            rc.setAttribute(FREEMARKER_DIRECTIVE_CONTEXT, new FreemarkerDirectiveContext(env, paramMap));
-            methodInvoker.invokeWebHandler(freemarkerDirectiveRef, rc);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
+			rc.setAttribute(FREEMARKER_DIRECTIVE_CONTEXT, new FreemarkerDirectiveContext(env, paramMap));
+			methodInvoker.invokeWebHandler(freemarkerDirectiveRef, rc);
+		} catch (Exception e) {
+            logger.error(e.getMessage(),e);
         }finally{
             rc.removeAttribute(FREEMARKER_DIRECTIVE_CONTEXT);
         }
