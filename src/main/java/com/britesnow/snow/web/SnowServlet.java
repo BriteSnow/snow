@@ -31,7 +31,7 @@ public class SnowServlet extends HttpServlet {
         ServletContext servletContext = config.getServletContext();
         
         try {
-			String realPath = servletContext.getRealPath(File.separator);
+			String realPath = servletContext.getRealPath("/");
             if (realPath == null){
                 throw new ServletException("Somehow the servlet container returned null for servletContext.getRealPath(File.separator)" +
                     "\n\t Cannot initialize with null as realPath. If you use 'mvn jetty:run' make sure you use <groupId>org.eclipse.jetty</groupId> and not the legacy" +
