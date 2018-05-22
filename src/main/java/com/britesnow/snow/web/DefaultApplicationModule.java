@@ -83,28 +83,37 @@ public class DefaultApplicationModule extends AbstractModule {
     
 
     private static Predicate<Class> webClassPredicate = new Predicate<Class>() {
-        
+
+
+    	// NOTE: The Guava default Predicate.test does not seems to be taken in account or something.
+		//       If we do not override it here, we get an compile error.
+        @Override
+        public boolean test(Class input) {
+            return this.apply(input);
+        }
+
+
         @Override
         public boolean apply(@Nullable Class cls) {
             for (Method method : cls.getDeclaredMethods()) {
-                
+
                 if (method.getAnnotation(WebActionHandler.class) != null || method.getAnnotation(WebResourceHandler.class) != null
-                                        || method.getAnnotation(WebModelHandler.class) != null
-                                        || method.getAnnotation(WebParamResolver.class) != null
-                                        || method.getAnnotation(WebExceptionCatcher.class) != null
-                                        || method.getAnnotation(WebApplicationHook.class) != null
-                                        || method.getAnnotation(WebRequestHook.class) != null
-                                        || method.getAnnotation(FreemarkerDirectiveHandler.class) != null                                                
-                                        || method.getAnnotation(FreemarkerMethodHandler.class) != null
-                                        || method.getAnnotation(WebGet.class) != null
-                                        || method.getAnnotation(WebPost.class) != null
-                                        || method.getAnnotation(WebPut.class) != null
-                                        || method.getAnnotation(WebDelete.class) != null
-                                        || method.getAnnotation(WebSerializer.class) != null){
+                        || method.getAnnotation(WebModelHandler.class) != null
+                        || method.getAnnotation(WebParamResolver.class) != null
+                        || method.getAnnotation(WebExceptionCatcher.class) != null
+                        || method.getAnnotation(WebApplicationHook.class) != null
+                        || method.getAnnotation(WebRequestHook.class) != null
+                        || method.getAnnotation(FreemarkerDirectiveHandler.class) != null
+                        || method.getAnnotation(FreemarkerMethodHandler.class) != null
+                        || method.getAnnotation(WebGet.class) != null
+                        || method.getAnnotation(WebPost.class) != null
+                        || method.getAnnotation(WebPut.class) != null
+                        || method.getAnnotation(WebDelete.class) != null
+                        || method.getAnnotation(WebSerializer.class) != null){
                     return true;
                 }
             }
-            return false; 
+            return false;
         }
     };
 

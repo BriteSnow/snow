@@ -147,16 +147,16 @@
     </dependency>
     
     <!-- for the @Nullable of WebObjectRegistry --> 
-     <dependency>
+     <!-- <dependency>
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>jsr305</artifactId>
       <version>3.0.1</version>
-    </dependency> 
+    </dependency>  -->
         
     <dependency>
 	    <groupId>com.google.guava</groupId>
 	    <artifactId>guava</artifactId>
-	    <version>19.0</version>
+	    <version>25.0-jre</version>
 	  </dependency>
     
     <dependency>
