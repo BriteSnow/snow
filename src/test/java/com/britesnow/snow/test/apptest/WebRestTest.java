@@ -2,7 +2,7 @@ package com.britesnow.snow.test.apptest;
 
 import java.util.Map;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -31,7 +31,32 @@ public class WebRestTest extends SnowTestSupport {
         
         Assert.assertEquals("123Hello",result.get("param1"));
     }
-    
+
+    @Test
+    public void testWebOptions(){
+        RequestContextMock rc;
+        Map result;
+
+        rc = requestContextFactory.createRequestContext(RequestMethod.OPTIONS, "/api/echoParam1");
+        rc.setParamMap(MapUtil.mapIt("param1", "123Hello"));
+        webController.service(rc);
+        result = rc.getResponseAsJson();
+
+        Assert.assertEquals("optionsEchoParam1",result.get("method"));
+    }
+
+	@Test
+	public void testWebPatch(){
+		RequestContextMock rc;
+		Map result;
+
+		rc = requestContextFactory.createRequestContext(RequestMethod.PATCH, "/api/echoParam1");
+		rc.setParamMap(MapUtil.mapIt("param1", "123Hello"));
+		webController.service(rc);
+		result = rc.getResponseAsJson();
+
+		Assert.assertEquals("patchEchoParam1",result.get("method"));
+	}
     
     @Test
     public void testWebPost(){

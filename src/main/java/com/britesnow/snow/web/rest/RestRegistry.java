@@ -28,12 +28,16 @@ public class RestRegistry {
     private Map<String,WebRestRef> webGetRefByPath = new HashMap<String, WebRestRef>();
     private Map<String,WebRestRef> webPostRefByPath = new HashMap<String, WebRestRef>();
     private Map<String,WebRestRef> webPutRefByPath = new HashMap<String, WebRestRef>();
+	private Map<String,WebRestRef> webPatchRefByPath = new HashMap<String, WebRestRef>();
     private Map<String,WebRestRef> webDeleteRefByPath = new HashMap<String, WebRestRef>();
+	private Map<String,WebRestRef> webOptionsRefByPath = new HashMap<String, WebRestRef>();
     
     private List<WebRestRef> patternWebGetRefList = new ArrayList<WebRestRef>();
     private List<WebRestRef> patternWebPostRefList = new ArrayList<WebRestRef>();
     private List<WebRestRef> patternWebPutRefList = new ArrayList<WebRestRef>();
+	private List<WebRestRef> patternWebPatchRefList = new ArrayList<WebRestRef>();
     private List<WebRestRef> patternWebDeleteRefList = new ArrayList<WebRestRef>();
+	private List<WebRestRef> patternWebOptionsRefList = new ArrayList<WebRestRef>();
     
     // --------- WebRef Getters --------- //
     public WebRestRef getWebRestRef(RequestContext rc){
@@ -152,20 +156,25 @@ public class RestRegistry {
     
     private List<WebRestRef> getPatternWebRestRef(HttpMethod httpMethod){
         switch (httpMethod){
-            case GET: 
+            case GET:
                 return patternWebGetRefList;
             case POST: 
                 return patternWebPostRefList;
             case PUT:
                 return patternWebPutRefList;
+			case PATCH:
+				return patternWebPatchRefList;
             case DELETE:
                 return patternWebDeleteRefList;
-            default: 
+			case OPTIONS:
+				return patternWebOptionsRefList;
+            default:
                 return null;
         }        
     }
     
     private Map<String,WebRestRef> getRefByPath(HttpMethod httpMethod){
+
         switch (httpMethod){
             case GET: 
                 return webGetRefByPath;
@@ -173,8 +182,12 @@ public class RestRegistry {
                 return webPostRefByPath;
             case PUT:
                 return webPutRefByPath;
+			case PATCH:
+				return webPatchRefByPath;
             case DELETE:
                 return webDeleteRefByPath;
+			case OPTIONS:
+				return webOptionsRefByPath;
             default: 
                 return null;
         }        

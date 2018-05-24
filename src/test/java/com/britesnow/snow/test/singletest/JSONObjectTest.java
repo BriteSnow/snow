@@ -2,7 +2,7 @@ package com.britesnow.snow.test.singletest;
 
 import java.util.Map;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.junit.BeforeClass;
 import org.junit.Test;

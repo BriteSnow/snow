@@ -27,11 +27,7 @@ import com.britesnow.snow.web.renderer.freemarker.FreemarkerMethodProxy;
 import com.britesnow.snow.web.rest.DefaultWebSerializers;
 import com.britesnow.snow.web.rest.RestRegistry;
 import com.britesnow.snow.web.rest.SerializerRegistry;
-import com.britesnow.snow.web.rest.annotation.WebDelete;
-import com.britesnow.snow.web.rest.annotation.WebGet;
-import com.britesnow.snow.web.rest.annotation.WebPost;
-import com.britesnow.snow.web.rest.annotation.WebPut;
-import com.britesnow.snow.web.rest.annotation.WebSerializer;
+import com.britesnow.snow.web.rest.annotation.*;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -247,11 +243,21 @@ public class WebObjectRegistry {
             if (webPut != null){
                 restRegistry.registerWebRest(c, m, paramDefBuilder.buildParamDefs(m, true), HttpMethod.PUT, webPut.value());
             }
+
+            WebPatch webPatch = m.getAnnotation(WebPatch.class);
+            if (webPatch != null){
+                restRegistry.registerWebRest(c, m, paramDefBuilder.buildParamDefs(m, true), HttpMethod.PATCH, webPatch.value());
+            }
             
             WebDelete webDelete = m.getAnnotation(WebDelete.class);
             if (webDelete != null){
                 restRegistry.registerWebRest(c, m, paramDefBuilder.buildParamDefs(m, true), HttpMethod.DELETE, webDelete.value());
-            }            
+            }
+
+            WebOptions webOptions = m.getAnnotation(WebOptions.class);
+            if (webOptions != null){
+                restRegistry.registerWebRest(c, m, paramDefBuilder.buildParamDefs(m, true), HttpMethod.OPTIONS, webOptions.value());
+            }
             // --------- /Register Rest Methods --------- //
             
             // --------- Register Web Serializer --------- //

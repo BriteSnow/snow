@@ -27,11 +27,7 @@ import com.britesnow.snow.web.renderer.JsonLibJsonRenderer;
 import com.britesnow.snow.web.renderer.JsonRenderer;
 import com.britesnow.snow.web.rest.ContentTypeResolver;
 import com.britesnow.snow.web.rest.DefaultContentTypeResolver;
-import com.britesnow.snow.web.rest.annotation.WebDelete;
-import com.britesnow.snow.web.rest.annotation.WebGet;
-import com.britesnow.snow.web.rest.annotation.WebPost;
-import com.britesnow.snow.web.rest.annotation.WebPut;
-import com.britesnow.snow.web.rest.annotation.WebSerializer;
+import com.britesnow.snow.web.rest.annotation.*;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 
@@ -108,7 +104,9 @@ public class DefaultApplicationModule extends AbstractModule {
                         || method.getAnnotation(WebGet.class) != null
                         || method.getAnnotation(WebPost.class) != null
                         || method.getAnnotation(WebPut.class) != null
+                        || method.getAnnotation(WebPatch.class) != null
                         || method.getAnnotation(WebDelete.class) != null
+                        || method.getAnnotation(WebOptions.class) != null
                         || method.getAnnotation(WebSerializer.class) != null){
                     return true;
                 }

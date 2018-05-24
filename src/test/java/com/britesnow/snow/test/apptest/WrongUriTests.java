@@ -1,6 +1,6 @@
 package com.britesnow.snow.test.apptest;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.junit.BeforeClass;
 import org.junit.Test;

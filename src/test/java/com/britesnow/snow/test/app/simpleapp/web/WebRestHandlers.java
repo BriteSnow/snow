@@ -8,13 +8,23 @@ import com.britesnow.snow.util.MapUtil;
 import com.britesnow.snow.web.HttpMethod;
 import com.britesnow.snow.web.param.annotation.PathVar;
 import com.britesnow.snow.web.param.annotation.WebParam;
-import com.britesnow.snow.web.rest.annotation.WebDelete;
-import com.britesnow.snow.web.rest.annotation.WebGet;
-import com.britesnow.snow.web.rest.annotation.WebPost;
-import com.britesnow.snow.web.rest.annotation.WebPut;
+import com.britesnow.snow.web.rest.annotation.*;
 
 @Singleton
 public class WebRestHandlers {
+
+
+    @WebOptions("/api/echoParam1")
+    public Map optionsEchoParam1(@WebParam("param1") String param1){
+        Map result = MapUtil.mapIt("method","optionsEchoParam1");
+        return result;
+    }
+
+    @WebPatch("/api/echoParam1")
+    public Map patchEchoParam1(@WebParam("param1") String param1){
+        Map result = MapUtil.mapIt("method","patchEchoParam1");
+        return result;
+    }
 
     @WebGet("/api/echoParam1")
     public Map simpleEchoParam1(@WebParam("param1")String param1){

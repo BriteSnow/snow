@@ -7,7 +7,7 @@ import com.google.inject.Injector;
 public class RequestContextMockFactory {
 
     public enum RequestMethod{
-        POST, GET, PUT, DELETE
+        POST, GET, PUT, PATCH, DELETE, OPTIONS
     }
     private Injector injector;
     
