@@ -9,6 +9,7 @@ import com.britesnow.snow.web.handler.WebHandlerRef;
 
 public class WebRestRef extends WebHandlerRef {
 
+    private String path = null;
     private Pattern pathPattern = null;
     private Map<Integer,String> pathVarByIdx = null;
     
@@ -16,10 +17,15 @@ public class WebRestRef extends WebHandlerRef {
         super(webClass, method, paramDefs);
     }
     
-    WebRestRef(Class webClass, Method method, ParamDef[] paramDefs, Pattern pathPattern, Map<Integer,String> pathVarByIdx) {
+    WebRestRef(Class webClass, Method method, ParamDef[] paramDefs, String path, Pattern pathPattern, Map<Integer,String> pathVarByIdx) {
         super(webClass, method, paramDefs);
+        this.path = path;
         this.pathPattern = pathPattern;
         this.pathVarByIdx = pathVarByIdx;
+    }
+
+    public String getPath() {
+        return path;
     }
 
     public Pattern getPathPattern() {

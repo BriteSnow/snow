@@ -96,13 +96,15 @@ public class WebObjectRegistry {
         }
         if (exs.hasExceptions()) {
             throw exs;
+        }else{
+            restRegistry.finalize();
         }
     }
 
     /**
      * Validate that the
      * 
-     * @param webObject
+     * @param webClass
      * @since 2.0.0
      */
     private void validateWebObject(Class webClass) throws WebObjectValidationException {

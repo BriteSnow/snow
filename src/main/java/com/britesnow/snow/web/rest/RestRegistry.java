@@ -1,8 +1,7 @@
 package com.britesnow.snow.web.rest;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,10 +30,10 @@ public class RestRegistry {
     private Map<String,WebRestRef> webPutRefByPath = new HashMap<String, WebRestRef>();
     private Map<String,WebRestRef> webDeleteRefByPath = new HashMap<String, WebRestRef>();
     
-    private Map<Pattern,WebRestRef> webGetRefByVaredPath = new HashMap<Pattern, WebRestRef>();
-    private Map<Pattern,WebRestRef> webPostRefByVaredPath = new HashMap<Pattern, WebRestRef>();
-    private Map<Pattern,WebRestRef> webPutRefByVaredPath = new HashMap<Pattern, WebRestRef>();
-    private Map<Pattern,WebRestRef> webDeleteRefByVaredPath = new HashMap<Pattern, WebRestRef>();    
+    private List<WebRestRef> patternWebGetRefList = new ArrayList<WebRestRef>();
+    private List<WebRestRef> patternWebPostRefList = new ArrayList<WebRestRef>();
+    private List<WebRestRef> patternWebPutRefList = new ArrayList<WebRestRef>();
+    private List<WebRestRef> patternWebDeleteRefList = new ArrayList<WebRestRef>();
     
     // --------- WebRef Getters --------- //
     public WebRestRef getWebRestRef(RequestContext rc){
@@ -56,12 +55,13 @@ public class RestRegistry {
         
         // if still null, check if there is a vared path matching
         if (ref == null){
-            Map<Pattern,WebRestRef> refByPattern = getRefByPattern(method);
-            if(refByPattern != null){
-                for (Pattern pattern : refByPattern.keySet()){
-                    Matcher matcher = pattern.matcher(resourcePath);
-                    if (matcher.matches()){
-                        ref = refByPattern.get(pattern);
+            List<WebRestRef> patterRefList = getPatternWebRestRef(method);
+            if(patterRefList != null){
+                for (WebRestRef patternWebRestRef : patterRefList){
+                    Matcher matcher = patternWebRestRef.getPathPattern().matcher(resourcePath);
+					boolean isMatching = matcher.matches();
+                    if (isMatching){
+                        ref = patternWebRestRef;
                         break;
                     }
                 }
@@ -76,7 +76,7 @@ public class RestRegistry {
     // --------- Register Methods (called in init only) --------- //
     public void registerWebRest(Class webClass, Method m, ParamDef[] paramDefs, HttpMethod method, String[] paths ){
         Map<String,WebRestRef> refByPath = getRefByPath(method);
-        Map<Pattern,WebRestRef> refByPattern = getRefByPattern(method);
+        List<WebRestRef> patternWebRestRefList = getPatternWebRestRef(method);
         
         if (refByPath != null){
             WebRestRef ref = new WebRestRef(webClass,m, paramDefs);
@@ -88,15 +88,28 @@ public class RestRegistry {
                     if (path.indexOf("{") > -1){
                         Pair<Pattern, Map<Integer, String>> patternAndMap = getPathPatternAndMap(path);
                         Pattern pattern = patternAndMap.getFirst();
-                        WebRestRef varPathRef = new WebRestRef(webClass,m, paramDefs,pattern,patternAndMap.getSecond());
-                        refByPattern.put(pattern,varPathRef);
+                        WebRestRef varPathRef = new WebRestRef(webClass,m, paramDefs,path, pattern,patternAndMap.getSecond());
+						patternWebRestRefList.add(varPathRef);
                     }else{
                         refByPath.put(path, ref);
                     }
-                    
-                }     
+                }
             }
         }
+    }
+
+    /** To be called once, after all is registered to order and do any registry optimization needed
+     *  TODO: Ideally this shoul dnot be public, but because it needs to be access from web.handler.WebObjectRegistry, it has for now
+     *  TODO: Also, we need to mmake this "more" thread safe.
+     *  */
+    public void finalize(){
+    	// TODO: In future release we need to make sure this is thread safe. In practice registerWebRest and
+		//       .finilize are not called but since they have to be public (to be accessilble from WebObjectRegistry, they theorically could)
+		VaredPathComparator comparator = new VaredPathComparator();
+		Collections.sort(patternWebGetRefList,comparator);
+		Collections.sort(patternWebPostRefList,comparator);
+		Collections.sort(patternWebPutRefList,comparator);
+		Collections.sort(patternWebDeleteRefList,comparator);
     }
     
     
@@ -137,16 +150,16 @@ public class RestRegistry {
         return str.replace(".", "\\.");
     }    
     
-    private Map<Pattern,WebRestRef> getRefByPattern(HttpMethod httpMethod){
+    private List<WebRestRef> getPatternWebRestRef(HttpMethod httpMethod){
         switch (httpMethod){
             case GET: 
-                return webGetRefByVaredPath;
+                return patternWebGetRefList;
             case POST: 
-                return webPostRefByVaredPath;
+                return patternWebPostRefList;
             case PUT:
-                return webPutRefByVaredPath;
+                return patternWebPutRefList;
             case DELETE:
-                return webDeleteRefByVaredPath;
+                return patternWebDeleteRefList;
             default: 
                 return null;
         }        
@@ -170,4 +183,81 @@ public class RestRegistry {
 
 
     
+}
+
+class VaredPathComparator implements Comparator<WebRestRef>{
+
+	@Override
+	public int compare(WebRestRef wref1, WebRestRef wref2) {
+		String o1 = collapse(wref1.getPath());
+		String o2 = collapse(wref2.getPath());
+
+		Integer[] o1Indexes = allIndexOf(o1, '{');
+		Integer[] o2Indexes = allIndexOf(o2, '{');
+
+
+		// if none has path var, then, order alphabitically
+		if (o1Indexes.length == 0 && o2Indexes.length == 0){
+			return o1.compareTo(o2);
+		}
+
+		// if we reach here, it means that one of them have a at least {
+
+		// if one them have no {, then, it wins (smaller)
+		if (o1Indexes.length == 0 && o2Indexes.length > 0){
+			return -1; // o1 is ealier (smaller than o2)
+		}
+		if (o1Indexes.length > 0 && o2Indexes.length == 0){
+			return 1; // o1 is later (greater than o2)
+		}
+
+		// if we are here, it means they both have some {
+		int min = Math.min(o1Indexes.length, o2Indexes.length);
+
+		for (int i = 0; i < min; i++){
+			if (o1Indexes[i] > o2Indexes[i]){
+				return -1; // o1 wins, smaller
+			}
+			if (o1Indexes[i] < o2Indexes[i]){
+				return 1; // o1 lose, greater than 02
+			}
+		}
+
+		// if we are here, this means that all {} position match the ones that have the least.
+
+		// If one has more {} than the other, then, it wins
+		if (o1Indexes.length != o2Indexes.length){
+			return (o1Indexes.length != o2Indexes.length) ? -1 : 1;
+		}
+
+		// if we are here, it means that thye both have the same number of {} and then, the longest win
+		if (o1.length() != o2.length()){
+			return (o1.length() > o2.length()) ? -1 : 1;
+		}
+
+		// if we are here all was the same, so, we just order alphabitically.
+		return o1.compareTo(o2);
+	}
+
+	static private Integer[] allIndexOf(String str, char c){
+		List<Integer> indexes = new ArrayList<Integer>();
+
+		int idx = 0;
+		for (char cs : str.toCharArray()){
+			if (cs == c){
+				indexes.add(idx);
+			}
+			idx ++;
+		}
+
+		return indexes.toArray(new Integer[indexes.size()]);
+	}
+
+	/** Collapse the varPath {...} to {} so that the length of the name does not take in consideration */
+	static private String collapse(String s){
+		Pattern p = Pattern.compile("\\{(.*?)\\}",
+				Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+		String sCollapsed =  p.matcher(s).replaceAll("{}");
+		return sCollapsed;
+	}
 }
