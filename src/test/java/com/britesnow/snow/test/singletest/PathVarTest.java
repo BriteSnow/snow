@@ -27,6 +27,7 @@ public class PathVarTest extends SnowTestSupport {
         RequestContextMock rc;
         Map result;
 
+
         // @WegGet("/rest/{entity}");
         rc = requestContextFactory.createRequestContext(RequestMethod.GET, "/rest/Task");
         webController.service(rc);
@@ -38,6 +39,25 @@ public class PathVarTest extends SnowTestSupport {
         webController.service(rc);
         result = rc.getResponseAsJson();
         Assert.assertEquals("restGetEntity", result.get("method"));
+
+        // @WegGet("/rest/User/{id}");
+        rc = requestContextFactory.createRequestContext(RequestMethod.GET, "/rest/User/123");
+        webController.service(rc);
+        result = rc.getResponseAsJson();
+        Assert.assertEquals("restGetUser", result.get("method"));
+
+        // @WegGet("/rest/{entity}/first");
+        rc = requestContextFactory.createRequestContext(RequestMethod.GET, "/rest/User/first");
+        webController.service(rc);
+        result = rc.getResponseAsJson();
+        Assert.assertEquals("restGetEntityFirst", result.get("method"));
+
+        // Ideally should match to @WegGet("/rest/{entity}/first"); but will match to  @WegGet("/rest/Person/{id}");
+        // Note: There are many ways to match, and the logic have to be full predictable. So far, longest fix characters takes precedence.
+        rc = requestContextFactory.createRequestContext(RequestMethod.GET, "/rest/Person/first");
+        webController.service(rc);
+        result = rc.getResponseAsJson();
+        Assert.assertEquals("restGetPerson", result.get("method"));
 
 
         // @WebGet("/get-{entity}-{id}")

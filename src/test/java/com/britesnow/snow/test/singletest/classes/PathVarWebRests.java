@@ -32,6 +32,22 @@ public class PathVarWebRests {
         return MapUtil.mapIt("method", "restGetEntity");
     }
 
+    @WebGet("/rest/User/{id}")
+    public Map restGetUser(@PathVar("id")String id){
+        return MapUtil.mapIt("method", "restGetUser");
+    }
+
+    @WebGet("/rest/Person/{id}")
+    public Map restGetPerson(@PathVar("id")String id){
+        return MapUtil.mapIt("method", "restGetPerson");
+    }
+
+    @WebGet("/rest/{entity}/first")
+    public Map restGetEntityFirst(@PathVar("id")String id){
+        return MapUtil.mapIt("method", "restGetEntityFirst");
+    }
+
+
     @WebGet("/get-{entity}-{id}")
     public Map getEntityId(@PathVar("entity")String entity, @PathVar("id")String id){
         return MapUtil.mapIt("path", "/get-{entity}-{id}", "entity", entity, "id",id);

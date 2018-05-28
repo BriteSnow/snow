@@ -111,12 +111,11 @@ public class RestRegistry {
 		//       .finilize are not called but since they have to be public (to be accessilble from WebObjectRegistry, they theorically could)
 		VaredPathComparator comparator = new VaredPathComparator();
 		Collections.sort(patternWebGetRefList,comparator);
-		for (WebRestRef w : patternWebGetRefList){
-			System.out.println(w.getPath());
-		}
 		Collections.sort(patternWebPostRefList,comparator);
 		Collections.sort(patternWebPutRefList,comparator);
+		Collections.sort(patternWebPatchRefList,comparator);
 		Collections.sort(patternWebDeleteRefList,comparator);
+		Collections.sort(patternWebOptionsRefList,comparator);
     }
     
     
