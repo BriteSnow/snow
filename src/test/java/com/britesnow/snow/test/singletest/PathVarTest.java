@@ -27,6 +27,19 @@ public class PathVarTest extends SnowTestSupport {
         RequestContextMock rc;
         Map result;
 
+        // @WegGet("/rest/{entity}");
+        rc = requestContextFactory.createRequestContext(RequestMethod.GET, "/rest/Task");
+        webController.service(rc);
+        result = rc.getResponseAsJson();
+        Assert.assertEquals("restListEntities", result.get("method"));
+
+        // @WegGet("/rest/{entity}/{id}");
+        rc = requestContextFactory.createRequestContext(RequestMethod.GET, "/rest/Task/123");
+        webController.service(rc);
+        result = rc.getResponseAsJson();
+        Assert.assertEquals("restGetEntity", result.get("method"));
+
+
         // @WebGet("/get-{entity}-{id}")
         rc = requestContextFactory.createRequestContext(RequestMethod.GET, "/get-item-222");
         webController.service(rc);

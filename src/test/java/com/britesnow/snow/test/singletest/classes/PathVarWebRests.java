@@ -22,6 +22,15 @@ public class PathVarWebRests {
 //                        "api/Task/123",
 //                        "bb/{id}"};
 
+    @WebGet("/rest/{entity}")
+    public Map restListEntities(@PathVar("entity")String entity){
+        return MapUtil.mapIt("method", "restListEntities");
+    }
+
+    @WebGet("/rest/{entity}/{id}")
+    public Map restGetEntity(@PathVar("entity")String entity, @PathVar("id")String id){
+        return MapUtil.mapIt("method", "restGetEntity");
+    }
 
     @WebGet("/get-{entity}-{id}")
     public Map getEntityId(@PathVar("entity")String entity, @PathVar("id")String id){

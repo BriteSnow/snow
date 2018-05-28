@@ -111,6 +111,9 @@ public class RestRegistry {
 		//       .finilize are not called but since they have to be public (to be accessilble from WebObjectRegistry, they theorically could)
 		VaredPathComparator comparator = new VaredPathComparator();
 		Collections.sort(patternWebGetRefList,comparator);
+		for (WebRestRef w : patternWebGetRefList){
+			System.out.println(w.getPath());
+		}
 		Collections.sort(patternWebPostRefList,comparator);
 		Collections.sort(patternWebPutRefList,comparator);
 		Collections.sort(patternWebDeleteRefList,comparator);
@@ -202,75 +205,25 @@ class VaredPathComparator implements Comparator<WebRestRef>{
 
 	@Override
 	public int compare(WebRestRef wref1, WebRestRef wref2) {
-		String o1 = collapse(wref1.getPath());
-		String o2 = collapse(wref2.getPath());
-
-		Integer[] o1Indexes = allIndexOf(o1, '{');
-		Integer[] o2Indexes = allIndexOf(o2, '{');
-
-
-		// if none has path var, then, order alphabitically
-		if (o1Indexes.length == 0 && o2Indexes.length == 0){
-			return o1.compareTo(o2);
+		String fix1 = removeAllVars(wref1.getPath());
+		String fix2 = removeAllVars(wref2.getPath());
+		if (fix1.length() > fix2.length()){
+			return -1; // wref1 takes pecedence (smaller, will get earlier in the array)
+		}else if (fix1.length() < fix2.length()){
+			return 1;
+		}else{
+			return fix1.compareTo(fix2);
 		}
-
-		// if we reach here, it means that one of them have a at least {
-
-		// if one them have no {, then, it wins (smaller)
-		if (o1Indexes.length == 0 && o2Indexes.length > 0){
-			return -1; // o1 is ealier (smaller than o2)
-		}
-		if (o1Indexes.length > 0 && o2Indexes.length == 0){
-			return 1; // o1 is later (greater than o2)
-		}
-
-		// if we are here, it means they both have some {
-		int min = Math.min(o1Indexes.length, o2Indexes.length);
-
-		for (int i = 0; i < min; i++){
-			if (o1Indexes[i] > o2Indexes[i]){
-				return -1; // o1 wins, smaller
-			}
-			if (o1Indexes[i] < o2Indexes[i]){
-				return 1; // o1 lose, greater than 02
-			}
-		}
-
-		// if we are here, this means that all {} position match the ones that have the least.
-
-		// If one has more {} than the other, then, it wins
-		if (o1Indexes.length != o2Indexes.length){
-			return (o1Indexes.length != o2Indexes.length) ? -1 : 1;
-		}
-
-		// if we are here, it means that thye both have the same number of {} and then, the longest win
-		if (o1.length() != o2.length()){
-			return (o1.length() > o2.length()) ? -1 : 1;
-		}
-
-		// if we are here all was the same, so, we just order alphabitically.
-		return o1.compareTo(o2);
 	}
 
-	static private Integer[] allIndexOf(String str, char c){
-		List<Integer> indexes = new ArrayList<Integer>();
 
-		int idx = 0;
-		for (char cs : str.toCharArray()){
-			if (cs == c){
-				indexes.add(idx);
-			}
-			idx ++;
-		}
-
-		return indexes.toArray(new Integer[indexes.size()]);
-	}
-
-	/** Collapse the varPath {...} to {} so that the length of the name does not take in consideration */
-	static private String collapse(String s){
-		Pattern p = Pattern.compile("\\{(.*?)\\}",
+	/** Remove all eventual {} so that we can know the length of fix things */
+	static private String removeAllVars(String s){
+		Pattern p = Pattern.compile("(\\{.*?\\})",
 				Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-		String sCollapsed =  p.matcher(s).replaceAll("{}");
+		String sCollapsed =  p.matcher(s).replaceAll("");
 		return sCollapsed;
 	}
+
+
 }
