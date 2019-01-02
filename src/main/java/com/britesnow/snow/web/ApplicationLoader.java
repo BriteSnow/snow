@@ -5,10 +5,9 @@ package com.britesnow.snow.web;
 
 import java.io.File;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
 
 import javax.servlet.ServletContext;
 
@@ -23,6 +22,10 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
 
 /**
  * For Internal use, don't use. 
@@ -91,6 +94,18 @@ public class ApplicationLoader {
                 appProperties.put(key, overrideProperties.get(key));
             }
         }
+
+      boolean hasHibernate = false;
+      String hibernateFileProperty = appProperties.get("snow.hibernate.configuration");
+      if (hibernateFileProperty != null) {
+        Map<String, String> hibernateProperties = loadHibernateProperties(hibernateFileProperty);
+        if (hibernateProperties.size() > 0) {
+          hasHibernate = true;
+          for (String key : hibernateProperties.keySet()) {
+            appProperties.put(key, hibernateProperties.get(key));
+          }
+        }
+      }
         
         // build the webApplicationModules from the properties
         String applicationConfigClassStr = appProperties.get("snow.webApplicationModules");
@@ -117,9 +132,8 @@ public class ApplicationLoader {
         // build the defaultModules
         List<Module> defaultModules = new ArrayList<Module>();
         defaultModules.add(new DefaultApplicationModule(applicationPackageBase));
-        
-        boolean hasHibernate = (appProperties != null && MapUtil.hasKeyStartsWith(appProperties, "hibernate."));
-        if (hasHibernate) {
+
+        if (hasHibernate || MapUtil.hasKeyStartsWith(appProperties, "hibernate.")) {
             defaultModules.add(new DefaultHibernateModule());
         }
         
@@ -189,14 +203,12 @@ public class ApplicationLoader {
                 try {
                     appDirProperties.load(new FileReader(appDirPropertiesFile));
                 } catch (Exception e) {
-                    Throwables.propagate(e);
+                    logger.error("Unable to load application properties", e);
                 }
                 // override the appProperties with the WebAppRoperties
                 appProperties.putAll(appDirProperties);
             }
 
-        } else {
-            appFolder = getWebAppFolder();
         }
 
         PropertyPostProcessor propertyPostProcessor = getPropertyPostProcessor();
@@ -207,15 +219,15 @@ public class ApplicationLoader {
             String propertyPostProcessorClassName = (String) appProperties.get("snow.propertyPostProcessorClass");
             if (propertyPostProcessorClassName != null) {
                 try {
-                    Class<PropertyPostProcessor> propertyPostProcessorClass = (Class<PropertyPostProcessor>) Class.forName(propertyPostProcessorClassName);
+                    Class<PropertyPostProcessor> propertyPostProcessorClass = (Class<PropertyPostProcessor>)
+                        Class.forName(propertyPostProcessorClassName);
 
                     if (propertyPostProcessorClass != null) {
                         propertyPostProcessor = propertyPostProcessorClass.newInstance();
                     }
                 } catch (Exception e) {
-                    logger.error("Cannot load or process the PropertyPostProcess class: " + propertyPostProcessorClassName
-                                            + "\nException: "
-                                            + e.getMessage());
+                    logger.error("Cannot load or process the PropertyPostProcess class: " +
+                                 propertyPostProcessorClassName, e);
                 }
             }
         }
@@ -224,9 +236,7 @@ public class ApplicationLoader {
                 appProperties = propertyPostProcessor.processProperties(appProperties);
             }
         } catch (Exception e) {
-            logger.error("Cannot process PropertyPostProcess class: " + propertyPostProcessor
-                                    + "\nException: "
-                                    + e.getMessage());
+            logger.error("Cannot process PropertyPostProcess class: " + propertyPostProcessor, e);
         }
 
         return appProperties;
@@ -241,7 +251,7 @@ public class ApplicationLoader {
     /**
      * Allow to programatically set a propertyPostProcessor to the appLoader. Usually used for Unit Testing.
      * 
-     * @param propertyPostProcessor
+     * @param propertyPostProcessor PropertyPostProcessor
      */
     void setPropertyPostProcessor(PropertyPostProcessor propertyPostProcessor) {
         this.propertyPostProcessor = propertyPostProcessor;
@@ -261,9 +271,57 @@ public class ApplicationLoader {
         // is the case, need to go one parent up
         if (".".equals(webAppFolderName)) {
             webAppFolder = webAppFolder.getParentFile();
-            webAppFolderName = webAppFolder.getName();
         }
 
         return webAppFolder;
     }
+
+  private Map<String, String> loadHibernateProperties(String hibernateFileProperty) {
+    Map<String, String> properties = new HashMap<String, String>();
+    InputStream stream = getResourceAsStream(hibernateFileProperty);
+    if (stream != null) {
+      try {
+        SAXReader reader = new SAXReader();
+        Document doc = reader.read(stream);
+        Element sfNode = doc.getRootElement().element("session-factory");
+        Iterator itr = sfNode.elementIterator("property");
+        while (itr.hasNext()) {
+          Element node = (Element) itr.next();
+          String name = node.attributeValue("name");
+          String value = node.getText().trim();
+          if (!name.startsWith("hibernate")) {
+            name = "hibernate." + name;
+          }
+          properties.put(name, value);
+        }
+        stream.close();
+      }
+      catch (DocumentException e) {
+        logger.error("Unable to parse hibernate properties", e);
+      }
+      catch (IOException e) {
+        logger.error("Unable to parse hibernate properties", e);
+      }
+    }
+    return properties;
+  }
+
+  private InputStream getResourceAsStream(String resource) {
+    String stripped = resource.startsWith("/") ? resource.substring(1) : resource;
+    InputStream stream = null;
+    ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+    if (classLoader != null) {
+      stream = classLoader.getResourceAsStream(stripped);
+    }
+    if (stream == null) {
+      stream = ApplicationLoader.class.getResourceAsStream(resource);
+    }
+    if (stream == null) {
+      stream = ApplicationLoader.class.getClassLoader().getResourceAsStream(stripped);
+    }
+    if (stream == null) {
+      logger.error(resource + " not found");
+    }
+    return stream;
+  }
 }
